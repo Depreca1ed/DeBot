@@ -1,21 +1,23 @@
-from discord.ext import commands
-from bot import Elysian
-import discord
-import humanize
 import datetime
 
+import discord
+import humanize
+from discord.ext import commands
 
-async def DefaultToUser(ctx: commands.Context[Elysian]):
+from bot import Elysian
+
+
+async def DefaultToUser(ctx: commands.Context[Elysian]) -> discord.User | discord.Member:
     """Use this function with commands.parameter(default=DefaultToUser) only since its meant to be used for that"""
     return ctx.author
 
 
-def StatusMessageGen(user: discord.Member):
+def StatusMessageGen(user: discord.Member) -> list[str]:
     activity_string: list[str] = []
     for activity in user.activities:
         if isinstance(activity, discord.BaseActivity):
             if isinstance(activity, discord.CustomActivity):
-                if activity.name and not activity.name == "Custom Status":
+                if activity.name and activity.name != "Custom Status":
                     activity_string.append(activity.name)
             elif isinstance(activity, discord.Streaming):
                 statement = ["Streaming"]

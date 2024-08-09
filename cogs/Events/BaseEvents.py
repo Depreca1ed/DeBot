@@ -1,20 +1,20 @@
+import contextlib
+import inspect
+
 import discord
 from discord.ext import commands
 
-from utils.Embed import ElyEmbed
 from bot import Elysian
-import inspect
-from typing import Union
-import contextlib
+from utils.Embed import ElyEmbed
 
 
 class DevEvents(commands.Cog):
 
-    def __init__(self, bot: Elysian):
+    def __init__(self, bot: Elysian) -> None:
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         assert self.bot.user is not None
         val = f"""
 
@@ -31,12 +31,12 @@ class DevEvents(commands.Cog):
         )
 
     @commands.Cog.listener("on_message_edit")
-    async def edit_mechanic(self, before: discord.Message, after: discord.Message):
+    async def edit_mechanic(self, before: discord.Message, after: discord.Message) -> None:
         if after.author.id == 688293803613880334:
             await self.bot.process_commands(after)
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction, user: Union[discord.Member, discord.User]):
+    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member | discord.User) -> None:
         if (
             self.bot.owner_ids
             and reaction.emoji
@@ -49,5 +49,5 @@ class DevEvents(commands.Cog):
                 await reaction.message.delete()
 
 
-async def setup(bot: Elysian):
+async def setup(bot: Elysian) -> None:
     await bot.add_cog(DevEvents(bot))

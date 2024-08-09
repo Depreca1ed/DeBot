@@ -1,12 +1,14 @@
-import discord
-from discord.ext import commands
-from bot import Elysian
-from utils.Embed import ElyEmbed
-from typing import Any, List, Optional
 import contextlib
 import traceback
-from utils.Checks import FeatureDisabled
+from typing import Any
+
+import discord
 import mystbin
+from discord.ext import commands
+
+from bot import Elysian
+from utils.Checks import FeatureDisabled
+from utils.Embed import ElyEmbed
 
 
 def get_command_signature(context: commands.Context[Elysian], command: commands.Command[Any, ..., Any], /) -> str:
@@ -23,8 +25,8 @@ def get_command_signature(context: commands.Context[Elysian], command: commands.
     :class:`str`
         The signature for the command.
     """
-    parent: Optional[commands.Group[Any, ..., Any]] = command.parent  # type: ignore
-    entries: List[str] = []
+    parent: commands.Group[Any, ..., Any] | None = command.parent  # type: ignore
+    entries: list[str] = []
     while parent is not None:
         if not parent.signature or parent.invoke_without_command:
             entries.append(parent.name)
@@ -53,7 +55,7 @@ def clean_error_message(error_string: str) -> str:
 
 
 class Errors(commands.Cog):
-    def __init__(self, bot: Elysian):
+    def __init__(self, bot: Elysian) -> None:
         self.bot = bot
 
     @commands.Cog.listener()
@@ -84,14 +86,14 @@ class Errors(commands.Cog):
             embed = ElyEmbed.default(
                 ctx,
                 title="<:redTick:1237048136527249510> | Missing Permissions",
-                description=f"I am missing the following permissions to run this command.\n{permissions}",  # type: ignore
+                description=f"I am missing the following permissions to run this command.\n{permissions}",
                 color=0xFF0000,
             )
             channel = (
                 ctx.channel
                 if isinstance(ctx.author, discord.Member) and ctx.channel.permissions_for(ctx.author).send_messages is True
                 else ctx.author
-            )  # type: ignore
+            )
             return (
                 await channel.send(embed=embed)
                 if ctx.guild and ctx.channel.permissions_for(ctx.guild.me).embed_links is True
@@ -134,14 +136,14 @@ class Errors(commands.Cog):
             embed = ElyEmbed.default(
                 ctx,
                 title="<:redTick:1237048136527249510> | Missing Permissions",
-                description=f"You are missing the following permissions to run this command.\n{permissions}",  # type: ignore
+                description=f"You are missing the following permissions to run this command.\n{permissions}",
                 color=0xFF0000,
             )
             channel = (
                 ctx.channel
                 if isinstance(ctx.author, discord.Member) and ctx.channel.permissions_for(ctx.author).send_messages is True
                 else ctx.author
-            )  # type: ignore
+            )
             return (
                 await channel.send(embed=embed)
                 if ctx.guild and ctx.channel.permissions_for(ctx.guild.me).embed_links is True
@@ -154,14 +156,14 @@ class Errors(commands.Cog):
             embed = ElyEmbed.default(
                 ctx,
                 title="<:redTick:1237048136527249510> | Missing Permissions",
-                description=f"I am missing the following permissions to run this command.\n{permissions}",  # type: ignore
+                description=f"I am missing the following permissions to run this command.\n{permissions}",
                 color=0xFF0000,
             )
             channel = (
                 ctx.channel
                 if isinstance(ctx.author, discord.Member) and ctx.channel.permissions_for(ctx.author).send_messages is True
                 else ctx.author
-            )  # type: ignore
+            )
             return (
                 await channel.send(embed=embed)
                 if ctx.guild and ctx.channel.permissions_for(ctx.guild.me).embed_links is True
@@ -235,11 +237,11 @@ class Errors(commands.Cog):
                 extras = [
                     f"- **Command -** {ctx.command.qualified_name}",
                     f"- **Invoked as -** {ctx.message.clean_content}",
-                    f"- **Short error**\n```py\n{str(error)}```",
+                    f"- **Short error**\n```py\n{error!s}```",
                 ]
                 error_embed.add_field(name="Extra", value="\n".join(extras), inline=False)
                 return await self.bot.logger_webhook.send(embed=error_embed)
 
 
-async def setup(bot: Elysian):
+async def setup(bot: Elysian) -> None:
     await bot.add_cog(Errors(bot))

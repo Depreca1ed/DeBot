@@ -1,12 +1,11 @@
+from collections.abc import Iterable
 from typing import (
     Any,
-    Iterable,
-    Optional,
-    Tuple,
-    Union,
 )
+
 import discord
 from discord.ext import commands
+
 from bot import Elysian
 
 
@@ -15,12 +14,12 @@ class ElyEmbed(discord.Embed):
 
     def __init__(
         self,
-        color: Union[discord.Color, int] = Elysian.color,
-        colour: Union[discord.Colour, int] = Elysian.colour,
-        fields: Iterable[Tuple[str, str]] = (),
+        color: discord.Color | int = Elysian.color,
+        colour: discord.Colour | int = Elysian.colour,
+        fields: Iterable[tuple[str, str]] = (),
         field_inline: bool = False,
         **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__(color=color, colour=colour, **kwargs)
         for n, v in fields:
             self.add_field(name=n, value=v, inline=field_inline)
@@ -29,10 +28,10 @@ class ElyEmbed(discord.Embed):
     def default(
         cls,
         ctx: commands.Context[Any],
-        colour: Optional[Union[discord.Colour, int]] = None,
-        color: Optional[Union[discord.Color, int]] = None,
+        colour: discord.Colour | int | None = None,
+        color: discord.Color | int | None = None,
         **kwargs: Any,
-    ):
+    ) -> discord.Embed:
         instance = cls(**kwargs)
         instance.set_footer(
             text=f"Requested by {ctx.author}",

@@ -1,17 +1,19 @@
-from typing import Any, Union, List
-import discord
-from discord.ext import commands
 import asyncio
-from utils.Embed import ElyEmbed
-from bot import Elysian
 import contextlib
-from utils.Pagination import ElyPagination
-import mystbin
 import json
+from typing import Any, Never
+
+import discord
+import mystbin
+from discord.ext import commands
+
+from bot import Elysian
+from utils.Embed import ElyEmbed
+from utils.Pagination import ElyPagination
 
 
 class Dev(commands.Cog):
-    def __init__(self, bot: Elysian):
+    def __init__(self, bot: Elysian) -> None:
         self.bot = bot
 
     @commands.group(
@@ -21,17 +23,17 @@ class Dev(commands.Cog):
         hidden=True,
     )
     @commands.is_owner()
-    async def dev(self, ctx: commands.Context[Any]):
+    async def dev(self, ctx: commands.Context[Any]) -> None:
         await ctx.send_help(ctx.command)
 
     @dev.command(name="beta", description="Yes")
     @commands.is_owner()
-    async def beta(self, ctx: commands.Context[Any]):
+    async def beta(self, ctx: commands.Context[Any]) -> Never:
         raise commands.CommandError("I love women")
 
     @dev.command(name="say", description="Say things")
     @commands.is_owner()
-    async def say(self, ctx: commands.Context[Any], *, message: str) -> Union[discord.Message, discord.PartialMessage]:
+    async def say(self, ctx: commands.Context[Any], *, message: str) -> discord.Message | discord.PartialMessage:
         with contextlib.suppress(discord.HTTPException):
             await ctx.message.delete()
         return (
@@ -44,13 +46,13 @@ class Dev(commands.Cog):
 
     @dev.command(name="pull", description="Pull things")
     @commands.is_owner()
-    async def pull(self, ctx: commands.Context[Any]):
+    async def pull(self, ctx: commands.Context[Any]) -> None:
         result = await self.shell("git pull")
         output = "\n".join(i.strip() for i in result)
         embed = ElyEmbed.default(ctx, title="Pulling from source", description="```ansi\n" + output + "```")
         msg = await ctx.reply(embed=embed)
-        reloads: List[str] = []
-        cogs = [a for a in self.bot.cogs]
+        reloads: list[str] = []
+        cogs = list(self.bot.cogs)
         cogs.remove("Jishaku")
         successfuls = 0
         failures = 0
@@ -58,7 +60,7 @@ class Dev(commands.Cog):
             try:
                 await ctx.bot.reload_extension("cogs." + cog)
             except Exception as err:
-                reloads.append(f"<:redTick:1237048136527249510> Failed to reload **{cog}**.py\nError: ```py\n{str(err)}```")
+                reloads.append(f"<:redTick:1237048136527249510> Failed to reload **{cog}**.py\nError: ```py\n{err!s}```")
                 failures = failures + 1
             else:
                 reloads.append(f"<:greenTick:1237048095699636245> Successfully reloaded **{cog}.py**")
@@ -69,7 +71,7 @@ class Dev(commands.Cog):
         )
         await msg.edit(embed=embed)
 
-    async def shell(self, code: str, wait: bool = True):
+    async def shell(self, code: str, wait: bool = True) -> tuple[str, ...]:
         proc = await asyncio.subprocess.create_subprocess_shell(
             code, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
@@ -79,7 +81,7 @@ class Dev(commands.Cog):
 
     @dev.command(name="del", description="Delete things")
     @commands.is_owner()
-    async def dele(self, ctx: commands.Context[Any]):
+    async def dele(self, ctx: commands.Context[Any]) -> None | discord.Message:
         with contextlib.suppress(discord.HTTPException):
             return (
                 await ctx.message.reference.resolved.delete()
@@ -91,22 +93,22 @@ class Dev(commands.Cog):
 
     @dev.command("prefixless", description="Mf boutta get or unget prefix")
     @commands.is_owner()
-    async def prefixless(self, ctx: commands.Context[Any]):
-        self.bot.prefixless_check = False if self.bot.prefixless_check is True else True
+    async def prefixless(self, ctx: commands.Context[Any]) -> None:
+        self.bot.prefixless_check = not self.bot.prefixless_check is True
         with contextlib.suppress(discord.HTTPException):
             await ctx.message.add_reaction("<:greenTick:1237048095699636245>")
 
     @dev.command(description="Search for emojis with name")
     @commands.guild_only()
     @commands.is_owner()
-    async def emojisearch(self, ctx: commands.Context[Any], name: str):
+    async def emojisearch(self, ctx: commands.Context[Any], name: str) -> discord.Message | None:
         emojis = [emoji for emoji in ctx.bot.emojis if name in emoji.name]
         if not emojis:
             return await ctx.reply("Sorry, there are no emojis with that name that i can see.")
         embed = ElyEmbed.default(
             ctx,
             title=f"Emojis with the name {name}",
-            description=str("\n".join([f"{str(emoji)} `:` `{emoji}`" for emoji in emojis])),
+            description=str("\n".join([f"{emoji!s} `:` `{emoji}`" for emoji in emojis])),
         )
         await ctx.reply(embed=embed)
 
@@ -117,12 +119,12 @@ class Dev(commands.Cog):
         hidden=True,
     )
     @commands.is_owner()
-    async def bl(self, ctx: commands.Context[Any]):
+    async def bl(self, ctx: commands.Context[Any]) -> Any:
         return await ctx.send_help(ctx.command)
 
     @bl.command(name="add", description="A motherfucker is about to be blacklisted")
     @commands.is_owner()
-    async def bl_add(self, ctx: commands.Context[Any], user: discord.User):
+    async def bl_add(self, ctx: commands.Context[Any], user: discord.User) -> discord.Message:
         async with self.bot.pool.acquire() as db:
             async with db.execute("SELECT * FROM blacklists WHERE id = ? AND type = ?", (user.id, "user")) as cursor:
                 already_blacklisted = await cursor.fetchone()
@@ -139,7 +141,7 @@ class Dev(commands.Cog):
 
     @bl.command(name="remove", description="A motherfucker is about to be unblacklisted")
     @commands.is_owner()
-    async def bl_remove(self, ctx: commands.Context[Any], user: discord.User):
+    async def bl_remove(self, ctx: commands.Context[Any], user: discord.User) -> discord.Message:
         async with self.bot.pool.acquire() as db:
             async with db.execute("SELECT * FROM blacklists WHERE id = ? AND type = ?", (user.id, "user")) as cursor:
                 already_blacklisted = await cursor.fetchone()
@@ -161,12 +163,12 @@ class Dev(commands.Cog):
         hidden=True,
     )
     @commands.is_owner()
-    async def gbl(self, ctx: commands.Context[Any]):
+    async def gbl(self, ctx: commands.Context[Any]) -> Any:
         return await ctx.send_help(ctx.command)
 
     @gbl.command(name="add", description="A guild is about to be blacklisted")
     @commands.is_owner()
-    async def gbl_add(self, ctx: commands.Context[Any], guild: discord.Guild):
+    async def gbl_add(self, ctx: commands.Context[Any], guild: discord.Guild) -> discord.Message | None:
         async with self.bot.pool.acquire() as db:
             async with db.execute("SELECT * FROM blacklists WHERE id = ? AND type = ?", (guild.id, "guild")) as cursor:
                 already_blacklisted = await cursor.fetchone()
@@ -184,7 +186,7 @@ class Dev(commands.Cog):
 
     @gbl.command(name="remove", description="A motherfucker is about to be unblacklisted")
     @commands.is_owner()
-    async def gbl_remove(self, ctx: commands.Context[Any], guild: int):
+    async def gbl_remove(self, ctx: commands.Context[Any], guild: int) -> discord.Message:
         async with self.bot.pool.acquire() as db:
             async with db.execute("SELECT * FROM blacklists WHERE id = ? AND type = ?", (guild, "guild")) as cursor:
                 already_blacklisted = await cursor.fetchone()
@@ -200,20 +202,20 @@ class Dev(commands.Cog):
             return await ctx.reply(f"Unblacklisted `{guild}`")
 
     @dev.group(name="err", description="Error commands", invoke_without_command=True)
-    async def error_base(self, ctx: commands.Context[Elysian]):
+    async def error_base(self, ctx: commands.Context[Elysian]) -> None:
         await ctx.send_help(ctx.command)
 
     @error_base.command(
         name="show",
         description="Show details about an error. This basically shows the embed similar to what is shown in the logs",
     )
-    async def error_show(self, ctx: commands.Context[Elysian]):
+    async def error_show(self, ctx: commands.Context[Elysian]) -> discord.Message | None:
         async with self.bot.pool.acquire() as conn:
             data = await conn.fetchall("SELECT * FROM errorlogs")
         if not data:
             return await ctx.send("No currently registered errors at all in the database.")
 
-        error_embeds: List[ElyEmbed] = []
+        error_embeds: list[discord.Embed] = []
 
         for error in data:
             if len(error[3]) >= 1990:
@@ -238,7 +240,7 @@ class Dev(commands.Cog):
         message = await ctx.send(embed=error_embeds[0], view=view)
         view.message = message
 
-    async def _basic_cleanup_strategy(self, ctx: commands.Context[Elysian], search: int):
+    async def _basic_cleanup_strategy(self, ctx: commands.Context[Elysian], search: int) -> dict[str, int]:
         count = 0
         async for msg in ctx.history(limit=search, before=ctx.message):
             if (
@@ -253,7 +255,7 @@ class Dev(commands.Cog):
     @dev.command()
     @commands.cooldown(1, 5.0, type=commands.BucketType.channel)
     @commands.is_owner()
-    async def cleanup(self, ctx: commands.Context[Elysian], search: int = 100):
+    async def cleanup(self, ctx: commands.Context[Elysian], search: int = 100) -> None:
         """Cleans up the bot's messages from the channel.
 
         If a search number is specified, it searches that many messages to delete.
@@ -282,7 +284,7 @@ class Dev(commands.Cog):
 
     @dev.command()
     @commands.is_owner()
-    async def cachesync(self, ctx: commands.Context[Elysian]):
+    async def cachesync(self, ctx: commands.Context[Elysian]) -> None:
         async with self.bot.pool.acquire() as db:
             blacklisted_users = await db.fetchall("SELECT * FROM blacklists WHERE type = 'user'")
             blacklisted_guilds = await db.fetchall("SELECT * FROM blacklists WHERE type = 'guild'")
@@ -300,5 +302,5 @@ class Dev(commands.Cog):
             await ctx.message.add_reaction("<:greenTick:1237048095699636245>")
 
 
-async def setup(bot: Elysian):
+async def setup(bot: Elysian) -> None:
     await bot.add_cog(Dev(bot))

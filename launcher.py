@@ -1,9 +1,21 @@
-from bot import Elysian
-import logging
-import discord
-import contextlib
+"""
+This file was sourced from [RoboDanny](https://github.com/Rapptz/RoboDanny).
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+"""
+
 import asyncio
+import contextlib
+import logging
+from collections.abc import Generator
 from logging.handlers import RotatingFileHandler
+from typing import Any
+
+import discord
+
+from bot import Elysian
 
 
 class RemoveNoise(logging.Filter):
@@ -11,13 +23,11 @@ class RemoveNoise(logging.Filter):
         super().__init__(name="discord.state")
 
     def filter(self, record: logging.LogRecord) -> bool:
-        if record.levelname == "WARNING" and "referencing an unknown" in record.msg:
-            return False
-        return True
+        return not (record.levelname == "WARNING" and "referencing an unknown" in record.msg)
 
 
 @contextlib.contextmanager
-def setup_logging():
+def setup_logging() -> Generator[Any, Any, Any]:
     log: logging.Logger = logging.getLogger()
 
     try:
