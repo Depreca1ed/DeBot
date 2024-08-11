@@ -57,6 +57,10 @@ class Wordism(commands.Cog):
             await self.bot.guild.edit(icon=image.read())
         return
 
+    @wordism_icon_change.before_loop
+    async def before_loop(self) -> None:
+        await self.bot.wait_until_ready()
+
 
 async def setup(bot: Elysian) -> None:
     await bot.add_cog(Wordism(bot))

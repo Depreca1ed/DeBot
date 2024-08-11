@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import contextlib
 import inspect
+from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
 
-from bot import Elysian
+if TYPE_CHECKING:
+    from bot import Elysian
 from utils.Embed import ElyEmbed
 
 

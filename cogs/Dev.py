@@ -1,13 +1,17 @@
+from __future__ import annotations
+
 import asyncio
 import contextlib
 import json
-from typing import Any, Never
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from bot import Elysian
 
 import discord
 import mystbin
 from discord.ext import commands
 
-from bot import Elysian
 from utils.Embed import ElyEmbed
 from utils.Pagination import ElyPagination
 
@@ -28,7 +32,7 @@ class Dev(commands.Cog):
 
     @dev.command(name="beta", description="Yes")
     @commands.is_owner()
-    async def beta(self, ctx: commands.Context[Any]) -> Never:
+    async def beta(self, ctx: commands.Context[Any]) -> Any:
         raise commands.CommandError("I love women")
 
     @dev.command(name="say", description="Say things")

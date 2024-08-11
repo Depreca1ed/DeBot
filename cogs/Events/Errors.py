@@ -1,12 +1,18 @@
+from __future__ import annotations
+
 import contextlib
 import traceback
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+
+    from bot import Elysian
+
 
 import discord
 import mystbin
 from discord.ext import commands
 
-from bot import Elysian
 from utils.Checks import FeatureDisabled
 from utils.Embed import ElyEmbed
 

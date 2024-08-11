@@ -1,4 +1,10 @@
-from bot import Elysian
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+
+    from bot import Elysian
 
 from .BaseEvents import DevEvents
 from .Errors import Errors

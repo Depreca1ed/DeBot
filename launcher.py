@@ -6,16 +6,22 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
+from __future__ import annotations
+
 import asyncio
 import contextlib
 import logging
-from collections.abc import Generator
 from logging.handlers import RotatingFileHandler
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import discord
 
 from bot import Elysian
+
+if TYPE_CHECKING:
+
+    from collections.abc import Generator
+
 
 
 class RemoveNoise(logging.Filter):
