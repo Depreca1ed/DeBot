@@ -55,6 +55,7 @@ class Wordism(commands.Cog):
 
         with Path(random.choice(files)).open(mode="rb") as image:
             await self.bot.guild.edit(icon=image.read())
+            await self.bot.user.edit(avatar=image.read())
         return
 
     @wordism_icon_change.before_loop
