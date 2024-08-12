@@ -8,6 +8,7 @@ from typing import cast
 import discord
 from discord.ext import commands, tasks
 
+from io import BytesIO
 from bot import Elysian
 
 ICONS = "assets/wordism_icons/"
@@ -30,6 +31,8 @@ class Wordism(commands.Cog):
 
     @commands.Cog.listener("on_member_join")
     async def welcome_event(self, member: discord.Member) -> discord.Message:
+        if member.guild is not self.bot.guild:
+            return
         ch = cast(discord.TextChannel, self.bot.guild.get_channel(1262409199992705105))
         if datetime.timedelta(seconds=datetime.datetime.now().timestamp() - member.created_at.timestamp()).days <= 14:
             # await member.kick(reason=ModerationFlags.NEW_ACCOUNT)
@@ -46,6 +49,8 @@ class Wordism(commands.Cog):
     @commands.Cog.listener("on_member_remove")
     async def leave_event(self, member: discord.Member) -> discord.Message:
         # TODO: Add a persistent roles functionality in this event as well as `welcome_event`
+        if member.guild is not self.bot.guild:
+            return
         ch = cast(discord.TextChannel, self.bot.guild.get_channel(1262409199992705105))
         return await ch.send(content=f"**{member.name}** left the server. Unfortunate.")
 
@@ -54,8 +59,9 @@ class Wordism(commands.Cog):
         files = list(Path(ICONS).iterdir())
 
         with Path(random.choice(files)).open(mode="rb") as image:
-            await self.bot.guild.edit(icon=image.read())
-            await self.bot.user.edit(avatar=image.read())
+            imagebytes = image.read()
+            await self.bot.guild.edit(icon=imagebytes)
+            await self.bot.user.edit(avatar=imagebytes)
         return
 
     @wordism_icon_change.before_loop
