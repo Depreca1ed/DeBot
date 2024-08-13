@@ -7,15 +7,16 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands
 
-if TYPE_CHECKING:
-    from bot import Elysian
 from utils.Embed import ElyEmbed
+
+if TYPE_CHECKING:
+    from bot import YukiSuou
 
 
 class DevEvents(commands.Cog):
 
-    def __init__(self, bot: Elysian) -> None:
-        self.bot = bot
+    def __init__(self, bot: YukiSuou) -> None:
+        self.bot: YukiSuou = bot
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -53,5 +54,5 @@ class DevEvents(commands.Cog):
                 await reaction.message.delete()
 
 
-async def setup(bot: Elysian) -> None:
+async def setup(bot: YukiSuou) -> None:
     await bot.add_cog(DevEvents(bot))

@@ -4,11 +4,6 @@ import contextlib
 import traceback
 from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:
-
-    from bot import Elysian
-
-
 import discord
 import mystbin
 from discord.ext import commands
@@ -16,8 +11,11 @@ from discord.ext import commands
 from utils.Checks import FeatureDisabled
 from utils.Embed import ElyEmbed
 
+if TYPE_CHECKING:
+    from bot import YukiSuou
 
-def get_command_signature(context: commands.Context[Elysian], command: commands.Command[Any, ..., Any], /) -> str:
+
+def get_command_signature(context: commands.Context[YukiSuou], command: commands.Command[Any, ..., Any], /) -> str:
     """Get the command signature of a command, this is from the help command
     Parameters
     ------------
@@ -61,11 +59,11 @@ def clean_error_message(error_string: str) -> str:
 
 
 class Errors(commands.Cog):
-    def __init__(self, bot: Elysian) -> None:
-        self.bot = bot
+    def __init__(self, bot: YukiSuou) -> None:
+        self.bot: YukiSuou = bot
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: commands.Context[Elysian], error: Exception) -> Any:
+    async def on_command_error(self, ctx: commands.Context[YukiSuou], error: Exception) -> Any:
         if ctx.cog and commands.Cog._get_overridden_method(ctx.cog.cog_command_error):
             return
 
@@ -249,5 +247,5 @@ class Errors(commands.Cog):
                 return await self.bot.logger_webhook.send(embed=error_embed)
 
 
-async def setup(bot: Elysian) -> None:
+async def setup(bot: YukiSuou) -> None:
     await bot.add_cog(Errors(bot))

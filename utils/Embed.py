@@ -6,7 +6,7 @@ from typing import (
 import discord
 from discord.ext import commands
 
-from bot import Elysian
+from bot import YukiSuou
 
 
 class ElyEmbed(discord.Embed):
@@ -14,8 +14,8 @@ class ElyEmbed(discord.Embed):
 
     def __init__(
         self,
-        color: discord.Color | int = Elysian.color,
-        colour: discord.Colour | int = Elysian.colour,
+        color: discord.Color | int = YukiSuou.color,
+        colour: discord.Colour | int = YukiSuou.colour,
         fields: Iterable[tuple[str, str]] = (),
         field_inline: bool = False,
         **kwargs: Any,

@@ -16,12 +16,11 @@ from typing import TYPE_CHECKING, Any
 
 import discord
 
-from bot import Elysian
+from bot import YukiSuou
 
 if TYPE_CHECKING:
 
     from collections.abc import Generator
-
 
 
 class RemoveNoise(logging.Filter):
@@ -62,7 +61,7 @@ def setup_logging() -> Generator[Any, Any, Any]:
 
 async def run_bot() -> None:
 
-    async with Elysian() as bot:
+    async with YukiSuou() as bot:
         await bot.start(bot.token)
 
 

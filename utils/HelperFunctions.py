@@ -4,10 +4,10 @@ import discord
 import humanize
 from discord.ext import commands
 
-from bot import Elysian
+from bot import YukiSuou
 
 
-async def DefaultToUser(ctx: commands.Context[Elysian]) -> discord.User | discord.Member:
+async def DefaultToUser(ctx: commands.Context[YukiSuou]) -> discord.User | discord.Member:
     """Use this function with commands.parameter(default=DefaultToUser) only since its meant to be used for that"""
     return ctx.author
 

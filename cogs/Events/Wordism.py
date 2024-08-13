@@ -1,17 +1,15 @@
+from __future__ import annotations
+
 import datetime
 import inspect
-import random
 from enum import StrEnum
-from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 
-from io import BytesIO
-from bot import Elysian
-
-ICONS = "assets/wordism_icons/"
+if TYPE_CHECKING:
+    from bot import YukiSuou
 
 
 class ModerationFlags(StrEnum):
@@ -20,17 +18,11 @@ class ModerationFlags(StrEnum):
 
 class Wordism(commands.Cog):
 
-    def __init__(self, bot: Elysian) -> None:
-        self.bot = bot
-
-    async def cog_load(self) -> None:
-        self.wordism_icon_change.start()
-
-    async def cog_unload(self) -> None:
-        self.wordism_icon_change.stop()
+    def __init__(self, bot: YukiSuou) -> None:
+        self.bot: YukiSuou = bot
 
     @commands.Cog.listener("on_member_join")
-    async def welcome_event(self, member: discord.Member) -> discord.Message:
+    async def welcome_event(self, member: discord.Member) -> discord.Message | None:
         if member.guild is not self.bot.guild:
             return
         ch = cast(discord.TextChannel, self.bot.guild.get_channel(1262409199992705105))
@@ -47,27 +39,13 @@ class Wordism(commands.Cog):
         return await ch.send(content=(f"**{member.name}** just joined the server!"))
 
     @commands.Cog.listener("on_member_remove")
-    async def leave_event(self, member: discord.Member) -> discord.Message:
+    async def leave_event(self, member: discord.Member) -> discord.Message | None:
         # TODO: Add a persistent roles functionality in this event as well as `welcome_event`
         if member.guild is not self.bot.guild:
             return
         ch = cast(discord.TextChannel, self.bot.guild.get_channel(1262409199992705105))
         return await ch.send(content=f"**{member.name}** left the server. Unfortunate.")
 
-    @tasks.loop(name="wordism_icon_change", hours=1.0)
-    async def wordism_icon_change(self) -> None:
-        files = list(Path(ICONS).iterdir())
 
-        with Path(random.choice(files)).open(mode="rb") as image:
-            imagebytes = image.read()
-            await self.bot.guild.edit(icon=imagebytes)
-            await self.bot.user.edit(avatar=imagebytes)
-        return
-
-    @wordism_icon_change.before_loop
-    async def before_loop(self) -> None:
-        await self.bot.wait_until_ready()
-
-
-async def setup(bot: Elysian) -> None:
+async def setup(bot: YukiSuou) -> None:
     await bot.add_cog(Wordism(bot))
