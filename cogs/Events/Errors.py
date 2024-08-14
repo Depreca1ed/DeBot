@@ -8,7 +8,7 @@ import discord
 import mystbin
 from discord.ext import commands
 
-from utils.Checks import FeatureDisabled
+from utils.Error import FeatureDisabled
 from utils.Embed import ElyEmbed
 
 if TYPE_CHECKING:

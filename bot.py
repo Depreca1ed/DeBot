@@ -3,6 +3,7 @@ import datetime
 import functools
 import json
 import logging
+from itertools import product
 from pathlib import Path
 from pkgutil import iter_modules
 from typing import Any, ClassVar, Self
@@ -14,6 +15,8 @@ import jishaku
 import mystbin
 from discord.ext import commands
 
+from utils.Error import PrefixAlreadyPresent, PrefixNotInitialised, PrefixNotPresent
+
 log: logging.Logger = logging.getLogger(__name__)
 
 jishaku.Flags.FORCE_PAGINATOR = True
@@ -22,15 +25,21 @@ jishaku.Flags.NO_DM_TRACEBACK = True
 jishaku.Flags.USE_ANSI_ALWAYS = True
 jishaku.Flags.NO_UNDERSCORE = True
 
+BASE_PREFIX = "Yuki"
+
 
 class YukiSuou(commands.Bot):
-    prefix: ClassVar[list[str]] = ["+", "y!"]
+    prefix: ClassVar[list[str]] = [
+        "".join(capitalization) for capitalization in product(*zip(BASE_PREFIX.lower(), BASE_PREFIX.upper()))
+    ]
     colour = color = 0xFFFFFF
+    pool: asqlite.Pool
+    session: aiohttp.ClientSession
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         intents: discord.Intents = discord.Intents.all()
         super().__init__(
-            command_prefix=self.get_prefix_func,
+            command_prefix=self.get_prefix,  # pyright: ignore[reportArgumentType]
             case_insensitive=True,
             strip_after_prefix=True,
             intents=intents,
@@ -45,14 +54,64 @@ class YukiSuou(commands.Bot):
         self.session = aiohttp.ClientSession()
         self.mystbin = mystbin.Client()
         self.load_time = datetime.datetime.now(datetime.UTC)
-        self.prefixes: dict[int, str] = {}
+        self.prefixes: dict[int, list[str]] = {}
 
-    @classmethod
-    async def get_prefix_func(cls, client: Self, message: discord.Message) -> list[str] | str:
-        prefixes = client.prefix.copy()
-        if message.guild and message.guild.id in client.prefixes:
-            prefixes.extend(client.prefixes[message.guild.id])
-        return commands.when_mentioned_or(*prefixes)(client, message)
+    async def get_prefix(self, message: discord.Message) -> list[str]:
+        prefixes = self.prefix.copy()
+        if message.guild is None:
+            return commands.when_mentioned_or(*prefixes)(self, message)
+
+        if self.prefixes.get(message.guild.id):
+            prefixes.extend(self.prefixes[message.guild.id])
+            return commands.when_mentioned_or(*prefixes)(self, message)
+
+        async with self.pool.acquire() as conn:
+            fetched_prefix: list[str] = json.loads(
+                (
+                    await conn.fetchone(
+                        """SELECT json_group_array(prefix) AS Prefixes FROM prefixes WHERE guild = ?""",
+                        (message.guild.id),
+                    )
+                )[0]
+            )
+        if fetched_prefix:
+            self.prefixes[message.guild.id] = fetched_prefix
+            prefixes.extend(self.prefixes[message.guild.id])
+
+        return commands.when_mentioned_or(*prefixes)(self, message)
+
+    async def add_prefix(self, guild: discord.Guild, prefix: str) -> list[str]:
+        if prefix in self.prefix:
+            raise PrefixAlreadyPresent(f"{prefix} is an already present prefix.")
+        async with self.pool.acquire() as conn:
+            await conn.execute("""INSERT INTO Prefixes VALUES (?, ?)""", (guild.id, prefix))
+        #TODO: IMPORTANT: Modify schema to allow multiple entries of guild and prefix but not a duplicate row.
+        if not self.prefixes.get(guild.id):
+            self.prefixes[guild.id] = [prefix]
+            return self.prefixes[guild.id]
+        self.prefixes[guild.id].append(prefix)
+
+        return self.prefixes[guild.id]
+
+    async def remove_prefix(self, guild: discord.Guild, prefix: str) -> list[str]:
+        if not self.prefixes.get(guild.id):
+            raise PrefixNotInitialised(f"Prefixes were not initialised for {guild.id}")
+
+        elif prefix not in self.prefixes[guild.id]:
+            raise PrefixNotPresent(f"{prefix} is not present in guild: {guild.id}")
+        async with self.pool.acquire() as conn:
+            await conn.execute("""DELETE FROM Prefixes WHERE guild = ? AND prefix = ?""", (guild.id, prefix))
+        self.prefixes[guild.id].remove(prefix)
+        if not self.prefixes[guild.id]:
+            self.prefixes.pop(guild.id)  # NOTE: This is an excessive cleaner. Unsure if it should be present
+        return self.prefixes[guild.id]
+
+    async def get_prefix_list(self, guild: discord.Guild) -> list[str]:
+        prefixes = [BASE_PREFIX]
+        if self.prefixes.get(guild.id):
+            prefixes.extend(self.prefixes[guild.id])
+
+        return prefixes
 
     async def blacklistcheck(self, ctx: commands.Context[Self]) -> bool:
         if ctx.author.id not in self.blacklistedusers:
@@ -70,18 +129,12 @@ class YukiSuou(commands.Bot):
         return config
 
     async def setup_hook(self) -> None:
-        self.pool = await asqlite.create_pool("database/db.db")
+        self.pool: asqlite.Pool = await asqlite.create_pool("database/db.db")
         async with self.pool.acquire() as db:
 
             with Path("schema.sql").open(encoding="utf-8") as f:
                 await db.executescript(f.read())
 
-            self.prefixes: dict[int, str] = {
-                guild: json.loads(prefix)
-                for guild, prefix in await db.fetchall(
-                    """SELECT guild, json_group_array(prefix) AS prefixes FROM prefixes GROUP BY guild"""
-                )
-            }
             self.blacklistedguilds: list[int] = [
                 blacklist[0] for blacklist in await db.fetchall("""SELECT * FROM blacklists WHERE type = 'guild'""")
             ]
@@ -122,6 +175,8 @@ class YukiSuou(commands.Bot):
         return user
 
     async def close(self) -> None:
-        await self.pool.close()
-        await self.session.close()
+        if hasattr(self, "pool"):
+            await self.pool.close()
+        if hasattr(self, "session"):
+            await self.session.close()
         await super().close()
