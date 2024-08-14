@@ -85,7 +85,6 @@ class YukiSuou(commands.Bot):
             raise PrefixAlreadyPresent(f"{prefix} is an already present prefix.")
         async with self.pool.acquire() as conn:
             await conn.execute("""INSERT INTO Prefixes VALUES (?, ?)""", (guild.id, prefix))
-        #TODO: IMPORTANT: Modify schema to allow multiple entries of guild and prefix but not a duplicate row.
         if not self.prefixes.get(guild.id):
             self.prefixes[guild.id] = [prefix]
             return self.prefixes[guild.id]
@@ -93,7 +92,7 @@ class YukiSuou(commands.Bot):
 
         return self.prefixes[guild.id]
 
-    async def remove_prefix(self, guild: discord.Guild, prefix: str) -> list[str]:
+    async def remove_prefix(self, guild: discord.Guild, prefix: str) -> list[str] | None:
         if not self.prefixes.get(guild.id):
             raise PrefixNotInitialised(f"Prefixes were not initialised for {guild.id}")
 
@@ -104,14 +103,15 @@ class YukiSuou(commands.Bot):
         self.prefixes[guild.id].remove(prefix)
         if not self.prefixes[guild.id]:
             self.prefixes.pop(guild.id)  # NOTE: This is an excessive cleaner. Unsure if it should be present
+            return
         return self.prefixes[guild.id]
 
-    async def get_prefix_list(self, guild: discord.Guild) -> list[str]:
+    async def get_prefix_list(self, message: discord.Message) -> list[str]:
         prefixes = [BASE_PREFIX]
-        if self.prefixes.get(guild.id):
-            prefixes.extend(self.prefixes[guild.id])
+        if message.guild and self.prefixes.get(message.guild.id):
+            prefixes.extend(self.prefixes[message.guild.id])
 
-        return prefixes
+        return commands.when_mentioned_or(*prefixes)(self, message)
 
     async def blacklistcheck(self, ctx: commands.Context[Self]) -> bool:
         if ctx.author.id not in self.blacklistedusers:
