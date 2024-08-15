@@ -8,8 +8,8 @@ import discord
 import mystbin
 from discord.ext import commands
 
-from utils.Error import FeatureDisabled
 from utils.Embed import ElyEmbed
+from utils.Error import FeatureDisabled
 
 if TYPE_CHECKING:
     from bot import YukiSuou
