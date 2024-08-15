@@ -91,7 +91,7 @@ class Errors(commands.Cog):
                 ctx,
                 title="<:redTick:1237048136527249510> | Missing Permissions",
                 description=f"I am missing the following permissions to run this command.\n{permissions}",
-                color=0xFF0000,
+                colour=0xFF0000,
             )
             channel = (
                 ctx.channel
@@ -111,7 +111,7 @@ class Errors(commands.Cog):
                     ctx,
                     title="<:redTick:1237048136527249510> | Invalid Argument",
                     description=f"{error}",
-                    color=0xFF0000,
+                    colour=0xFF0000,
                 )
             )
         if isinstance(error, commands.TooManyArguments):
@@ -120,7 +120,7 @@ class Errors(commands.Cog):
                     ctx,
                     title="<:redTick:1237048136527249510> | Too Many Arguments",
                     description=f"{error}",
-                    color=0xFF0000,
+                    colour=0xFF0000,
                 )
             )
         if isinstance(error, commands.MissingRequiredArgument):
@@ -129,7 +129,7 @@ class Errors(commands.Cog):
                     ctx,
                     title="<:redTick:1237048136527249510> | Missing argument",
                     description=f"You did not provide a {error.param.name} argument. \n- How to use the command:\n  - `{get_command_signature(ctx, ctx.command)}`",
-                    color=0xFF0000,
+                    colour=0xFF0000,
                 )
             )
         # Permission checks
@@ -141,7 +141,7 @@ class Errors(commands.Cog):
                 ctx,
                 title="<:redTick:1237048136527249510> | Missing Permissions",
                 description=f"You are missing the following permissions to run this command.\n{permissions}",
-                color=0xFF0000,
+                colour=0xFF0000,
             )
             channel = (
                 ctx.channel
@@ -161,7 +161,7 @@ class Errors(commands.Cog):
                 ctx,
                 title="<:redTick:1237048136527249510> | Missing Permissions",
                 description=f"I am missing the following permissions to run this command.\n{permissions}",
-                color=0xFF0000,
+                colour=0xFF0000,
             )
             channel = (
                 ctx.channel
@@ -189,7 +189,7 @@ class Errors(commands.Cog):
                     ctx,
                     title="<:status_dnd:1237048172174643200> | Cannot run command",
                     description=f"{message}",
-                    color=0xFF0000,
+                    colour=0xFF0000,
                 )
             )
         else:
@@ -206,7 +206,7 @@ class Errors(commands.Cog):
                         ctx,
                         title="Unknown error occured!",
                         description="The developers have been informed.",
-                        color=0xFF0000,
+                        colour=0xFF0000,
                     )
                     if check:
                         embed.title = "Known error occured"
@@ -230,14 +230,14 @@ class Errors(commands.Cog):
                     await conn.commit()
 
                 if len(error_message) >= 1990:
-                    error_link = await self.bot.mystbin.create_paste(
+                    error_link = await self.bot.mystbin_cli.create_paste(
                         files=[mystbin.File(filename="error.py", content=error_message)]
                     )
 
                     post_message = f"Error message was too long to be shown in this embed. \n- [Link to Error]({error_link})"
                 else:
                     post_message = f"```py\n{error_message}```"
-                error_embed = ElyEmbed.default(ctx, title=f"Error #{error_id[0]}", description=post_message, color=0x000000)
+                error_embed = ElyEmbed.default(ctx, title=f"Error #{error_id[0]}", description=post_message, colour=0x000000)
                 extras = [
                     f"- **Command -** {ctx.command.qualified_name}",
                     f"- **Invoked as -** {ctx.message.clean_content}",

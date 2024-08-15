@@ -15,6 +15,5 @@ class Dev(commands.Cog):
     async def cog_check(self, ctx: commands.Context[YukiSuou]) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
         return await self.bot.is_owner(ctx.author) and ctx.prefix != ""
 
-
 async def setup(bot: YukiSuou) -> None:
     await bot.add_cog(Dev(bot))

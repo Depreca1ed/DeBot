@@ -1,12 +1,4 @@
-venv/
 __pycache__/
-cogs/__pycache__/
-utils/__pycache__/
-/.vscode
-/.cache
-/.gitconfig
-/.local
 Elybot.log
 /database
-database/db.db
-/config
+utils/config.py

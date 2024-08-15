@@ -62,6 +62,7 @@ def setup_logging() -> Generator[Any, Any, Any]:
 async def run_bot() -> None:
 
     async with YukiSuou() as bot:
+
         await bot.start(bot.token)
 
 

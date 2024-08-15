@@ -15,3 +15,19 @@ class PrefixAlreadyPresent(commands.CommandError):
 
 class PrefixNotPresent(commands.CommandError):
     pass
+
+
+class BlacklistedUser(commands.CheckFailure):
+    pass
+
+
+class BlacklistedGuild(commands.CheckFailure):
+    pass
+
+
+class UserAlreadyBlacklisted(commands.CommandError):
+    pass
+
+
+class GuildAlreadyBlacklisted(commands.CommandError):
+    pass

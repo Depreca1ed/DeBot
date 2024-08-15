@@ -1,4 +1,3 @@
-import configparser
 import datetime
 import functools
 import json
@@ -6,16 +5,27 @@ import logging
 from itertools import product
 from pathlib import Path
 from pkgutil import iter_modules
-from typing import Any, ClassVar, Self
+from typing import Any, ClassVar
 
 import aiohttp
 import asqlite
 import discord
 import jishaku
 import mystbin
+from altair import Literal, Self
 from discord.ext import commands
 
-from utils.Error import PrefixAlreadyPresent, PrefixNotInitialised, PrefixNotPresent
+from utils.config import BASE_PREFIX, BOT_TOKEN, THEME_COLOUR, WEBHOOK_URL
+from utils.Error import (
+    BlacklistedGuild,
+    BlacklistedUser,
+    GuildAlreadyBlacklisted,
+    PrefixAlreadyPresent,
+    PrefixNotInitialised,
+    PrefixNotPresent,
+    UserAlreadyBlacklisted,
+)
+from utils.Types import BlackListedTypes
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -25,16 +35,20 @@ jishaku.Flags.NO_DM_TRACEBACK = True
 jishaku.Flags.USE_ANSI_ALWAYS = True
 jishaku.Flags.NO_UNDERSCORE = True
 
-BASE_PREFIX = "Yuki"
+EXTERNAL_COGS: list[str] = ["jishaku"]
 
 
 class YukiSuou(commands.Bot):
     prefix: ClassVar[list[str]] = [
         "".join(capitalization) for capitalization in product(*zip(BASE_PREFIX.lower(), BASE_PREFIX.upper()))
     ]
-    colour = color = 0xFFFFFF
+    colour: discord.Colour = discord.Colour.from_str(THEME_COLOUR)
     pool: asqlite.Pool
     session: aiohttp.ClientSession
+    mystbin_cli: mystbin.Client
+    load_time: datetime.datetime
+    prefixes: dict[int, list[str]]
+    blacklist: BlackListedTypes
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         intents: discord.Intents = discord.Intents.all()
@@ -50,12 +64,14 @@ class YukiSuou(commands.Bot):
             **kwargs,
         )
 
-        self.token = str(self.config.get("TOKENS", "bot"))
+        self.token = BOT_TOKEN  # The thing everyone looks for; A way to control their beloved waifu: Yuki Suou
         self.session = aiohttp.ClientSession()
-        self.mystbin = mystbin.Client()
+        self.mystbin_cli = mystbin.Client()
         self.load_time = datetime.datetime.now(datetime.UTC)
         self.prefixes: dict[int, list[str]] = {}
+        self.blacklist = {"guild": [], "user": []}
 
+    @discord.utils.copy_doc(commands.Bot.get_prefix)
     async def get_prefix(self, message: discord.Message) -> list[str]:
         prefixes = self.prefix.copy()
         if message.guild is None:
@@ -81,6 +97,25 @@ class YukiSuou(commands.Bot):
         return commands.when_mentioned_or(*prefixes)(self, message)
 
     async def add_prefix(self, guild: discord.Guild, prefix: str) -> list[str]:
+        """Adds a prefix to the database and cache for the provided guild
+
+        Parameters
+        ----------
+        guild : discord.Guild
+            The guild which will be assigned the prefix
+        prefix : str
+            The prefix to be added to the guild
+
+        Returns
+        -------
+        list[str]
+            Returns the new prefixes for the guild.
+
+        Raises
+        ------
+        PrefixAlreadyPresent
+            Raised when provided prefix is already present
+        """
         if prefix in self.prefix:
             raise PrefixAlreadyPresent(f"{prefix} is an already present prefix.")
         async with self.pool.acquire() as conn:
@@ -93,6 +128,27 @@ class YukiSuou(commands.Bot):
         return self.prefixes[guild.id]
 
     async def remove_prefix(self, guild: discord.Guild, prefix: str) -> list[str] | None:
+        """Removes a prefix from the database and the cache for the provided guild
+
+        Parameters
+        ----------
+        guild : discord.Guild
+            The guild from which the prefix will be removed
+        prefix : str
+            The prefix to be removed from the guild
+
+        Returns
+        -------
+        list[str] | None
+            Returns the new prefixes for the guild. If there are no prefixes for the guild, the guild will be removed from the cache dict and NoneType will be returned
+
+        Raises
+        ------
+        PrefixNotInitialised
+            Raised when prefixes for the guild were never created.
+        PrefixNotPresent
+            Raised when provided prefix is not present in the guild's prefixes
+        """
         if not self.prefixes.get(guild.id):
             raise PrefixNotInitialised(f"Prefixes were not initialised for {guild.id}")
 
@@ -107,6 +163,18 @@ class YukiSuou(commands.Bot):
         return self.prefixes[guild.id]
 
     async def clear_prefix(self, guild: discord.Guild) -> None:
+        """Removes all prefixes from the database and cache for the provided guild
+
+        Parameters
+        ----------
+        guild : discord.Guild
+            The guild who's prefixes will be removed
+
+        Raises
+        ------
+        PrefixNotInitialised
+            Raised when prefixes for the guild were never created.
+        """
         if not self.prefixes.get(guild.id):
             raise PrefixNotInitialised(f"Prefixes were not initialised for {guild.id}")
         async with self.pool.acquire() as conn:
@@ -116,26 +184,63 @@ class YukiSuou(commands.Bot):
         return
 
     async def get_prefix_list(self, message: discord.Message) -> list[str]:
+        """Retrieves the prefix the bot is listening to with the message as a context.
+
+        Parameters
+        ----------
+        message : discord.Message
+            The message context to get the prefix of.
+        Returns
+        -------
+        list[str]
+            A list of prefixes that the bot is listening for.
+        """
+
         prefixes = [BASE_PREFIX]
         if message.guild and self.prefixes.get(message.guild.id):
             prefixes.extend(self.prefixes[message.guild.id])
 
         return commands.when_mentioned_or(*prefixes)(self, message)
 
-    async def blacklistcheck(self, ctx: commands.Context[Self]) -> bool:
-        if ctx.author.id not in self.blacklistedusers:
-            return True
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            await ctx.channel.send(
-                f"Hey {ctx.author!s}! You are currently blacklisted from using the bot. You will not be able to run my commands in any servers or DMs"
-            )
-        return False
+    async def check_blacklist(self, ctx: commands.Context[Self]) -> Literal[True]:
+        if ctx.guild and self.is_blacklisted(ctx.guild):
+            raise BlacklistedGuild("Guild is blacklisted")
+        elif ctx.author and self.is_blacklisted(ctx.author):
+            raise BlacklistedUser("User is blacklisted")
+        return True
 
-    @property
-    def config(self) -> configparser.ConfigParser:
-        config = configparser.ConfigParser()
-        config.read("config/config.ini")
-        return config
+    def is_blacklisted(self, object: discord.Member | discord.User | discord.Guild) -> bool:
+        return bool(
+            isinstance(object, discord.User | discord.Member)
+            and object.id in self.blacklist["user"]
+            or isinstance(object, discord.Guild)
+            and object.id in self.blacklist["guild"]
+        )
+
+    async def add_blacklist(self, object: discord.User | discord.Guild) -> list[int]:
+        if (
+            isinstance(object, discord.User)
+            and object.id in self.blacklist["user"]
+            or isinstance(object, discord.Guild)
+            and object.id in self.blacklist["guild"]
+        ):
+            raise (
+                UserAlreadyBlacklisted(f"{object} is already blacklisted")
+                if isinstance(object, discord.User)
+                else GuildAlreadyBlacklisted(f"{object} is already blacklisted")
+            )
+        sql = """INSERT INTO Blacklists (id, type) VALUES (?, ?)"""
+        param: str = "user" if isinstance(object, discord.User) else "guild"
+        async with self.pool.acquire() as conn:
+            await conn.execute(
+                sql,
+                (
+                    object.id,
+                    param,
+                ),
+            )
+        self.blacklist[param].append(object.id)
+        return self.blacklist[param]
 
     async def setup_hook(self) -> None:
         self.pool: asqlite.Pool = await asqlite.create_pool("database/db.db")
@@ -152,9 +257,8 @@ class YukiSuou(commands.Bot):
             ]
 
         cogs = [m.name for m in iter_modules(["cogs"], prefix="cogs.")]
-        external_cogs = ["jishaku"]
 
-        cogs.extend(external_cogs)
+        cogs.extend(EXTERNAL_COGS)
 
         for cog in cogs:
             try:
@@ -163,13 +267,13 @@ class YukiSuou(commands.Bot):
                 log.error("%s \U00002717\nIgnoring exception in loading %s", cog, exc_info=error)
             else:
                 log.info("%s \U00002713", cog)
+        self.check_once(self.check_blacklist)
 
-        self.add_check(self.blacklistcheck)
         log.info("Setup complete")
 
     @functools.cached_property
     def logger_webhook(self) -> discord.Webhook:
-        return discord.Webhook.from_url(self.config.get("WEBHOOKS", "logger"), session=self.session, bot_token=self.token)
+        return discord.Webhook.from_url(WEBHOOK_URL, session=self.session, bot_token=self.token)
 
     @property
     def guild(self) -> discord.Guild:

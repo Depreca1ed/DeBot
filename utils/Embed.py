@@ -14,13 +14,12 @@ class ElyEmbed(discord.Embed):
 
     def __init__(
         self,
-        color: discord.Color | int = YukiSuou.color,
         colour: discord.Colour | int = YukiSuou.colour,
         fields: Iterable[tuple[str, str]] = (),
         field_inline: bool = False,
         **kwargs: Any,
     ) -> None:
-        super().__init__(color=color, colour=colour, **kwargs)
+        super().__init__(colour=colour, **kwargs)
         for n, v in fields:
             self.add_field(name=n, value=v, inline=field_inline)
 
@@ -29,7 +28,6 @@ class ElyEmbed(discord.Embed):
         cls,
         ctx: commands.Context[Any],
         colour: discord.Colour | int | None = None,
-        color: discord.Color | int | None = None,
         **kwargs: Any,
     ) -> discord.Embed:
         instance = cls(**kwargs)
@@ -37,8 +35,8 @@ class ElyEmbed(discord.Embed):
             text=f"Requested by {ctx.author}",
             icon_url=ctx.author.display_avatar.url or None,
         )
-        if colour or color:
-            instance.colour = instance.color = colour or color
+        if colour:
+            instance.colour = colour
             return instance
         if ctx.author.id in ctx.bot.owner_ids:
             instance.colour = 0xFFFFFF
