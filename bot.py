@@ -106,6 +106,15 @@ class YukiSuou(commands.Bot):
             return
         return self.prefixes[guild.id]
 
+    async def clear_prefix(self, guild: discord.Guild) -> None:
+        if not self.prefixes.get(guild.id):
+            raise PrefixNotInitialised(f"Prefixes were not initialised for {guild.id}")
+        async with self.pool.acquire() as conn:
+            await conn.execute("""DELETE FROM Prefixes WHERE guild = ?""", (guild.id,))
+
+        self.prefixes.pop(guild.id)
+        return
+
     async def get_prefix_list(self, message: discord.Message) -> list[str]:
         prefixes = [BASE_PREFIX]
         if message.guild and self.prefixes.get(message.guild.id):
