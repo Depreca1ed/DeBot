@@ -9,7 +9,7 @@ from discord.ext import commands
 from bot import YukiSuou
 
 
-class ElyEmbed(discord.Embed):
+class YukiEmbed(discord.Embed):
     """Main purpose is to get the usual setup of Embed for a command or an error embed"""
 
     def __init__(

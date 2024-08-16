@@ -15,11 +15,12 @@ import mystbin
 from altair import Literal, Self
 from discord.ext import commands
 
-from utils.config import BASE_PREFIX, BOT_TOKEN, THEME_COLOUR, WEBHOOK_URL
+from utils.config import BASE_PREFIX, BOT_TOKEN, OWNERS_ID, THEME_COLOUR, WEBHOOK_URL
 from utils.Error import (
     BlacklistedGuild,
     BlacklistedUser,
     GuildAlreadyBlacklisted,
+    NotBlacklisted,
     PrefixAlreadyPresent,
     PrefixNotInitialised,
     PrefixNotPresent,
@@ -59,7 +60,6 @@ class YukiSuou(commands.Bot):
             intents=intents,
             max_messages=5000,
             allowed_mentions=discord.AllowedMentions(everyone=False, users=True, roles=False, replied_user=True),
-            owner_ids=[688293803613880334],
             *args,
             **kwargs,
         )
@@ -242,6 +242,27 @@ class YukiSuou(commands.Bot):
         self.blacklist[param].append(object.id)
         return self.blacklist[param]
 
+    async def remove_blacklist(self, object: discord.User | discord.Guild) -> list[int]:
+        if (
+            isinstance(object, discord.User)
+            and object.id not in self.blacklist["user"]
+            or isinstance(object, discord.Guild)
+            and object.id not in self.blacklist["guild"]
+        ):
+            raise NotBlacklisted(f"{object} is not blacklisted.")
+        sql = """DELETE FROM Blacklists WHERE id = ? AND type = ?"""
+        param: str = "user" if isinstance(object, discord.User) else "guild"
+        async with self.pool.acquire() as conn:
+            await conn.execute(
+                sql,
+                (
+                    object.id,
+                    param,
+                ),
+            )
+        self.blacklist[param].append(object.id)
+        return self.blacklist[param]
+
     async def setup_hook(self) -> None:
         self.pool: asqlite.Pool = await asqlite.create_pool("database/db.db")
         async with self.pool.acquire() as db:
@@ -270,6 +291,10 @@ class YukiSuou(commands.Bot):
         self.check_once(self.check_blacklist)
 
         log.info("Setup complete")
+
+    @discord.utils.copy_doc(commands.Bot.is_owner)
+    async def is_owner(self, user: discord.abc.User) -> bool:
+        return bool(user.id in OWNERS_ID)
 
     @functools.cached_property
     def logger_webhook(self) -> discord.Webhook:

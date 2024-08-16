@@ -1,7 +1,20 @@
+from __future__ import annotations
+
 import datetime
+from typing import TYPE_CHECKING
 
 import discord
 import humanize
+
+if TYPE_CHECKING:
+    from discord.ext import commands
+
+    from bot import YukiSuou
+
+
+async def DefaultToUser(ctx: commands.Context[YukiSuou]) -> discord.User | discord.Member:
+    """Use this function with commands.parameter(default=DefaultToUser) only since its meant to be used for that"""
+    return ctx.author
 
 
 def StatusMessageGen(user: discord.Member) -> list[str]:

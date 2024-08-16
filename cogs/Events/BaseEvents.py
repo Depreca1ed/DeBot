@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands
 
-from utils.Embed import ElyEmbed
+from utils.Embed import YukiEmbed
 
 if TYPE_CHECKING:
     from bot import YukiSuou
@@ -29,7 +29,7 @@ class DevEvents(commands.Cog):
               ID       - {self.bot.user.id}\n
               """
         await self.bot.logger_webhook.send(
-            embed=ElyEmbed(
+            embed=YukiEmbed(
                 title="Bot started",
                 description=str("```\n" + inspect.cleandoc(val) + "\n```"),
             )
@@ -43,10 +43,8 @@ class DevEvents(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member | discord.User) -> None:
         if (
-            self.bot.owner_ids
+            await self.bot.is_owner(user)
             and reaction.emoji
-            and self.bot.user
-            and user.id in self.bot.owner_ids
             and reaction.emoji == "🗑️"
             and reaction.message.author.id == self.bot.user.id
         ):

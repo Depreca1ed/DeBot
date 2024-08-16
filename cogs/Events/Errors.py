@@ -8,7 +8,8 @@ import discord
 import mystbin
 from discord.ext import commands
 
-from utils.Embed import ElyEmbed
+from utils.config import OWNERS_ID
+from utils.Embed import YukiEmbed
 from utils.Error import FeatureDisabled
 
 if TYPE_CHECKING:
@@ -71,7 +72,7 @@ class Errors(commands.Cog):
             return
 
         if isinstance(error, commands.CommandNotFound):
-            if self.bot.owner_ids and ctx.author.id in self.bot.owner_ids:
+            if ctx.author.id in OWNERS_ID:
                 return
             with contextlib.suppress(discord.HTTPException):
                 return await ctx.message.add_reaction("<:status_dnd:1237048172174643200>")
@@ -87,7 +88,7 @@ class Errors(commands.Cog):
             and ctx.channel.permissions_for(ctx.guild.me).embed_links is False
         ):
             permissions = "\n".join([f"- {clean_error_message('embed_links')}"])  # The string used in the command
-            embed = ElyEmbed.default(
+            embed = YukiEmbed.default(
                 ctx,
                 title="<:redTick:1237048136527249510> | Missing Permissions",
                 description=f"I am missing the following permissions to run this command.\n{permissions}",
@@ -107,7 +108,7 @@ class Errors(commands.Cog):
         # Few Argument checks not much
         if isinstance(error, commands.BadArgument):
             return await ctx.send(
-                embed=ElyEmbed.default(
+                embed=YukiEmbed.default(
                     ctx,
                     title="<:redTick:1237048136527249510> | Invalid Argument",
                     description=f"{error}",
@@ -116,7 +117,7 @@ class Errors(commands.Cog):
             )
         if isinstance(error, commands.TooManyArguments):
             return await ctx.send(
-                embed=ElyEmbed.default(
+                embed=YukiEmbed.default(
                     ctx,
                     title="<:redTick:1237048136527249510> | Too Many Arguments",
                     description=f"{error}",
@@ -125,7 +126,7 @@ class Errors(commands.Cog):
             )
         if isinstance(error, commands.MissingRequiredArgument):
             return await ctx.send(
-                embed=ElyEmbed.default(
+                embed=YukiEmbed.default(
                     ctx,
                     title="<:redTick:1237048136527249510> | Missing argument",
                     description=f"You did not provide a {error.param.name} argument. \n- How to use the command:\n  - `{get_command_signature(ctx, ctx.command)}`",
@@ -137,7 +138,7 @@ class Errors(commands.Cog):
             permissions = "\n".join(
                 [f"- {clean_error_message(permission)}" for permission in error.missing_permissions]
             )  # The string used in the command
-            embed = ElyEmbed.default(
+            embed = YukiEmbed.default(
                 ctx,
                 title="<:redTick:1237048136527249510> | Missing Permissions",
                 description=f"You are missing the following permissions to run this command.\n{permissions}",
@@ -157,7 +158,7 @@ class Errors(commands.Cog):
             permissions = "\n".join(
                 [f"- {clean_error_message(permission)}" for permission in error.missing_permissions]
             )  # The string used in the command
-            embed = ElyEmbed.default(
+            embed = YukiEmbed.default(
                 ctx,
                 title="<:redTick:1237048136527249510> | Missing Permissions",
                 description=f"I am missing the following permissions to run this command.\n{permissions}",
@@ -185,7 +186,7 @@ class Errors(commands.Cog):
         message = ERROR_MESSAGES.get(type(error), None)  # type: ignore
         if message:
             await ctx.send(
-                embed=ElyEmbed.default(
+                embed=YukiEmbed.default(
                     ctx,
                     title="<:status_dnd:1237048172174643200> | Cannot run command",
                     description=f"{message}",
@@ -202,7 +203,7 @@ class Errors(commands.Cog):
                             str(error),
                         ),
                     )
-                    embed = ElyEmbed.default(
+                    embed = YukiEmbed.default(
                         ctx,
                         title="Unknown error occured!",
                         description="The developers have been informed.",
@@ -237,7 +238,9 @@ class Errors(commands.Cog):
                     post_message = f"Error message was too long to be shown in this embed. \n- [Link to Error]({error_link})"
                 else:
                     post_message = f"```py\n{error_message}```"
-                error_embed = ElyEmbed.default(ctx, title=f"Error #{error_id[0]}", description=post_message, colour=0x000000)
+                error_embed = YukiEmbed.default(
+                    ctx, title=f"Error #{error_id[0]}", description=post_message, colour=0x000000
+                )
                 extras = [
                     f"- **Command -** {ctx.command.qualified_name}",
                     f"- **Invoked as -** {ctx.message.clean_content}",

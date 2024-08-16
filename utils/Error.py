@@ -31,3 +31,10 @@ class UserAlreadyBlacklisted(commands.CommandError):
 
 class GuildAlreadyBlacklisted(commands.CommandError):
     pass
+
+
+class NotBlacklisted(commands.CommandError):
+    pass
+
+
+# TODO: All of these are not supposed to be commands.CommandError. Change them to actual errors which mostly likely suit their use case
