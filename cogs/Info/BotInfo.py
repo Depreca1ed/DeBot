@@ -13,12 +13,12 @@ from discord import app_commands
 from discord.ext import commands
 from jishaku.math import natural_size
 
-from utils.config import OWNERS_ID
+from utils import OWNERS_ID
 
 if TYPE_CHECKING:
     from bot import YukiSuou
 
-from utils.Embed import YukiEmbed
+from utils import YukiEmbed
 
 try:
     from importlib.metadata import distribution, packages_distributions
@@ -41,7 +41,7 @@ class BotInformation(commands.Cog):
         bot = self.bot
         owners = [owner for owner in [bot.get_user(dev) for dev in OWNERS_ID] if owner]
         random_owner = random.choice(owners)
-        embed = YukiEmbed.default(ctx, title=str(bot.user.name), description=bot.description)
+        embed = YukiEmbed(title=str(bot.user.name), description=bot.description, ctx=ctx)
         embed.set_author(
             name=f"Made by {' and '.join([dev.name for dev in owners]) }",
             icon_url=random_owner.avatar.url if random_owner.avatar else None,

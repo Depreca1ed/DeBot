@@ -1,23 +1,29 @@
+from __future__ import annotations
+
 import datetime
 import functools
-import json
 import logging
 from itertools import product
 from pathlib import Path
 from pkgutil import iter_modules
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Self
 
 import aiohttp
-import asqlite
+import asyncpg
 import discord
 import jishaku
 import mystbin
-from altair import Literal, Self
 from discord.ext import commands
 
-from utils.config import BASE_PREFIX, BOT_TOKEN, OWNERS_ID, THEME_COLOUR, WEBHOOK_URL
-from utils.Error import (
+from utils import (
+    BASE_PREFIX,
+    BOT_TOKEN,
+    OWNERS_ID,
+    POSTGRES_CREDENTIALS,
+    THEME_COLOUR,
+    WEBHOOK_URL,
     BlacklistedGuild,
+    BlackListedTypes,
     BlacklistedUser,
     GuildAlreadyBlacklisted,
     NotBlacklisted,
@@ -26,7 +32,8 @@ from utils.Error import (
     PrefixNotPresent,
     UserAlreadyBlacklisted,
 )
-from utils.Types import BlackListedTypes
+
+__all__ = ("YukiSuou",)
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -44,8 +51,9 @@ class YukiSuou(commands.Bot):
         "".join(capitalization) for capitalization in product(*zip(BASE_PREFIX.lower(), BASE_PREFIX.upper()))
     ]
     colour: discord.Colour = discord.Colour.from_str(THEME_COLOUR)
-    pool: asqlite.Pool
     session: aiohttp.ClientSession
+    if TYPE_CHECKING:
+        pool: asyncpg.Pool[asyncpg.Record]
     mystbin_cli: mystbin.Client
     load_time: datetime.datetime
     prefixes: dict[int, list[str]]
@@ -81,15 +89,9 @@ class YukiSuou(commands.Bot):
             prefixes.extend(self.prefixes[message.guild.id])
             return commands.when_mentioned_or(*prefixes)(self, message)
 
-        async with self.pool.acquire() as conn:
-            fetched_prefix: list[str] = json.loads(
-                (
-                    await conn.fetchone(
-                        """SELECT json_group_array(prefix) AS Prefixes FROM prefixes WHERE guild = ?""",
-                        (message.guild.id),
-                    )
-                )[0]
-            )
+        fetched_prefix: list[str] = await self.pool.fetchval(
+            """SELECT array_agg(prefix) FROM prefixes WHERE guild = $1""", (message.guild.id)
+        )
         if fetched_prefix:
             self.prefixes[message.guild.id] = fetched_prefix
             prefixes.extend(self.prefixes[message.guild.id])
@@ -118,8 +120,8 @@ class YukiSuou(commands.Bot):
         """
         if prefix in self.prefix:
             raise PrefixAlreadyPresent(f"{prefix} is an already present prefix.")
-        async with self.pool.acquire() as conn:
-            await conn.execute("""INSERT INTO Prefixes VALUES (?, ?)""", (guild.id, prefix))
+
+        await self.pool.execute("""INSERT INTO Prefixes VALUES ($1, $2)""", guild.id, prefix)
         if not self.prefixes.get(guild.id):
             self.prefixes[guild.id] = [prefix]
             return self.prefixes[guild.id]
@@ -154,8 +156,8 @@ class YukiSuou(commands.Bot):
 
         elif prefix not in self.prefixes[guild.id]:
             raise PrefixNotPresent(f"{prefix} is not present in guild: {guild.id}")
-        async with self.pool.acquire() as conn:
-            await conn.execute("""DELETE FROM Prefixes WHERE guild = ? AND prefix = ?""", (guild.id, prefix))
+
+        await self.pool.execute("""DELETE FROM Prefixes WHERE guild = $1 AND prefix = $2""", guild.id, prefix)
         self.prefixes[guild.id].remove(prefix)
         if not self.prefixes[guild.id]:
             self.prefixes.pop(guild.id)  # NOTE: This is an excessive cleaner. Unsure if it should be present
@@ -177,8 +179,8 @@ class YukiSuou(commands.Bot):
         """
         if not self.prefixes.get(guild.id):
             raise PrefixNotInitialised(f"Prefixes were not initialised for {guild.id}")
-        async with self.pool.acquire() as conn:
-            await conn.execute("""DELETE FROM Prefixes WHERE guild = ?""", (guild.id,))
+
+        await self.pool.execute("""DELETE FROM Prefixes WHERE guild = $1""", guild.id)
 
         self.prefixes.pop(guild.id)
         return
@@ -207,6 +209,7 @@ class YukiSuou(commands.Bot):
             raise BlacklistedGuild("Guild is blacklisted")
         elif ctx.author and self.is_blacklisted(ctx.author):
             raise BlacklistedUser("User is blacklisted")
+
         return True
 
     def is_blacklisted(self, object: discord.Member | discord.User | discord.Guild) -> bool:
@@ -229,16 +232,16 @@ class YukiSuou(commands.Bot):
                 if isinstance(object, discord.User)
                 else GuildAlreadyBlacklisted(f"{object} is already blacklisted")
             )
-        sql = """INSERT INTO Blacklists (id, type) VALUES (?, ?)"""
+
+        sql = """INSERT INTO Blacklists (id, type) VALUES ($1, $2)"""
         param: str = "user" if isinstance(object, discord.User) else "guild"
-        async with self.pool.acquire() as conn:
-            await conn.execute(
-                sql,
-                (
-                    object.id,
-                    param,
-                ),
-            )
+        await self.pool.execute(
+            sql,
+            (
+                object.id,
+                param,
+            ),
+        )
         self.blacklist[param].append(object.id)
         return self.blacklist[param]
 
@@ -250,32 +253,29 @@ class YukiSuou(commands.Bot):
             and object.id not in self.blacklist["guild"]
         ):
             raise NotBlacklisted(f"{object} is not blacklisted.")
+
         sql = """DELETE FROM Blacklists WHERE id = ? AND type = ?"""
         param: str = "user" if isinstance(object, discord.User) else "guild"
-        async with self.pool.acquire() as conn:
-            await conn.execute(
-                sql,
-                (
-                    object.id,
-                    param,
-                ),
-            )
+        await self.pool.execute(
+            sql,
+            object.id,
+            param,
+        )
         self.blacklist[param].append(object.id)
         return self.blacklist[param]
 
     async def setup_hook(self) -> None:
-        self.pool: asqlite.Pool = await asqlite.create_pool("database/db.db")
-        async with self.pool.acquire() as db:
 
-            with Path("schema.sql").open(encoding="utf-8") as f:
-                await db.executescript(f.read())
+        # Close your eyes for the next 6 lines or something and look at https://github.com/itswilliboy/Harmony/blob/master/bot.py#L79-L84 instead
+        credentials: dict[str, Any] = POSTGRES_CREDENTIALS
+        pool: asyncpg.Pool[asyncpg.Record] | None = await asyncpg.create_pool(**credentials)
+        if not pool or pool and pool._closed:
+            raise RuntimeError("Pool is closed")
 
-            self.blacklistedguilds: list[int] = [
-                blacklist[0] for blacklist in await db.fetchall("""SELECT * FROM blacklists WHERE type = 'guild'""")
-            ]
-            self.blacklistedusers = [
-                blacklist[0] for blacklist in await db.fetchall("""SELECT * FROM blacklists WHERE type = 'user'""")
-            ]
+        self.pool = pool
+
+        with Path("schema.sql").open(encoding="utf-8") as f:
+            await self.pool.execute(f.read())
 
         cogs = [m.name for m in iter_modules(["cogs"], prefix="cogs.")]
 

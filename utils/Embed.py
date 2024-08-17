@@ -1,12 +1,19 @@
-from collections.abc import Iterable
-from typing import (
-    Any,
-)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 import discord
-from discord.ext import commands
 
-from bot import YukiSuou
+from .config import DEV_THEME, OWNERS_ID, THEME_COLOUR
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from discord.ext import commands
+
+    from bot import YukiSuou
+
+__all__ = ("YukiEmbed",)
 
 
 class YukiEmbed(discord.Embed):
@@ -14,32 +21,20 @@ class YukiEmbed(discord.Embed):
 
     def __init__(
         self,
-        colour: discord.Colour | int = YukiSuou.colour,
+        colour: discord.Colour | int = discord.Colour.from_str(THEME_COLOUR),
         fields: Iterable[tuple[str, str]] = (),
         field_inline: bool = False,
+        *,
+        ctx: commands.Context[YukiSuou] | None = None,
         **kwargs: Any,
     ) -> None:
+        if ctx:
+            self.set_footer(
+                text=f"Requested by {ctx.author}",
+                icon_url=ctx.author.display_avatar.url or None,
+            )
+            if ctx.author.id in OWNERS_ID:
+                colour = discord.Colour.from_str(DEV_THEME)
         super().__init__(colour=colour, **kwargs)
         for n, v in fields:
             self.add_field(name=n, value=v, inline=field_inline)
-
-    @classmethod
-    def default(
-        cls,
-        ctx: commands.Context[Any],
-        colour: discord.Colour | int | None = None,
-        **kwargs: Any,
-    ) -> discord.Embed:
-        instance = cls(**kwargs)
-        instance.set_footer(
-            text=f"Requested by {ctx.author}",
-            icon_url=ctx.author.display_avatar.url or None,
-        )
-        if colour:
-            instance.colour = colour
-            return instance
-        if ctx.author.id in ctx.bot.owner_ids:
-            instance.colour = 0xFFFFFF
-            return instance
-        instance.colour = instance.colour
-        return instance

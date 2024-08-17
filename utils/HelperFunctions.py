@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
     from bot import YukiSuou
 
+__all__ = ("DefaultToUser", "StatusMessageGen")
+
 
 async def DefaultToUser(ctx: commands.Context[YukiSuou]) -> discord.User | discord.Member:
     """Use this function with commands.parameter(default=DefaultToUser) only since its meant to be used for that"""

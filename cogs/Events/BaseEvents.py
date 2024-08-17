@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands
 
-from utils.Embed import YukiEmbed
+from utils import YukiEmbed
 
 if TYPE_CHECKING:
     from bot import YukiSuou

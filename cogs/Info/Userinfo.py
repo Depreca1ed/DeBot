@@ -6,12 +6,10 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.Embed import YukiEmbed
-from utils.HelperFunctions import DefaultToUser, StatusMessageGen
+from utils import DefaultToUser, StatusMessageGen, YukiEmbed
 
 if TYPE_CHECKING:
     from bot import YukiSuou
-
 badges_to_emoji = {
     "partner": "<:discordpartner:1250444436148584494>",
     "verified_bot_developer": "<:discordbotdev:1250444367315861674>",
@@ -40,7 +38,7 @@ class Userinfo(commands.Cog):
         ctx: commands.Context[YukiSuou],
         user: discord.Member | discord.User = commands.parameter(default=DefaultToUser),
     ) -> None:
-        embed = YukiEmbed.default(ctx, title=str(user), colour=user.colour)
+        embed = YukiEmbed(title=str(user), colour=user.colour, ctx=ctx)
 
         embed.set_author(
             name=f"{user.global_name or user.name} {f'({user.nick} in {user.guild.name})' if isinstance(user, discord.Member) and user.nick and user.guild.name else ''}",

@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.Embed import YukiEmbed
+from utils import YukiEmbed
 
 if TYPE_CHECKING:
     from bot import YukiSuou
@@ -24,7 +24,7 @@ class ServerInfo(commands.Cog):
         assert ctx.guild is not None
         guild = ctx.guild
 
-        embed = YukiEmbed.default(ctx, description=guild.description or None)
+        embed = YukiEmbed(description=guild.description or None, ctx=ctx)
         embed.set_author(name=guild.name, icon_url=guild.icon.url if guild.icon else None)
 
         guild_data = [
