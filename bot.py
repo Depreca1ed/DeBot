@@ -33,7 +33,7 @@ from utils import (
     UserAlreadyBlacklisted,
 )
 
-__all__ = ("YukiSuou",)
+__all__ = ('YukiSuou',)
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -43,14 +43,14 @@ jishaku.Flags.NO_DM_TRACEBACK = True
 jishaku.Flags.USE_ANSI_ALWAYS = True
 jishaku.Flags.NO_UNDERSCORE = True
 
-EXTERNAL_COGS: list[str] = ["jishaku"]
+EXTERNAL_COGS: list[str] = ['jishaku']
 
 
 class YukiSuou(commands.Bot):
     prefix: ClassVar[list[str]] = [
-        "".join(capitalization) for capitalization in product(*zip(BASE_PREFIX.lower(), BASE_PREFIX.upper()))
+        ''.join(capitalization) for capitalization in product(*zip(BASE_PREFIX.lower(), BASE_PREFIX.upper(), strict=False))
     ]
-    colour: discord.Colour = discord.Colour.from_str(THEME_COLOUR)
+    colour: discord.Colour = THEME_COLOUR
     session: aiohttp.ClientSession
     if TYPE_CHECKING:
         pool: asyncpg.Pool[asyncpg.Record]
@@ -58,6 +58,7 @@ class YukiSuou(commands.Bot):
     load_time: datetime.datetime
     prefixes: dict[int, list[str]]
     blacklist: BlackListedTypes
+    maintenance: bool
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         intents: discord.Intents = discord.Intents.all()
@@ -77,7 +78,8 @@ class YukiSuou(commands.Bot):
         self.mystbin_cli = mystbin.Client()
         self.load_time = datetime.datetime.now(datetime.UTC)
         self.prefixes: dict[int, list[str]] = {}
-        self.blacklist = {"guild": [], "user": []}
+        self.blacklist = {'guild': [], 'user': []}
+        self.maintenance = False
 
     @discord.utils.copy_doc(commands.Bot.get_prefix)
     async def get_prefix(self, message: discord.Message) -> list[str]:
@@ -90,7 +92,8 @@ class YukiSuou(commands.Bot):
             return commands.when_mentioned_or(*prefixes)(self, message)
 
         fetched_prefix: list[str] = await self.pool.fetchval(
-            """SELECT array_agg(prefix) FROM prefixes WHERE guild = $1""", (message.guild.id)
+            """SELECT array_agg(prefix) FROM prefixes WHERE guild = $1""",
+            (message.guild.id),
         )
         if fetched_prefix:
             self.prefixes[message.guild.id] = fetched_prefix
@@ -117,9 +120,10 @@ class YukiSuou(commands.Bot):
         ------
         PrefixAlreadyPresent
             Raised when provided prefix is already present
+
         """
         if prefix in self.prefix:
-            raise PrefixAlreadyPresent(f"{prefix} is an already present prefix.")
+            raise PrefixAlreadyPresent(prefix)
 
         await self.pool.execute("""INSERT INTO Prefixes VALUES ($1, $2)""", guild.id, prefix)
         if not self.prefixes.get(guild.id):
@@ -150,18 +154,23 @@ class YukiSuou(commands.Bot):
             Raised when prefixes for the guild were never created.
         PrefixNotPresent
             Raised when provided prefix is not present in the guild's prefixes
+
         """
         if not self.prefixes.get(guild.id):
-            raise PrefixNotInitialised(f"Prefixes were not initialised for {guild.id}")
+            raise PrefixNotInitialised(guild)
 
-        elif prefix not in self.prefixes[guild.id]:
-            raise PrefixNotPresent(f"{prefix} is not present in guild: {guild.id}")
+        if prefix not in self.prefixes[guild.id]:
+            raise PrefixNotPresent(prefix, guild)
 
-        await self.pool.execute("""DELETE FROM Prefixes WHERE guild = $1 AND prefix = $2""", guild.id, prefix)
+        await self.pool.execute(
+            """DELETE FROM Prefixes WHERE guild = $1 AND prefix = $2""",
+            guild.id,
+            prefix,
+        )
         self.prefixes[guild.id].remove(prefix)
         if not self.prefixes[guild.id]:
             self.prefixes.pop(guild.id)  # NOTE: This is an excessive cleaner. Unsure if it should be present
-            return
+            return None
         return self.prefixes[guild.id]
 
     async def clear_prefix(self, guild: discord.Guild) -> None:
@@ -176,14 +185,14 @@ class YukiSuou(commands.Bot):
         ------
         PrefixNotInitialised
             Raised when prefixes for the guild were never created.
+
         """
         if not self.prefixes.get(guild.id):
-            raise PrefixNotInitialised(f"Prefixes were not initialised for {guild.id}")
+            raise PrefixNotInitialised(guild)
 
         await self.pool.execute("""DELETE FROM Prefixes WHERE guild = $1""", guild.id)
 
         self.prefixes.pop(guild.id)
-        return
 
     async def get_prefix_list(self, message: discord.Message) -> list[str]:
         """Retrieves the prefix the bot is listening to with the message as a context.
@@ -192,12 +201,13 @@ class YukiSuou(commands.Bot):
         ----------
         message : discord.Message
             The message context to get the prefix of.
+
         Returns
         -------
         list[str]
             A list of prefixes that the bot is listening for.
-        """
 
+        """
         prefixes = [BASE_PREFIX]
         if message.guild and self.prefixes.get(message.guild.id):
             prefixes.extend(self.prefixes[message.guild.id])
@@ -206,78 +216,91 @@ class YukiSuou(commands.Bot):
 
     async def check_blacklist(self, ctx: commands.Context[Self]) -> Literal[True]:
         if ctx.guild and self.is_blacklisted(ctx.guild):
-            raise BlacklistedGuild("Guild is blacklisted")
-        elif ctx.author and self.is_blacklisted(ctx.author):
-            raise BlacklistedUser("User is blacklisted")
+            raise BlacklistedGuild
+        if ctx.author and self.is_blacklisted(ctx.author):
+            raise BlacklistedUser
 
         return True
 
-    def is_blacklisted(self, object: discord.Member | discord.User | discord.Guild) -> bool:
+    def is_blacklisted(self, snowflake: discord.Member | discord.User | discord.Guild) -> bool:
         return bool(
-            isinstance(object, discord.User | discord.Member)
-            and object.id in self.blacklist["user"]
-            or isinstance(object, discord.Guild)
-            and object.id in self.blacklist["guild"]
+            isinstance(snowflake, discord.User | discord.Member)
+            and snowflake.id in self.blacklist['user']
+            or isinstance(snowflake, discord.Guild)
+            and snowflake.id in self.blacklist['guild'],
         )
 
-    async def add_blacklist(self, object: discord.User | discord.Guild) -> list[int]:
+    async def add_blacklist(self, snowflake: discord.User | discord.Guild) -> list[int]:
         if (
-            isinstance(object, discord.User)
-            and object.id in self.blacklist["user"]
-            or isinstance(object, discord.Guild)
-            and object.id in self.blacklist["guild"]
+            isinstance(snowflake, discord.User)
+            and snowflake.id in self.blacklist['user']
+            or isinstance(snowflake, discord.Guild)
+            and snowflake.id in self.blacklist['guild']
         ):
             raise (
-                UserAlreadyBlacklisted(f"{object} is already blacklisted")
-                if isinstance(object, discord.User)
-                else GuildAlreadyBlacklisted(f"{object} is already blacklisted")
+                UserAlreadyBlacklisted(f'{snowflake} is already blacklisted')
+                if isinstance(snowflake, discord.User)
+                else GuildAlreadyBlacklisted(f'{snowflake} is already blacklisted')
             )
 
         sql = """INSERT INTO Blacklists (id, type) VALUES ($1, $2)"""
-        param: str = "user" if isinstance(object, discord.User) else "guild"
+        param: str = 'user' if isinstance(snowflake, discord.User) else 'guild'
         await self.pool.execute(
             sql,
             (
-                object.id,
+                snowflake.id,
                 param,
             ),
         )
-        self.blacklist[param].append(object.id)
+        self.blacklist[param].append(snowflake.id)
         return self.blacklist[param]
 
-    async def remove_blacklist(self, object: discord.User | discord.Guild) -> list[int]:
+    async def remove_blacklist(self, snowflake: discord.User | discord.Guild) -> list[int]:
         if (
-            isinstance(object, discord.User)
-            and object.id not in self.blacklist["user"]
-            or isinstance(object, discord.Guild)
-            and object.id not in self.blacklist["guild"]
+            isinstance(snowflake, discord.User)
+            and snowflake.id not in self.blacklist['user']
+            or isinstance(snowflake, discord.Guild)
+            and snowflake.id not in self.blacklist['guild']
         ):
-            raise NotBlacklisted(f"{object} is not blacklisted.")
+            raise NotBlacklisted(snowflake)
 
         sql = """DELETE FROM Blacklists WHERE id = ? AND type = ?"""
-        param: str = "user" if isinstance(object, discord.User) else "guild"
+        param: str = 'user' if isinstance(snowflake, discord.User) else 'guild'
         await self.pool.execute(
             sql,
-            object.id,
+            snowflake.id,
             param,
         )
-        self.blacklist[param].append(object.id)
+        self.blacklist[param].append(snowflake.id)
         return self.blacklist[param]
 
-    async def setup_hook(self) -> None:
+    async def check_maintenance(self, ctx: commands.Context[Self]) -> bool:
+        if self.maintenance and await self.is_owner(ctx.author):
+            return True
+        await ctx.send('Bot is currently undermaintenance.')
+        return False
 
+    async def toggle_maintenance(self, toggle: bool | None = None) -> bool:
+        if toggle:
+            self.maintenance = toggle
+            return self.maintenance
+        self.maintenance = self.maintenance is False
+        return self.maintenance
+
+    async def setup_hook(self) -> None:
         # Close your eyes for the next 6 lines or something and look at https://github.com/itswilliboy/Harmony/blob/master/bot.py#L79-L84 instead
         credentials: dict[str, Any] = POSTGRES_CREDENTIALS
         pool: asyncpg.Pool[asyncpg.Record] | None = await asyncpg.create_pool(**credentials)
         if not pool or pool and pool._closed:
-            raise RuntimeError("Pool is closed")
+            msg = 'Pool is closed'
+            raise RuntimeError(msg)
 
         self.pool = pool
 
-        with Path("schema.sql").open(encoding="utf-8") as f:
+        with Path('schema.sql').open(encoding='utf-8') as f:  # noqa: ASYNC230
             await self.pool.execute(f.read())
 
-        cogs = [m.name for m in iter_modules(["cogs"], prefix="cogs.")]
+        cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
 
         cogs.extend(EXTERNAL_COGS)
 
@@ -285,12 +308,17 @@ class YukiSuou(commands.Bot):
             try:
                 await self.load_extension(str(cog))
             except commands.ExtensionError as error:
-                log.error("%s \U00002717\nIgnoring exception in loading %s", cog, exc_info=error)
+                log.exception(
+                    '%s \U00002717\nIgnoring exception in loading %s',
+                    cog,
+                    exc_info=error,
+                )
             else:
-                log.info("%s \U00002713", cog)
+                log.info('%s \U00002713', cog)
         self.check_once(self.check_blacklist)
+        self.check_once(self.check_maintenance)
 
-        log.info("Setup complete")
+        log.info('Setup complete')
 
     @discord.utils.copy_doc(commands.Bot.is_owner)
     async def is_owner(self, user: discord.abc.User) -> bool:
@@ -313,8 +341,8 @@ class YukiSuou(commands.Bot):
         return user
 
     async def close(self) -> None:
-        if hasattr(self, "pool"):
+        if hasattr(self, 'pool'):
             await self.pool.close()
-        if hasattr(self, "session"):
+        if hasattr(self, 'session'):
             await self.session.close()
         await super().close()

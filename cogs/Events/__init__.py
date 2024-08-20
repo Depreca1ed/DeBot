@@ -3,15 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-
     from bot import YukiSuou
 
-from .BaseEvents import DevEvents
-from .Errors import Errors
-from .Wordism import Wordism
+from .base_events import DevEvents
+from .wordism import Wordism
 
 
-class Events(Errors, DevEvents, Wordism, name="Events"):
+class Events(DevEvents, Wordism, name='Events'):
     def __init__(self, bot: YukiSuou) -> None:
         self.bot = bot
 

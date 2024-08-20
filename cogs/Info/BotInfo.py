@@ -33,7 +33,9 @@ class BotInformation(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(
-        name="about", aliases=["botinformation", "boti", "botinfo", "info"], description="Get information about this bot"
+        name='about',
+        aliases=['botinformation', 'boti', 'botinfo', 'info'],
+        description='Get information about this bot',
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
@@ -48,31 +50,31 @@ class BotInformation(commands.Cog):
         )  # This f string is assuming you have 2 devs since originally down bad and Dep were the only one.
         visible_channels = list(bot.get_all_channels())
         bot_visible_statistics = [
-            f"- **Servers :** `{len(bot.guilds)}`",
-            f"- **Users :** `{len(bot.users)}`",
-            f"- **Channels :** `{len(visible_channels)}`",
+            f'- **Servers :** `{len(bot.guilds)}`',
+            f'- **Users :** `{len(bot.users)}`',
+            f'- **Channels :** `{len(visible_channels)}`',
         ]
-        embed.add_field(name="General Statistics", value="\n".join(bot_visible_statistics), inline=False)
+        embed.add_field(name='General Statistics', value='\n'.join(bot_visible_statistics), inline=False)
 
         proc = psutil.Process()
         mem = proc.memory_full_info()
         distributions: list[str] = [
             dist
-            for dist in packages_distributions()["discord"]
-            if any(file.parts == ("discord", "__init__.py") for file in distribution(dist).files)  # type: ignore
+            for dist in packages_distributions()['discord']
+            if any(file.parts == ('discord', '__init__.py') for file in distribution(dist).files)  # type: ignore[reportOptionalIterable]
         ]
 
         if distributions:
-            dist_version = f"{distributions[0]} {importlib.metadata.version(distributions[0])}"
+            dist_version = f'{distributions[0]} {importlib.metadata.version(distributions[0])}'
         else:
-            dist_version = f"unknown {discord.__version__}"
+            dist_version = f'unknown {discord.__version__}'
         backend_statistic = [
-            f"> Made in `Python {platform.python_version()}` & `{dist_version}`",
-            f"- **Uptime :** {humanize.naturaldelta(datetime.timedelta(seconds=datetime.datetime.now().timestamp() - bot.load_time.timestamp()))}",
-            f"- **Memory :** `{natural_size(mem.uss)}`",
-            f"- **CPU :** `{proc.cpu_percent()}`%",
+            f'> Made in `Python {platform.python_version()}` & `{dist_version}`',
+            f'- **Uptime :** {humanize.naturaldelta(datetime.timedelta(seconds=datetime.datetime.now(datetime.UTC).timestamp() - bot.load_time.timestamp()))}',
+            f'- **Memory :** `{natural_size(mem.uss)}`',
+            f'- **CPU :** `{proc.cpu_percent()}`%',
         ]
-        embed.add_field(name="System Statistics", value="\n".join(backend_statistic), inline=False)
+        embed.add_field(name='System Statistics', value='\n'.join(backend_statistic), inline=False)
 
         embed.set_thumbnail(url=bot.user.avatar.url if bot.user.avatar else None)
         await ctx.send(embed=embed)

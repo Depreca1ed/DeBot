@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 
 import discord
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     from bot import YukiSuou
 
-__all__ = ("YukiEmbed",)
+__all__ = ('YukiEmbed',)
 
 
 class YukiEmbed(discord.Embed):
@@ -21,20 +21,23 @@ class YukiEmbed(discord.Embed):
 
     def __init__(
         self,
-        colour: discord.Colour | int = discord.Colour.from_str(THEME_COLOUR),
+        colour: discord.Colour | int = THEME_COLOUR,
         fields: Iterable[tuple[str, str]] = (),
-        field_inline: bool = False,
         *,
+        field_inline: bool = False,
         ctx: commands.Context[YukiSuou] | None = None,
         **kwargs: Any,
     ) -> None:
         if ctx:
             self.set_footer(
-                text=f"Requested by {ctx.author}",
+                text=f'Requested by {ctx.author}',
                 icon_url=ctx.author.display_avatar.url or None,
             )
             if ctx.author.id in OWNERS_ID:
-                colour = discord.Colour.from_str(DEV_THEME)
+                colour = DEV_THEME
         super().__init__(colour=colour, **kwargs)
         for n, v in fields:
             self.add_field(name=n, value=v, inline=field_inline)
+
+    def add_field(self, *, name: str | None = '', value: str | None = '', inline: bool = False) -> Self:
+        return super().add_field(name=name, value=value, inline=inline)
