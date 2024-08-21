@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .BotInfo import BotInformation
-from .Serverinfo import ServerInfo
-from .Userinfo import Userinfo
+from .botinfo import BotInformation
+from .serverinfo import ServerInfo
+from .userinfo import Userinfo
 
 if TYPE_CHECKING:
     from bot import YukiSuou
