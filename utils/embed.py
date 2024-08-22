@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Self
 
 import discord
 
-from .config import DEV_THEME, OWNERS_ID, THEME_COLOUR
+from .config import THEME_COLOUR
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -21,7 +21,7 @@ class YukiEmbed(discord.Embed):
 
     def __init__(
         self,
-        colour: discord.Colour | int = THEME_COLOUR,
+        colour: discord.Colour | int | None = THEME_COLOUR,
         fields: Iterable[tuple[str, str]] = (),
         *,
         field_inline: bool = False,
@@ -33,8 +33,6 @@ class YukiEmbed(discord.Embed):
                 text=f'Requested by {ctx.author}',
                 icon_url=ctx.author.display_avatar.url or None,
             )
-            if ctx.author.id in OWNERS_ID:
-                colour = DEV_THEME
         super().__init__(colour=colour, **kwargs)
         for n, v in fields:
             self.add_field(name=n, value=v, inline=field_inline)

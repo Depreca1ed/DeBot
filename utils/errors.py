@@ -11,12 +11,12 @@ __all__ = (
     'BlacklistedGuild',
     'BlacklistedUser',
     'FeatureDisabled',
-    'GuildAlreadyBlacklisted',
+    'AlreadyBlacklisted',
     'PrefixAlreadyPresent',
     'PrefixNotInitialised',
     'PrefixNotPresent',
-    'UserAlreadyBlacklisted',
     'NotBlacklisted',
+    'UnderMaintenance',
 )
 
 
@@ -40,26 +40,28 @@ class PrefixNotPresent(commands.CommandError):
 
 
 class BlacklistedUser(commands.CheckFailure):
-    def __init__(self) -> None:
-        super().__init__('This server is blacklisted')
+    def __init__(self, snowflake: discord.User | discord.Member) -> None:
+        super().__init__(f'{snowflake} is blacklisted')
 
 
 class BlacklistedGuild(commands.CheckFailure):
-    def __init__(self) -> None:
-        super().__init__('This user is blacklisted')
+    def __init__(self, snowflake: discord.Guild) -> None:
+        super().__init__(f'{snowflake} is blacklisted.')
 
 
-class UserAlreadyBlacklisted(commands.CommandError):
-    pass
-
-
-class GuildAlreadyBlacklisted(commands.CommandError):
-    pass
+class AlreadyBlacklisted(commands.CommandError):
+    def __init__(self, snowflake: discord.User | discord.Guild) -> None:
+        super().__init__(f'{snowflake} is already blacklisted')
 
 
 class NotBlacklisted(commands.CommandError):
     def __init__(self, snowflake: discord.User | discord.Guild) -> None:
         super().__init__(f'{snowflake} is not blacklisted.')
+
+
+class UnderMaintenance(commands.CheckFailure):
+    def __init__(self) -> None:
+        super().__init__('The bot is currently under maintenance.')
 
 
 # TODO(Depreca1ed): All of these are not supposed to be commands.CommandError. Change them to actual errors which mostly likely suit their use case

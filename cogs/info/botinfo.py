@@ -13,12 +13,10 @@ from discord import app_commands
 from discord.ext import commands
 from jishaku.math import natural_size
 
-from utils import OWNERS_ID
-
 if TYPE_CHECKING:
     from bot import YukiSuou
 
-from utils import YukiEmbed
+from utils import OWNERS_ID, YukiEmbed, better_string
 
 try:
     from importlib.metadata import distribution, packages_distributions
@@ -47,14 +45,17 @@ class BotInformation(commands.Cog):
         embed.set_author(
             name=f"Made by {' and '.join([dev.name for dev in owners]) }",
             icon_url=random_owner.avatar.url if random_owner.avatar else None,
-        )  # This f string is assuming you have 2 devs since originally down bad and Dep were the only one.
-        visible_channels = list(bot.get_all_channels())
-        bot_visible_statistics = [
-            f'- **Servers :** `{len(bot.guilds)}`',
-            f'- **Users :** `{len(bot.users)}`',
-            f'- **Channels :** `{len(visible_channels)}`',
-        ]
-        embed.add_field(name='General Statistics', value='\n'.join(bot_visible_statistics), inline=False)
+        )
+        embed.add_field(
+            name='General Statistics',
+            value=better_string(
+                [
+                    f'- **Servers :** `{len(bot.guilds)}`',
+                    f'- **Users :** `{len(bot.users)}`',
+                ],
+                seperator='\n',
+            ),
+        )
 
         proc = psutil.Process()
         mem = proc.memory_full_info()
@@ -68,13 +69,19 @@ class BotInformation(commands.Cog):
             dist_version = f'{distributions[0]} {importlib.metadata.version(distributions[0])}'
         else:
             dist_version = f'unknown {discord.__version__}'
-        backend_statistic = [
-            f'> Made in `Python {platform.python_version()}` & `{dist_version}`',
-            f'- **Uptime :** {humanize.naturaldelta(datetime.timedelta(seconds=datetime.datetime.now(datetime.UTC).timestamp() - bot.load_time.timestamp()))}',
-            f'- **Memory :** `{natural_size(mem.uss)}`',
-            f'- **CPU :** `{proc.cpu_percent()}`%',
-        ]
-        embed.add_field(name='System Statistics', value='\n'.join(backend_statistic), inline=False)
+        embed.add_field(
+            name='System Statistics',
+            value=better_string(
+                [
+                    f'> Made in `Python {platform.python_version()}` & `{dist_version}`',
+                    f'- **Uptime :** {humanize.naturaldelta(datetime.timedelta(seconds=datetime.datetime.now(datetime.UTC).timestamp() - bot.load_time.timestamp()))}',
+                    f'- **Memory :** `{natural_size(mem.uss)}`',
+                    f'- **CPU :** `{proc.cpu_percent()}`%',
+                ],
+                seperator='\n',
+            ),
+            inline=False,
+        )
 
         embed.set_thumbnail(url=bot.user.avatar.url if bot.user.avatar else None)
         await ctx.send(embed=embed)

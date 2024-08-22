@@ -18,7 +18,6 @@ import discord
 from bot import YukiSuou
 
 if TYPE_CHECKING:
-
     from collections.abc import Generator
 
 
@@ -58,12 +57,10 @@ def setup_logging() -> Generator[Any, Any, Any]:
             log.removeHandler(hdlr)
 
 
-async def run_bot() -> None:
+if __name__ == '__main__':
+    with setup_logging():
 
-    async with YukiSuou() as bot:
-
-        await bot.start(bot.token)
-
-
-with setup_logging():
-    asyncio.run(run_bot())
+        async def run_bot() -> None:
+            async with YukiSuou() as bot:
+                await bot.start(bot.token)
+        asyncio.run(run_bot())

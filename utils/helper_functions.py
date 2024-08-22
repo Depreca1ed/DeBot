@@ -57,7 +57,7 @@ class ActivityHandler:
                 if activity.created_at
                 else None,
             ],
-            seperator='',
+            seperator=' ',
         )
 
     def spotify(self, activity: discord.Spotify) -> str:
@@ -79,7 +79,7 @@ class ActivityHandler:
         instance_datetime = activity.start or activity.created_at
         return better_string(
             [
-                f'{activity.type.name}',
+                f'{activity.type.name.title()}',
                 f'**[{activity.name}]({activity.url})**'
                 if activity.url
                 else f'**{activity.name}**'

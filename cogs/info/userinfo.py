@@ -39,12 +39,13 @@ class Userinfo(commands.Cog):
         user: discord.Member | discord.User | None,
     ) -> None:
         user = user or ctx.author
-        embed = YukiEmbed(title=str(user), colour=user.colour, ctx=ctx)
+        embed = YukiEmbed(title=str(user), colour=user.colour if user.colour != discord.Colour.default() else None, ctx=ctx)
 
         embed.set_author(
             name=f"{user.global_name or user.name} {f'({user.nick} in {user.guild.name})' if isinstance(user, discord.Member) and user.nick and user.guild.name else ''}",
             icon_url=user.avatar.url if user.avatar else user.default_avatar.url,
         )
+
         set_flags = {
             flag for flag, value in user.public_flags if value
         }  # Credits to https://github.com/Rapptz/RoboDanny/blob/cf7e4ec88882175eb18b1152ea60755d08c05de2/cogs/meta.py#L513
@@ -90,7 +91,7 @@ class Userinfo(commands.Cog):
                 if perm in [subperm for subperm in discord.Permissions.elevated() if subperm[1] is True] and perm[1] is True
             ]:
                 acknoledgements.append('<:discordstaff:1250444441727008850> Server Staff')
-        embed.add_field(value='\n'.join(basic_user_listing), inline=False)
+        embed.add_field(value=basic_user_listing)
         if acknoledgements:
             embed.add_field(name='Acknowledgements', value='\n'.join(acknoledgements), inline=False)
 

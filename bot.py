@@ -22,15 +22,15 @@ from utils import (
     POSTGRES_CREDENTIALS,
     THEME_COLOUR,
     WEBHOOK_URL,
+    AlreadyBlacklisted,
     BlacklistedGuild,
     BlackListedTypes,
     BlacklistedUser,
-    GuildAlreadyBlacklisted,
     NotBlacklisted,
     PrefixAlreadyPresent,
     PrefixNotInitialised,
     PrefixNotPresent,
-    UserAlreadyBlacklisted,
+    UnderMaintenance,
 )
 
 __all__ = ('YukiSuou',)
@@ -148,32 +148,21 @@ class YukiSuou(commands.Bot):
 
     async def check_blacklist(self, ctx: commands.Context[Self]) -> Literal[True]:
         if ctx.guild and self.is_blacklisted(ctx.guild):
-            raise BlacklistedGuild
+            raise BlacklistedGuild(ctx.guild)
         if ctx.author and self.is_blacklisted(ctx.author):
-            raise BlacklistedUser
+            raise BlacklistedUser(ctx.author)
 
         return True
 
-    def is_blacklisted(self, snowflake: discord.Member | discord.User | discord.Guild) -> bool:
+    def is_blacklisted(self, snowflake: discord.Member | discord.User | discord.Guild) -> bool:  # NOTE: YUP! DO CHECK THIS
         return bool(
-            isinstance(snowflake, discord.User | discord.Member)
-            and snowflake.id in self.blacklist['user']
-            or isinstance(snowflake, discord.Guild)
-            and snowflake.id in self.blacklist['guild'],
+            (isinstance(snowflake, discord.User | discord.Member) and snowflake.id in self.blacklist['user'])
+            or (isinstance(snowflake, discord.Guild) and snowflake.id in self.blacklist['guild']),
         )
 
     async def add_blacklist(self, snowflake: discord.User | discord.Guild) -> list[int]:
-        if (
-            isinstance(snowflake, discord.User)
-            and snowflake.id in self.blacklist['user']
-            or isinstance(snowflake, discord.Guild)
-            and snowflake.id in self.blacklist['guild']
-        ):
-            raise (
-                UserAlreadyBlacklisted(f'{snowflake} is already blacklisted')
-                if isinstance(snowflake, discord.User)
-                else GuildAlreadyBlacklisted(f'{snowflake} is already blacklisted')
-            )
+        if self.is_blacklisted(snowflake):
+            raise AlreadyBlacklisted(snowflake)
 
         sql = """INSERT INTO Blacklists (id, type) VALUES ($1, $2)"""
         param: str = 'user' if isinstance(snowflake, discord.User) else 'guild'
@@ -188,12 +177,7 @@ class YukiSuou(commands.Bot):
         return self.blacklist[param]
 
     async def remove_blacklist(self, snowflake: discord.User | discord.Guild) -> list[int]:
-        if (
-            isinstance(snowflake, discord.User)
-            and snowflake.id not in self.blacklist['user']
-            or isinstance(snowflake, discord.Guild)
-            and snowflake.id not in self.blacklist['guild']
-        ):
+        if not self.is_blacklisted(snowflake):
             raise NotBlacklisted(snowflake)
 
         sql = """DELETE FROM Blacklists WHERE id = ? AND type = ?"""
@@ -206,11 +190,10 @@ class YukiSuou(commands.Bot):
         self.blacklist[param].append(snowflake.id)
         return self.blacklist[param]
 
-    async def check_maintenance(self, ctx: commands.Context[Self]) -> bool:
-        if self.maintenance and await self.is_owner(ctx.author):
-            return True
-        await ctx.send('Bot is currently undermaintenance.')
-        return False
+    async def check_maintenance(self, ctx: commands.Context[Self]) -> Literal[True]:
+        if self.maintenance is True and not await self.is_owner(ctx.author):
+            raise UnderMaintenance
+        return True
 
     async def toggle_maintenance(self, toggle: bool | None = None) -> bool:
         if toggle:
@@ -241,16 +224,15 @@ class YukiSuou(commands.Bot):
                 await self.load_extension(str(cog))
             except commands.ExtensionError as error:
                 log.exception(
-                    '%s \U00002717\nIgnoring exception in loading %s',
+                    'Ignoring exception in loading %s',
                     cog,
                     exc_info=error,
                 )
             else:
-                log.info('%s \U00002713', cog)
+                log.info('Loaded %s ', cog)
+
         self.check_once(self.check_blacklist)
         self.check_once(self.check_maintenance)
-
-        log.info('Setup complete')
 
     @discord.utils.copy_doc(commands.Bot.is_owner)
     async def is_owner(self, user: discord.abc.User) -> bool:
