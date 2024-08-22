@@ -102,26 +102,6 @@ class YukiSuou(commands.Bot):
         return commands.when_mentioned_or(*prefixes)(self, message)
 
     async def add_prefix(self, guild: discord.Guild, prefix: str) -> list[str]:
-        """Adds a prefix to the database and cache for the provided guild
-
-        Parameters
-        ----------
-        guild : discord.Guild
-            The guild which will be assigned the prefix
-        prefix : str
-            The prefix to be added to the guild
-
-        Returns
-        -------
-        list[str]
-            Returns the new prefixes for the guild.
-
-        Raises
-        ------
-        PrefixAlreadyPresent
-            Raised when provided prefix is already present
-
-        """
         if prefix in self.prefix:
             raise PrefixAlreadyPresent(prefix)
 
@@ -134,28 +114,6 @@ class YukiSuou(commands.Bot):
         return self.prefixes[guild.id]
 
     async def remove_prefix(self, guild: discord.Guild, prefix: str) -> list[str] | None:
-        """Removes a prefix from the database and the cache for the provided guild
-
-        Parameters
-        ----------
-        guild : discord.Guild
-            The guild from which the prefix will be removed
-        prefix : str
-            The prefix to be removed from the guild
-
-        Returns
-        -------
-        list[str] | None
-            Returns the new prefixes for the guild. If there are no prefixes for the guild, the guild will be removed from the cache dict and NoneType will be returned
-
-        Raises
-        ------
-        PrefixNotInitialised
-            Raised when prefixes for the guild were never created.
-        PrefixNotPresent
-            Raised when provided prefix is not present in the guild's prefixes
-
-        """
         if not self.prefixes.get(guild.id):
             raise PrefixNotInitialised(guild)
 
@@ -174,19 +132,6 @@ class YukiSuou(commands.Bot):
         return self.prefixes[guild.id]
 
     async def clear_prefix(self, guild: discord.Guild) -> None:
-        """Removes all prefixes from the database and cache for the provided guild
-
-        Parameters
-        ----------
-        guild : discord.Guild
-            The guild who's prefixes will be removed
-
-        Raises
-        ------
-        PrefixNotInitialised
-            Raised when prefixes for the guild were never created.
-
-        """
         if not self.prefixes.get(guild.id):
             raise PrefixNotInitialised(guild)
 
@@ -195,19 +140,6 @@ class YukiSuou(commands.Bot):
         self.prefixes.pop(guild.id)
 
     async def get_prefix_list(self, message: discord.Message) -> list[str]:
-        """Retrieves the prefix the bot is listening to with the message as a context.
-
-        Parameters
-        ----------
-        message : discord.Message
-            The message context to get the prefix of.
-
-        Returns
-        -------
-        list[str]
-            A list of prefixes that the bot is listening for.
-
-        """
         prefixes = [BASE_PREFIX]
         if message.guild and self.prefixes.get(message.guild.id):
             prefixes.extend(self.prefixes[message.guild.id])
