@@ -1,4 +1,3 @@
-__pycache__/
-Elybot.log
-/database
 utils/config.py
+**.log
+__pycache__

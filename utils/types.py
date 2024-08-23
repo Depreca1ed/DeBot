@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-__all__ = ("BlackListedTypes",)
+__all__ = ('BlackListedTypes',)
 
 
 class BlackListedTypes(TypedDict):
