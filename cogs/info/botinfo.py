@@ -96,6 +96,7 @@ class BotInformation(commands.Cog):
                     f'[Invite the bot]({discord.utils.oauth_url(bot.user.id)})',
                     f'[Vote for {bot.user.name}]' if hasattr(bot, 'topgg_cli') else None,
                     '[Website](placeholder)' if hasattr(bot, 'website') else None,
+                    f'[Support Server]({bot.support_server)}',
                 ],
                 seperator='\n',
             ),
