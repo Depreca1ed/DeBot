@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bot import YukiSuou
+    from bot import Lagrange
 import contextlib
 
 import discord
@@ -13,7 +13,7 @@ from .errors import Errors
 
 
 class Events(Errors, name='Events'):
-    def __init__(self, bot: YukiSuou) -> None:
+    def __init__(self, bot: Lagrange) -> None:
         self.bot = bot
 
     @commands.Cog.listener('on_message_edit')
@@ -33,5 +33,5 @@ class Events(Errors, name='Events'):
                 await reaction.message.delete()
 
 
-async def setup(bot: YukiSuou) -> None:
+async def setup(bot: Lagrange) -> None:
     await bot.add_cog(Events(bot))

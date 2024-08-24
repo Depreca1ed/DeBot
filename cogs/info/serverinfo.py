@@ -6,25 +6,25 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import YukiEmbed, better_string
+from utils import Embed, better_string
 
 if TYPE_CHECKING:
-    from bot import YukiSuou
+    from bot import Lagrange
 
 
 class ServerInfo(commands.Cog):
-    def __init__(self, bot: YukiSuou) -> None:
+    def __init__(self, bot: Lagrange) -> None:
         self.bot = bot
 
     @commands.hybrid_command(name='serverinfo', description='Get information about the server')
     @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
     @app_commands.allowed_installs(guilds=True, users=False)
     @commands.guild_only()
-    async def serverinfo(self, ctx: commands.Context[YukiSuou]) -> None:
+    async def serverinfo(self, ctx: commands.Context[Lagrange]) -> None:
         assert ctx.guild is not None
         guild = ctx.guild
 
-        embed = YukiEmbed(description=guild.description or None, ctx=ctx)
+        embed = Embed(description=guild.description or None, ctx=ctx)
         embed.set_author(name=guild.name, icon_url=guild.icon.url if guild.icon else None)
 
         embed.add_field(
@@ -94,5 +94,5 @@ class ServerInfo(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot: YukiSuou) -> None:
+async def setup(bot: Lagrange) -> None:
     await bot.add_cog(ServerInfo(bot))

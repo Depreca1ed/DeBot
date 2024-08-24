@@ -33,7 +33,7 @@ from utils import (
     UnderMaintenance,
 )
 
-__all__ = ('YukiSuou',)
+__all__ = ('Lagrange',)
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ jishaku.Flags.NO_UNDERSCORE = True
 EXTERNAL_COGS: list[str] = ['jishaku']
 
 
-class YukiSuou(commands.Bot):
+class Lagrange(commands.Bot):
     prefix: ClassVar[list[str]] = [
         ''.join(capitalization) for capitalization in product(*zip(BASE_PREFIX.lower(), BASE_PREFIX.upper(), strict=False))
     ]
@@ -73,7 +73,7 @@ class YukiSuou(commands.Bot):
             **kwargs,
         )
 
-        self.token = BOT_TOKEN  # The thing everyone looks for; A way to control their beloved waifu: Yuki Suou
+        self.token = BOT_TOKEN  # The thing everyone looks for; A way to control their beloved waifu: Lagrange
         self.session = aiohttp.ClientSession()
         self.mystbin_cli = mystbin.Client()
         self.load_time = datetime.datetime.now(datetime.UTC)

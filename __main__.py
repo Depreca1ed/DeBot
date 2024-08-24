@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 import discord
 
-from bot import YukiSuou
+from bot import Lagrange
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -42,7 +42,7 @@ def setup_logging() -> Generator[Any, Any, Any]:
         logging.getLogger('discord.state').addFilter(RemoveNoise())
 
         log.setLevel(logging.INFO)
-        handler = RotatingFileHandler(filename='YukiSuou.log', encoding='utf-8', mode='w', maxBytes=max_bytes, backupCount=5)
+        handler = RotatingFileHandler(filename='Lagrange.log', encoding='utf-8', mode='w', maxBytes=max_bytes, backupCount=5)
         dt_fmt = '%Y-%m-%d %H:%M:%S'
         fmt = logging.Formatter('[{asctime}] [{levelname:<7}] {name}: {message}', dt_fmt, style='{')
         handler.setFormatter(fmt)
@@ -61,6 +61,7 @@ if __name__ == '__main__':
     with setup_logging():
 
         async def run_bot() -> None:
-            async with YukiSuou() as bot:
+            async with Lagrange() as bot:
                 await bot.start(bot.token)
+
         asyncio.run(run_bot())

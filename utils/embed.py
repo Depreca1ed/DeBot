@@ -11,12 +11,12 @@ if TYPE_CHECKING:
 
     from discord.ext import commands
 
-    from bot import YukiSuou
+    from bot import Lagrange
 
-__all__ = ('YukiEmbed',)
+__all__ = ('Embed',)
 
 
-class YukiEmbed(discord.Embed):
+class Embed(discord.Embed):
     """Main purpose is to get the usual setup of Embed for a command or an error embed"""
 
     def __init__(
@@ -25,7 +25,7 @@ class YukiEmbed(discord.Embed):
         fields: Iterable[tuple[str, str]] = (),
         *,
         field_inline: bool = False,
-        ctx: commands.Context[YukiSuou] | None = None,
+        ctx: commands.Context[Lagrange] | None = None,
         **kwargs: Any,
     ) -> None:
         if ctx:

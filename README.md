@@ -1,3 +1,3 @@
-Yuki Suou
+Lagrange
 =========
 A discord bot made by Dep!

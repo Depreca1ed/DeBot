@@ -14,9 +14,9 @@ from discord.ext import commands
 from jishaku.math import natural_size
 
 if TYPE_CHECKING:
-    from bot import YukiSuou
+    from bot import Lagrange
 
-from utils import OWNERS_ID, YukiEmbed, better_string
+from utils import OWNERS_ID, Embed, better_string
 
 try:
     from importlib.metadata import distribution, packages_distributions
@@ -27,7 +27,7 @@ import importlib
 
 
 class BotInformation(commands.Cog):
-    def __init__(self, bot: YukiSuou) -> None:
+    def __init__(self, bot: Lagrange) -> None:
         self.bot = bot
 
     @commands.hybrid_command(
@@ -37,11 +37,11 @@ class BotInformation(commands.Cog):
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
-    async def botinfo(self, ctx: commands.Context[YukiSuou]) -> None:
+    async def botinfo(self, ctx: commands.Context[Lagrange]) -> None:
         bot = self.bot
         owners = [owner for owner in [bot.get_user(dev) for dev in OWNERS_ID] if owner]
         random_owner = random.choice(owners)
-        embed = YukiEmbed(title=str(bot.user.name), description=bot.description, ctx=ctx)
+        embed = Embed(title=str(bot.user.name), description=bot.description, ctx=ctx)
         embed.set_author(
             name=f"Made by {' and '.join([dev.name for dev in owners]) }",
             icon_url=random_owner.avatar.url if random_owner.avatar else None,
@@ -87,5 +87,5 @@ class BotInformation(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot: YukiSuou) -> None:
+async def setup(bot: Lagrange) -> None:
     await bot.add_cog(BotInformation(bot))

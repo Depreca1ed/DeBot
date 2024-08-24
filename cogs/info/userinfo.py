@@ -6,10 +6,10 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import ActivityHandler, YukiEmbed, better_string
+from utils import ActivityHandler, Embed, better_string
 
 if TYPE_CHECKING:
-    from bot import YukiSuou
+    from bot import Lagrange
 badges_to_emoji = {
     'partner': '<:discordpartner:1250444436148584494>',
     'verified_bot_developer': '<:discordbotdev:1250444367315861674>',
@@ -27,7 +27,7 @@ badges_to_emoji = {
 
 
 class Userinfo(commands.Cog):
-    def __init__(self, bot: YukiSuou) -> None:
+    def __init__(self, bot: Lagrange) -> None:
         self.bot = bot
 
     @commands.hybrid_command(name='whois', description='Get information about a user', aliases=['userinfo', 'who'])
@@ -35,11 +35,11 @@ class Userinfo(commands.Cog):
     @app_commands.allowed_installs(guilds=True, users=True)
     async def whois(
         self,
-        ctx: commands.Context[YukiSuou],
+        ctx: commands.Context[Lagrange],
         user: discord.Member | discord.User | None,
     ) -> None:
         user = user or ctx.author
-        embed = YukiEmbed(title=str(user), colour=user.colour if user.colour != discord.Colour.default() else None, ctx=ctx)
+        embed = Embed(title=str(user), colour=user.colour if user.colour != discord.Colour.default() else None, ctx=ctx)
 
         embed.set_author(
             name=f"{user.global_name or user.name} {f'({user.nick} in {user.guild.name})' if isinstance(user, discord.Member) and user.nick and user.guild.name else ''}",
@@ -100,5 +100,5 @@ class Userinfo(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot: YukiSuou) -> None:
+async def setup(bot: Lagrange) -> None:
     await bot.add_cog(Userinfo(bot))
