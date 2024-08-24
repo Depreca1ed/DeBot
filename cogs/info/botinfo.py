@@ -11,7 +11,6 @@ import humanize
 import psutil
 from discord import app_commands
 from discord.ext import commands
-from jishaku.math import natural_size
 
 if TYPE_CHECKING:
     from bot import Lagrange
@@ -52,13 +51,14 @@ class BotInformation(commands.Cog):
                 [
                     f'- **Servers :** `{len(bot.guilds)}`',
                     f'- **Users :** `{len(bot.users)}`',
+                    # f'  - **Installed by :** `{self.bot.appinfo.approximate_user_install_count}` users' #TODO(Depreca1ed): https://github.com/Rapptz/discord.py/pull/9915  # noqa: ERA001
+                    # if self.bot.appinfo.approximate_user_install_count
+                    # else None,
                 ],
                 seperator='\n',
             ),
         )
 
-        proc = psutil.Process()
-        mem = proc.memory_full_info()
         distributions: list[str] = [
             dist
             for dist in packages_distributions()['discord']
@@ -69,21 +69,41 @@ class BotInformation(commands.Cog):
             dist_version = f'{distributions[0]} {importlib.metadata.version(distributions[0])}'
         else:
             dist_version = f'unknown {discord.__version__}'
+        proc = psutil.Process()
+        with proc.oneshot():
+            memory = proc.memory_info().rss
+            embed.add_field(
+                name='System Statistics',
+                value=better_string(
+                    [
+                        f'> Made in `Python {platform.python_version()}` using `{dist_version}`',
+                        f'- **Uptime :** {humanize.naturaldelta(datetime.timedelta(seconds=datetime.datetime.now(datetime.UTC).timestamp() - bot.load_time.timestamp()))}',
+                        f'- **Memory :** `{round((memory/1024)/1024)}/{round(((psutil.virtual_memory().total)/1024)/1024)} MB` (`{round(proc.memory_percent(), 2)}%`)',  # This is hardcoded to be in MB
+                        f'- **CPU Usage :** `{proc.cpu_percent(interval=None)}`%',
+                    ],
+                    seperator='\n',
+                ),
+                inline=False,
+            )
+
         embed.add_field(
-            name='System Statistics',
             value=better_string(
                 [
-                    f'> Made in `Python {platform.python_version()}` & `{dist_version}`',
-                    f'- **Uptime :** {humanize.naturaldelta(datetime.timedelta(seconds=datetime.datetime.now(datetime.UTC).timestamp() - bot.load_time.timestamp()))}',
-                    f'- **Memory :** `{natural_size(mem.uss)}`',
-                    f'- **CPU :** `{proc.cpu_percent()}`%',
+                    f'-# [Privacy Policy]({bot.appinfo.privacy_policy_url})' if bot.appinfo.privacy_policy_url else None,
+                    f'-# [Terms of Service]({bot.appinfo.terms_of_service_url})'
+                    if bot.appinfo.terms_of_service_url
+                    else None,
+                    f'[Invite the bot]({discord.utils.oauth_url(bot.user.id)})',
+                    f'[Vote for {bot.user.name}]' if hasattr(bot, 'topgg_cli') else None,
+                    '[Website](placeholder)' if hasattr(bot, 'website') else None,
                 ],
                 seperator='\n',
             ),
-            inline=False,
         )
 
         embed.set_thumbnail(url=bot.user.avatar.url if bot.user.avatar else None)
+        embed.set_image(url=bot.banner)
+
         await ctx.send(embed=embed)
 
 

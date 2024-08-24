@@ -1,7 +1,6 @@
 git+https://github.com/rapptz/discord.py
 git+https://github.com/rapptz/discord-ext-menus
 git+https://github.com/gorialis/jishaku
-git+https://github.com/rapptz/asqlite
 numpydoc
 cachetools
 fuzzywuzzy
@@ -20,4 +19,3 @@ mystbin.py
 topggpy
 pyright
 pillow
-waifuim.py

@@ -18,8 +18,10 @@ from discord.ext import commands
 from utils import (
     BASE_PREFIX,
     BOT_TOKEN,
+    DESCRIPTION,
     OWNERS_ID,
     POSTGRES_CREDENTIALS,
+    SERVER_INVITE,
     THEME_COLOUR,
     WEBHOOK_URL,
     AlreadyBlacklisted,
@@ -59,10 +61,21 @@ class Lagrange(commands.Bot):
     prefixes: dict[int, list[str]]
     blacklist: BlackListedTypes
     maintenance: bool
+    appinfo: discord.AppInfo
+    support_server: discord.Invite
+    banner: discord.Asset
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         intents: discord.Intents = discord.Intents.all()
+        self.token = BOT_TOKEN  # The thing everyone looks for; A way to control their beloved waifu: Lagrange
+        self.session = aiohttp.ClientSession()
+        self.mystbin_cli = mystbin.Client()
+        self.load_time = datetime.datetime.now(datetime.UTC)
+        self.prefixes: dict[int, list[str]] = {}
+        self.blacklist = {'guild': [], 'user': []}
+        self.maintenance = False
         super().__init__(
+            description=DESCRIPTION,
             command_prefix=self.get_prefix,  # pyright: ignore[reportArgumentType]
             case_insensitive=True,
             strip_after_prefix=True,
@@ -72,14 +85,6 @@ class Lagrange(commands.Bot):
             *args,
             **kwargs,
         )
-
-        self.token = BOT_TOKEN  # The thing everyone looks for; A way to control their beloved waifu: Lagrange
-        self.session = aiohttp.ClientSession()
-        self.mystbin_cli = mystbin.Client()
-        self.load_time = datetime.datetime.now(datetime.UTC)
-        self.prefixes: dict[int, list[str]] = {}
-        self.blacklist = {'guild': [], 'user': []}
-        self.maintenance = False
 
     @discord.utils.copy_doc(commands.Bot.get_prefix)
     async def get_prefix(self, message: discord.Message) -> list[str]:
@@ -209,16 +214,19 @@ class Lagrange(commands.Bot):
         if not pool or pool and pool._closed:
             msg = 'Pool is closed'
             raise RuntimeError(msg)
-
         self.pool = pool
 
         with Path('schema.sql').open(encoding='utf-8') as f:  # noqa: ASYNC230
             await self.pool.execute(f.read())
 
+        self.appinfo = await self.application_info()
+        self.invite = await self.fetch_invite(SERVER_INVITE)
+        banner = (await self.fetch_user(self.user.id)).banner
+        assert banner is not None
+        self.banner = banner
+
         cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
-
         cogs.extend(EXTERNAL_COGS)
-
         for cog in cogs:
             try:
                 await self.load_extension(str(cog))
