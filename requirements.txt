@@ -20,3 +20,4 @@ mystbin.py
 topggpy
 pyright
 pillow
+waifuim.py
