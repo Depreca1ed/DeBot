@@ -67,9 +67,10 @@ class WaifuView(discord.ui.View):
             return await interaction.response.send_message(
                 embed=Embed(
                     title='Smashers',
-                    description=better_string([str(user for user in self.smashers)], seperator=','),
+                    description=better_string([str(user) for user in self.smashers], seperator=','),
                     ctx=self.ctx,
                 ),
+                ephemeral=True,
             )
         self.smashers.append(interaction.user)
         return await interaction.response.edit_message(embed=self.embed(self.current))
@@ -85,9 +86,10 @@ class WaifuView(discord.ui.View):
             return await interaction.response.send_message(
                 embed=Embed(
                     title='Passers',
-                    description=better_string([str(user for user in self.passers)], seperator=','),
+                    description=better_string([str(user) for user in self.passers], seperator=','),
                     ctx=self.ctx,
                 ),
+                ephemeral=True,
             )
         self.passers.append(interaction.user)
         return await interaction.response.edit_message(embed=self.embed(self.current))
