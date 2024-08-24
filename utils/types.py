@@ -12,7 +12,7 @@ class WaifuImage(TypedDict):
     dominant_color: str
     image_id: int
     is_nsfw: bool
-    source: str
+    source: str | None
     url: str
 
 

@@ -44,7 +44,7 @@ class WaifuView(discord.ui.View):
             title='Smash or Pass',
             description=better_string(
                 [
-                    f'> [#{data["image_id"]}]({data["source"]})',
+                    f'> [#{data["image_id"]}]({data["source"]})' if data['source'] else None,
                     f'<:smash:1276874474628583497> **Smashers :** `{len(self.smashers)}`',
                     f'<:pass:1276874515296813118> **Passers :** `{len(self.passers)}`',
                 ],
