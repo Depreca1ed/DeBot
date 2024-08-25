@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Self, cast
 
 import discord
+from aiohttp import ClientSession
 from discord import app_commands
 from discord.ext import commands
 
@@ -122,11 +123,15 @@ class SmashOrPass(discord.ui.View):
 
 
 class WaifuView(SmashOrPass):
+    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool = False) -> None:
+        super().__init__(session, for_user=for_user)
+        self.nsfw = nsfw
+
     async def request(self) -> Image:
         waifu = await self.session.get(
             'https://api.waifu.im/search',
             params={
-                'is_nsfw': 'false',
+                'is_nsfw': 'false' if self.nsfw is False else 'true',
                 'token': WAIFU_TOKEN,
             },
         )
@@ -169,7 +174,8 @@ class Anime(commands.Cog):
     @app_commands.allowed_installs(guilds=True, users=True)
     @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
     async def waifu(self, ctx: commands.Context[Lagrange]) -> None:
-        view = WaifuView(self.bot.session, for_user=ctx.author.id)
+        ctx.channel = cast(discord.TextChannel, ctx.channel)
+        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.nsfw)
         await view.start(ctx)
 
     @commands.hybrid_command(name='pokemon')
