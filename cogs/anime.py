@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import datetime
 from typing import TYPE_CHECKING, Self, cast
 
@@ -139,7 +140,8 @@ class SmashOrPass(discord.ui.View):
         return True
 
     async def on_timeout(self) -> None:
-        await self.message.edit(view=None)
+        with contextlib.suppress(discord.errors.NotFound):
+            await self.message.edit(view=None)
         self.stop()
 
 
