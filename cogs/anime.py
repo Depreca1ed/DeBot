@@ -123,7 +123,7 @@ class SmashOrPass(discord.ui.View):
 
 
 class WaifuView(SmashOrPass):
-    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool = False) -> None:
+    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool | None = False) -> None:
         super().__init__(session, for_user=for_user)
         self.nsfw = nsfw
 
@@ -131,14 +131,15 @@ class WaifuView(SmashOrPass):
         waifu = await self.session.get(
             'https://api.waifu.im/search',
             params={
-                'is_nsfw': 'false' if self.nsfw is False else 'true',
+                'is_nsfw': 'true' if self.nsfw is True else 'null',
                 'token': WAIFU_TOKEN,
             },
         )
 
         data = await waifu.json()
+        data = data['images'][0]
         current: Image = {
-            'image_id': f'#{data['image_id']}',
+            'image_id': data['image_id'],
             'source': data['source'],
             'dominant_color': data['dominant_color'],
             'url': data['url'],
@@ -175,7 +176,7 @@ class Anime(commands.Cog):
     @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
     async def waifu(self, ctx: commands.Context[Lagrange]) -> None:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
-        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.nsfw)
+        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw())
         await view.start(ctx)
 
     @commands.hybrid_command(name='pokemon')
