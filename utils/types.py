@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-__all__ = ('BlackListedTypes', 'WaifuImage', 'Waifu')
+__all__ = ('BlackListedTypes', 'WaifuImImage', 'WaifuIm')
 
 
 class BlackListedTypes(TypedDict):
@@ -8,7 +8,7 @@ class BlackListedTypes(TypedDict):
     guild: list[int]
 
 
-class WaifuImage(TypedDict):
+class WaifuImImage(TypedDict):
     dominant_color: str
     image_id: int
     is_nsfw: bool
@@ -16,5 +16,5 @@ class WaifuImage(TypedDict):
     url: str
 
 
-class Waifu(TypedDict):
-    images: list[WaifuImage]
+class WaifuIm(TypedDict):
+    images: list[WaifuImImage]

@@ -62,7 +62,7 @@ class Lagrange(commands.Bot):
     blacklist: BlackListedTypes
     maintenance: bool
     appinfo: discord.AppInfo
-    support_server: discord.Invite
+    invite_link: discord.Invite
     banner: discord.Asset
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -220,7 +220,7 @@ class Lagrange(commands.Bot):
             await self.pool.execute(f.read())
 
         self.appinfo = await self.application_info()
-        self.invite = await self.fetch_invite(SERVER_INVITE)
+        self.invite_link = await self.fetch_invite(SERVER_INVITE)
         banner = (await self.fetch_user(self.user.id)).banner
         assert banner is not None
         self.banner = banner
