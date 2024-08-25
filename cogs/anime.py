@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING, Self, cast
 
 import discord
 from aiohttp import ClientSession
+from asyncpg.exceptions import UniqueViolationError
 from discord import app_commands
 from discord.ext import commands
 
@@ -19,17 +21,19 @@ class SmashOrPass(discord.ui.View):
     message: discord.Message
     current: Image
 
-    def __init__(self, session: ClientSession, *, for_user: int) -> None:
+    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool) -> None:
         super().__init__(timeout=500.0)
         self.session = session
         self.for_user = for_user
+        self.nsfw = nsfw
 
         self.smashers: set[discord.User | discord.Member] = set()
         self.passers: set[discord.User | discord.Member] = set()
 
     @classmethod
     async def start(cls, ctx: commands.Context[Lagrange]) -> Self:
-        inst = cls(ctx.bot.session, for_user=ctx.author.id)
+        ctx.channel = cast(discord.TextChannel, ctx.channel)
+        inst = cls(ctx.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.nsfw)
         data = await inst.request()
 
         embed = inst.embed(data)
@@ -67,7 +71,24 @@ class SmashOrPass(discord.ui.View):
     )
     async def smash(self, interaction: discord.Interaction[Lagrange], _: discord.ui.Button[Self]) -> None:
         if interaction.user in self.smashers:
-            return await interaction.response.defer()
+            interaction.channel = cast(discord.TextChannel, interaction.channel)
+            try:
+                await interaction.client.pool.execute(
+                    """INSERT INTO WaifuFavourites VALUES ($1, $2, $3, $4)""",
+                    self.current['url'],
+                    interaction.user.id,
+                    interaction.channel.is_nsfw(),
+                    datetime.datetime.now(),
+                )
+            except UniqueViolationError:
+                return await interaction.response.send_message(
+                    'You have already added this waifu in your favourites list',
+                    ephemeral=True,
+                )
+            return await interaction.response.send_message(
+                f'Successfully added [#{self.current["image_id"]}](<{self.current["url"]}>)',
+                ephemeral=True,
+            )
 
         if interaction.user in self.passers:
             self.passers.remove(interaction.user)
@@ -123,15 +144,11 @@ class SmashOrPass(discord.ui.View):
 
 
 class WaifuView(SmashOrPass):
-    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool | None = False) -> None:
-        super().__init__(session, for_user=for_user)
-        self.nsfw = nsfw
-
     async def request(self) -> Image:
         waifu = await self.session.get(
             'https://api.waifu.im/search',
             params={
-                'is_nsfw': 'true' if self.nsfw is True else 'null',
+                'is_nsfw': 'false' if self.nsfw is False else 'null',
                 'token': WAIFU_TOKEN,
             },
         )
@@ -184,7 +201,7 @@ class Anime(commands.Cog):
     @app_commands.allowed_installs(guilds=True, users=True)
     @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
     async def pokeemon(self, ctx: commands.Context[Lagrange]) -> None:
-        view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id)
+        view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=False)
         await view.start(ctx)
 
 
