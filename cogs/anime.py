@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import WAIFU_TOKEN, Embed, WaifuIm, WaifuImImage, better_string
+from utils import WAIFU_TOKEN, Embed, Image, better_string
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class SmashOrPass(discord.ui.View):
     message: discord.Message
-    current: WaifuImImage
+    current: Image
 
     def __init__(self, session: ClientSession, *, for_user: int) -> None:
         super().__init__(timeout=500.0)
@@ -36,11 +36,29 @@ class SmashOrPass(discord.ui.View):
 
         return inst
 
-    async def request(self) -> WaifuImImage:
+    async def request(self) -> Image:
         raise NotImplementedError
 
-    def embed(self, data: WaifuImImage) -> discord.Embed:
-        raise NotImplementedError
+    def embed(self, data: Image) -> discord.Embed:
+        smasher = ', '.join(smasher.mention for smasher in self.smashers) if self.smashers else ''
+        passer = ', '.join(passer.mention for passer in self.passers) if self.passers else ''
+
+        embed = Embed(
+            title='Smash or Pass',
+            description=better_string(
+                [
+                    f'> [#{data["image_id"]}]({data["source"]})' if data['image_id'] and data['source'] else None,
+                    '<:smash:1276874474628583497> **Smashers:** ' + smasher,
+                    '<:pass:1276874515296813118> **Passers:** ' + passer,
+                ],
+                seperator='\n',
+            ),
+            colour=discord.Colour.from_str(data['dominant_color']) if data['dominant_color'] else None,
+        )
+
+        embed.set_image(url=data['url'])
+
+        return embed
 
     @discord.ui.button(
         emoji='<:smash:1276874474628583497>',
@@ -104,7 +122,7 @@ class SmashOrPass(discord.ui.View):
 
 
 class WaifuView(SmashOrPass):
-    async def request(self) -> WaifuImImage:
+    async def request(self) -> Image:
         waifu = await self.session.get(
             'https://api.waifu.im/search',
             params={
@@ -113,31 +131,33 @@ class WaifuView(SmashOrPass):
             },
         )
 
-        data: WaifuIm = await waifu.json()
-        self.current = data['images'][0]
+        data = await waifu.json()
+        current: Image = {
+            'image_id': f'#{data['image_id']}',
+            'source': data['source'],
+            'dominant_color': data['dominant_color'],
+            'url': data['url'],
+        }
+        self.current = current
 
         return self.current
 
-    def embed(self, data: WaifuImImage) -> discord.Embed:
-        smasher = ', '.join(smasher.mention for smasher in self.smashers) if self.smashers else ''
-        passer = ', '.join(passer.mention for passer in self.passers) if self.passers else ''
 
-        embed = Embed(
-            title='Smash or Pass',
-            description=better_string(
-                [
-                    f'> [#{data["image_id"]}]({data["source"]})',
-                    '<:smash:1276874474628583497> **Smashers:** ' + smasher,
-                    '<:pass:1276874515296813118> **Passers:** ' + passer,
-                ],
-                seperator='\n',
-            ),
-            colour=discord.Colour.from_str(data['dominant_color']),
+class SafebooruPokemonView(SmashOrPass):
+    async def request(self) -> Image:
+        waifu = await self.session.get(
+            'https://safebooru.donmai.us/posts/random.json?tags=solo+pokemon_(creature)',
         )
+        data = await waifu.json()
+        current: Image = {
+            'image_id': data['id'],
+            'dominant_color': None,
+            'source': data['source'],
+            'url': data['file_url'],
+        }
+        self.current = current
 
-        embed.set_image(url=data['url'])
-
-        return embed
+        return self.current
 
 
 class Anime(commands.Cog):
@@ -150,6 +170,14 @@ class Anime(commands.Cog):
     @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
     async def waifu(self, ctx: commands.Context[Lagrange]) -> None:
         view = WaifuView(self.bot.session, for_user=ctx.author.id)
+        await view.start(ctx)
+
+    @commands.hybrid_command(name='pokemon')
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+    @app_commands.allowed_installs(guilds=True, users=True)
+    @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
+    async def pokeemon(self, ctx: commands.Context[Lagrange]) -> None:
+        view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id)
         await view.start(ctx)
 
 
