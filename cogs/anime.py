@@ -97,7 +97,7 @@ class SmashOrPass(discord.ui.View):
 
         self.smashers.add(interaction.user)
         await interaction.client.pool.execute(
-            """INSERT INTO Waifus (id, smashes, nsfw, type) VALUES ($1, 1, $2, $3) ON CONFLICT(id) DO UPDATE SET smashes = Waifus.smashes + 1""",
+            """INSERT INTO Waifus (id, smashes, nsfw, type) VALUES ($1, 1, $2, $3) ON CONFLICT(id, type) DO UPDATE SET smashes = Waifus.smashes + 1""",
             self.current['image_id'],
             self.nsfw,
             self.source,
@@ -118,7 +118,7 @@ class SmashOrPass(discord.ui.View):
 
         self.passers.add(interaction.user)
         await interaction.client.pool.execute(
-            """INSERT INTO Waifus (id, passes, nsfw, type) VALUES ($1, 1, $2, $3) ON CONFLICT(id) DO UPDATE SET passes = Waifus.passes + 1""",
+            """INSERT INTO Waifus (id, passes, nsfw, type) VALUES ($1, 1, $2, $3) ON CONFLICT(id, type) DO UPDATE SET passes = Waifus.passes + 1""",
             self.current['image_id'],
             self.nsfw,
             self.source,

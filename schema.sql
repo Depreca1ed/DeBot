@@ -18,13 +18,13 @@ CREATE TABLE IF NOT EXISTS WaifuFavourites (
     user_id BIGINT NOT NULL,
     nsfw BOOLEAN NOT NULL,
     tm TIMESTAMP NOT NULL,
-    PRIMARY KEY (user_id, waifu_url)
+    PRIMARY KEY(user_id, waifu_url)
 );
 
 CREATE TYPE WaifuType AS ENUM ('pokemon', 'waifu');
 
-CREATE TABLE Waifus(
-    id INTEGER,
+CREATE TABLE IF NOT EXISTS Waifus(
+    id INTEGER NOT NULL,
     smashes INTEGER NOT NULL DEFAULT 0,
     passes INTEGER NOT NULL DEFAULT 0,
     nsfw BOOLEAN NOT NUll,
