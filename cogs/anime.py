@@ -223,7 +223,7 @@ class Anime(commands.Cog):
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
-    async def pokeemon(self, ctx: LagContext) -> None:
+    async def pokemon(self, ctx: LagContext) -> None:
         view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='pokemon')
         await view.start(ctx, 'pokemon')
 
