@@ -2,6 +2,8 @@ Lagrange
 =========
 Hello, this is Lagrange, a discord application based on [Lagrange](https://arcaea.fandom.com/wiki/Lagrange) from a popular game known as [Arcaea](https://arcaea.lowiro.com/). At the moment, the bot does not have many features and mostly used privately but is allowed for public use.
 
+> Disclaimer: This bot is not affiliated with Arcaea and does not have any features related to it.
+
 Where can I use the bot & How can I host it?
 ============================================
 Lagrange is currently not hosted 24/7 and is self-hosted by me when in use. This might change in the future and depends on if I am confident with what the codebase will be.
