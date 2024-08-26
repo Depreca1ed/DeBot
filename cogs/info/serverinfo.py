@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import Embed, better_string
+from utils import Embed, LagContext, better_string
 
 if TYPE_CHECKING:
     from bot import Lagrange
@@ -20,7 +20,7 @@ class ServerInfo(commands.Cog):
     @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
     @app_commands.allowed_installs(guilds=True, users=False)
     @commands.guild_only()
-    async def serverinfo(self, ctx: commands.Context[Lagrange]) -> None:
+    async def serverinfo(self, ctx: LagContext) -> None:
         assert ctx.guild is not None
         guild = ctx.guild
 

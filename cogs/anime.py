@@ -10,7 +10,7 @@ from asyncpg.exceptions import UniqueViolationError
 from discord import app_commands
 from discord.ext import commands
 
-from utils import WAIFU_TOKEN, Embed, Image, better_string
+from utils import WAIFU_TOKEN, Embed, Image, LagContext, better_string
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
@@ -22,19 +22,20 @@ class SmashOrPass(discord.ui.View):
     message: discord.Message
     current: Image
 
-    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool) -> None:
+    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool, source: str) -> None:
         super().__init__(timeout=500.0)
         self.session = session
         self.for_user = for_user
         self.nsfw = nsfw
+        self.source = source
 
         self.smashers: set[discord.User | discord.Member] = set()
         self.passers: set[discord.User | discord.Member] = set()
 
     @classmethod
-    async def start(cls, ctx: commands.Context[Lagrange]) -> Self:
+    async def start(cls, ctx: LagContext, source: str) -> Self:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
-        inst = cls(ctx.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.nsfw)
+        inst = cls(ctx.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.nsfw, source=source)
         data = await inst.request()
 
         embed = inst.embed(data)
@@ -87,7 +88,7 @@ class SmashOrPass(discord.ui.View):
                     ephemeral=True,
                 )
             return await interaction.response.send_message(
-                f'Successfully added [#{self.current["image_id"]}](<{self.current["url"]}>)',
+                f'Successfully added [#{self.current["image_id"]}](<{self.current["url"]}>) to your favourites!',
                 ephemeral=True,
             )
 
@@ -95,6 +96,12 @@ class SmashOrPass(discord.ui.View):
             self.passers.remove(interaction.user)
 
         self.smashers.add(interaction.user)
+        await interaction.client.pool.execute(
+            """INSERT INTO Waifus (id, smashes, nsfw, type) VALUES ($1, 1, $2, $3) ON CONFLICT(id) DO UPDATE SET smashes = Waifus.smashes + 1""",
+            self.current['image_id'],
+            self.nsfw,
+            self.source,
+        )
         await interaction.response.edit_message(embed=self.embed(self.current))
         return None
 
@@ -110,6 +117,12 @@ class SmashOrPass(discord.ui.View):
             self.smashers.remove(interaction.user)
 
         self.passers.add(interaction.user)
+        await interaction.client.pool.execute(
+            """INSERT INTO Waifus (id, passes, nsfw, type) VALUES ($1, 1, $2, $3) ON CONFLICT(id) DO UPDATE SET passes = Waifus.passes + 1""",
+            self.current['image_id'],
+            self.nsfw,
+            self.source,
+        )
         await interaction.response.edit_message(embed=self.embed(self.current))
         return None
 
@@ -189,22 +202,30 @@ class Anime(commands.Cog):
     def __init__(self, bot: Lagrange) -> None:
         self.bot = bot
 
-    @commands.hybrid_command(name='waifu')
+    @commands.hybrid_group(name='waifu')
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
-    async def waifu(self, ctx: commands.Context[Lagrange]) -> None:
+    async def waifu(self, ctx: LagContext) -> None:
+        await ctx.invoke(self.waifu_show)
+
+    @waifu.command(name='favourites')
+    async def waifu_favourites(self, ctx: LagContext) -> None:
+        await ctx.reply('test')
+
+    @waifu.command(name='show', hidden=True)
+    async def waifu_show(self, ctx: LagContext) -> None:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
-        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw())
-        await view.start(ctx)
+        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='waifu')
+        await view.start(ctx, 'waifu')
 
     @commands.hybrid_command(name='pokemon')
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
-    async def pokeemon(self, ctx: commands.Context[Lagrange]) -> None:
-        view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=False)
-        await view.start(ctx)
+    async def pokeemon(self, ctx: LagContext) -> None:
+        view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='pokemon')
+        await view.start(ctx, 'pokemon')
 
 
 async def setup(bot: Lagrange) -> None:

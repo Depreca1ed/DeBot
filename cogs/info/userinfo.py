@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import ActivityHandler, Embed, better_string
+from utils import ActivityHandler, Embed, LagContext, better_string
 
 if TYPE_CHECKING:
     from bot import Lagrange
@@ -35,7 +35,7 @@ class Userinfo(commands.Cog):
     @app_commands.allowed_installs(guilds=True, users=True)
     async def whois(
         self,
-        ctx: commands.Context[Lagrange],
+        ctx: LagContext,
         user: discord.Member | discord.User | None,
     ) -> None:
         user = user or ctx.author

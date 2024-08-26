@@ -15,7 +15,7 @@ from discord.ext import commands
 if TYPE_CHECKING:
     from bot import Lagrange
 
-from utils import OWNERS_ID, Embed, better_string
+from utils import OWNERS_ID, Embed, LagContext, better_string
 
 try:
     from importlib.metadata import distribution, packages_distributions
@@ -36,7 +36,7 @@ class BotInformation(commands.Cog):
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
-    async def botinfo(self, ctx: commands.Context[Lagrange]) -> None:
+    async def botinfo(self, ctx: LagContext) -> None:
         bot = self.bot
         owners = [owner for owner in [bot.get_user(dev) for dev in OWNERS_ID] if owner]
         random_owner = random.choice(owners)

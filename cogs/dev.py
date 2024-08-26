@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from discord.ext import commands
 
-from utils import better_string
+from utils import LagContext, better_string
 
 if TYPE_CHECKING:
     from bot import Lagrange
@@ -15,11 +15,11 @@ class Dev(commands.Cog):
     def __init__(self, bot: Lagrange) -> None:
         self.bot: Lagrange = bot
 
-    async def cog_check(self, ctx: commands.Context[Lagrange]) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
+    async def cog_check(self, ctx: LagContext) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
         return await self.bot.is_owner(ctx.author) and ctx.prefix != ''
 
     @commands.command(name='reload', aliases=['re'])
-    async def reload_cogs(self, ctx: commands.Context[Lagrange]) -> None:
+    async def reload_cogs(self, ctx: LagContext) -> None:
         cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
         messages: list[str] = []
         for cog in cogs:

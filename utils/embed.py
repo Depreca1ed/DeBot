@@ -9,9 +9,7 @@ from .config import THEME_COLOUR
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from discord.ext import commands
-
-    from bot import Lagrange
+    from .context import LagContext
 
 __all__ = ('Embed',)
 
@@ -25,7 +23,7 @@ class Embed(discord.Embed):
         fields: Iterable[tuple[str, str]] = (),
         *,
         field_inline: bool = False,
-        ctx: commands.Context[Lagrange] | None = None,
+        ctx: LagContext | None = None,
         **kwargs: Any,
     ) -> None:
         if ctx:
