@@ -130,9 +130,12 @@ class SmashOrPass(discord.ui.View):
     async def _next(self, interaction: discord.Interaction[Lagrange], _: discord.ui.Button[Self]) -> None:
         self.smashers.clear()
         self.passers.clear()
-
-        data = await self.request()
-        await interaction.response.edit_message(embed=self.embed(data))
+        try:
+            data = await self.request()
+        except KeyError:
+            await interaction.response.send_message('Hey! Slow down.', ephemeral=True)
+        else:
+            await interaction.response.edit_message(embed=self.embed(data))
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if not self.for_user:

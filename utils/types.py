@@ -1,11 +1,18 @@
+from datetime import datetime
 from typing import TypedDict
 
 __all__ = ('BlackListedTypes', 'Image')
 
 
+class BlacklistBase(TypedDict):
+    snowflake: int
+    reason: str
+    lasts_until: datetime | None
+
+
 class BlackListedTypes(TypedDict):
-    user: list[int]
-    guild: list[int]
+    user: list[BlacklistBase]
+    guild: list[BlacklistBase]
 
 
 class Image(TypedDict):
