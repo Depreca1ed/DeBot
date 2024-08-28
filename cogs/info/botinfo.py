@@ -51,9 +51,9 @@ class BotInformation(commands.Cog):
                 [
                     f'- **Servers :** `{len(bot.guilds)}`',
                     f'- **Users :** `{len(bot.users)}`',
-                    # f'  - **Installed by :** `{self.bot.appinfo.approximate_user_install_count}` users' #TODO(Depreca1ed): https://github.com/Rapptz/discord.py/pull/9915  # noqa: ERA001
-                    # if self.bot.appinfo.approximate_user_install_count
-                    # else None,
+                    f'  - **Installed by :** `{self.bot.appinfo.approximate_user_install_count}` users' 
+                    if self.bot.appinfo.approximate_user_install_count
+                    else None,
                 ],
                 seperator='\n',
             ),
