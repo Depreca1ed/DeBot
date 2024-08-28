@@ -3,6 +3,7 @@ from __future__ import annotations
 from pkgutil import iter_modules
 from typing import TYPE_CHECKING
 
+import discord
 from discord.ext import commands
 
 from utils import LagContext, better_string
@@ -15,8 +16,9 @@ class Dev(commands.Cog):
     def __init__(self, bot: Lagrange) -> None:
         self.bot: Lagrange = bot
 
-    async def cog_check(self, ctx: LagContext) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
-        return await self.bot.is_owner(ctx.author) and ctx.prefix != ''
+    @discord.utils.copy_doc(commands.Cog.cog_check)
+    async def cog_check(self, ctx: LagContext) -> bool:
+        return await self.bot.is_owner(ctx.author)
 
     @commands.command(name='reload', aliases=['re'])
     async def reload_cogs(self, ctx: LagContext) -> None:

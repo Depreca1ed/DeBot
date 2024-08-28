@@ -78,7 +78,7 @@ class BotInformation(commands.Cog):
                     [
                         f'> Made in `Python {platform.python_version()}` using `{dist_version}`',
                         f'- **Uptime :** {humanize.naturaldelta(datetime.timedelta(seconds=datetime.datetime.now(datetime.UTC).timestamp() - bot.load_time.timestamp()))}',
-                        f'- **Memory :** `{round((memory/1024)/1024)}/{round(((psutil.virtual_memory().total)/1024)/1024)} MB` (`{round(proc.memory_percent(), 2)}%`)',  # This is hardcoded to be in MB
+                        f'- **Memory :** `{round((memory/1024)/1024)}/{round(((psutil.virtual_memory().total)/1024)/1024)} MB` (`{round(proc.memory_percent(), 2)}%`)',
                         f'- **CPU Usage :** `{proc.cpu_percent(interval=None)}`%',
                     ],
                     seperator='\n',

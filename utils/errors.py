@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 from discord.ext import commands
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     import discord
 
 __all__ = (
@@ -21,7 +23,8 @@ __all__ = (
 
 
 class FeatureDisabled(commands.CheckFailure):
-    pass
+    def __init__(self) -> None:
+        super().__init__('This feature is not enabled in this server.')
 
 
 class PrefixNotInitialised(commands.CommandError):
@@ -40,18 +43,18 @@ class PrefixNotPresent(commands.CommandError):
 
 
 class BlacklistedUser(commands.CheckFailure):
-    def __init__(self, snowflake: discord.User | discord.Member) -> None:
-        super().__init__(f'{snowflake} is blacklisted')
+    def __init__(self, snowflake: discord.User | discord.Member, reason: str, until: datetime | None) -> None:
+        super().__init__(f'{snowflake} is blacklisted for {reason} until {until}')
 
 
 class BlacklistedGuild(commands.CheckFailure):
-    def __init__(self, snowflake: discord.Guild) -> None:
-        super().__init__(f'{snowflake} is blacklisted.')
+    def __init__(self, snowflake: discord.Guild, reason: str, until: datetime | None) -> None:
+        super().__init__(f'{snowflake} is blacklisted for {reason} until {until}')
 
 
 class AlreadyBlacklisted(commands.CommandError):
-    def __init__(self, snowflake: discord.User | discord.Guild) -> None:
-        super().__init__(f'{snowflake} is already blacklisted')
+    def __init__(self, snowflake: discord.User | discord.Guild, reason: str, until: datetime | None) -> None:
+        super().__init__(f'{snowflake} is already blacklisted for {reason} until {until}')
 
 
 class NotBlacklisted(commands.CommandError):

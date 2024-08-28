@@ -75,7 +75,7 @@ class ActivityHandler:
         assert isinstance(
             activity,
             discord.Activity,
-        )  # NOTE:Ignoring leftover types that are purposefully ignored
+        )
         instance_datetime = activity.start or activity.created_at
         return better_string(
             [

@@ -9,6 +9,8 @@ from aiohttp import ClientSession
 from asyncpg.exceptions import UniqueViolationError
 from discord import app_commands
 from discord.ext import commands
+import discord.types
+import discord.types.interactions
 
 from utils import WAIFU_TOKEN, Embed, Image, LagContext, better_string
 
@@ -144,7 +146,7 @@ class SmashOrPass(discord.ui.View):
         if (
             interaction.user.id != self.for_user
             and interaction.data
-            and interaction.data['custom_id'] == self._next.custom_id  # pyright: ignore[reportGeneralTypeIssues]
+            and interaction.data.get('custom_id') == self._next.custom_id
         ):
             await interaction.response.send_message(
                 'Only the command initiator can cycle through waifus in this message.',
@@ -157,7 +159,8 @@ class SmashOrPass(discord.ui.View):
 
     async def on_timeout(self) -> None:
         with contextlib.suppress(discord.errors.NotFound):
-            await self.message.edit(view=None)
+            if hasattr(self, 'message'):
+                await self.message.edit(view=None)
         self.stop()
 
 
