@@ -51,7 +51,7 @@ class BotInformation(commands.Cog):
                 [
                     f'- **Servers :** `{len(bot.guilds)}`',
                     f'- **Users :** `{len(bot.users)}`',
-                    f'  - **Installed by :** `{self.bot.appinfo.approximate_user_install_count}` users' 
+                    f'  - **Installed by :** `{self.bot.appinfo.approximate_user_install_count}` users'
                     if self.bot.appinfo.approximate_user_install_count
                     else None,
                 ],

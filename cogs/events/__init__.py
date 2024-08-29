@@ -9,7 +9,7 @@ import contextlib
 import discord
 from discord.ext import commands
 
-from .errors import Errors
+from .error_handler import Errors
 
 
 class Events(Errors, name='Events'):

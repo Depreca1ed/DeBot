@@ -35,7 +35,6 @@ from utils import (
     PrefixNotPresent,
     UnderMaintenance,
 )
-from utils.errors import FeatureDisabled
 
 if TYPE_CHECKING:
     from discord.abc import Snowflake
@@ -264,19 +263,6 @@ class Lagrange(commands.Bot):
 
         self.check_once(self.check_blacklist)
         self.check_once(self.check_maintenance)
-
-    async def on_command_error(self, ctx: LagContext, exception: commands.CommandError) -> None:
-        if isinstance(exception, BlacklistedUser | BlacklistedGuild):
-            if isinstance(ctx.channel, discord.DMChannel):
-                await ctx.reply(content=str(exception))
-            elif ctx.guild and isinstance(exception, BlacklistedGuild):
-                await ctx.guild.leave()
-            return None
-        elif isinstance(exception, UnderMaintenance | FeatureDisabled):
-            await ctx.reply(str(exception))
-            return None
-        elif ctx.command and isinstance(exception, commands.CommandInvokeError):
-            log.exception('Ignoring exception in command %s', ctx.command.name, exc_info=exception)
 
     @overload
     async def get_context(self, origin: discord.Interaction | discord.Message, /) -> LagContext: ...

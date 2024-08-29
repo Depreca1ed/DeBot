@@ -9,8 +9,6 @@ from aiohttp import ClientSession
 from asyncpg.exceptions import UniqueViolationError
 from discord import app_commands
 from discord.ext import commands
-import discord.types
-import discord.types.interactions
 
 from utils import WAIFU_TOKEN, Embed, Image, LagContext, better_string
 
