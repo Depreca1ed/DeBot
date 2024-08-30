@@ -20,14 +20,6 @@ CREATE TABLE IF NOT EXISTS Prefixes (
     PRIMARY KEY (guild, prefix)
 );
 
-CREATE TABLE IF NOT EXISTS ErrorLogs (
-    id BIGINT PRIMARY KEY,
-    command TEXT NOT NULL,
-    error TEXT NOT NULL,
-    full_error TEXT NOT NULL,
-    message TEXT NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS WaifuFavourites (
     waifu_url TEXT NOT NULL,
     user_id BIGINT NOT NULL,

@@ -13,7 +13,7 @@ quote-style = "single"
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["D", "B026", "E501", "S101", "F403", "SLF001", "TD003", "FIX002", "S105", "INP001", "S311", "DTZ005", "PLR2004", "RET505", "RET503", "RET501", "PLR0911"]
+ignore = ["D", "B026", "E501", "S101", "F403", "SLF001", "TD003", "FIX002", "S105", "INP001", "S311", "DTZ005", "PLR2004", "RET505", "RET503", "RET501", "PLR0911", "N818"]
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = true

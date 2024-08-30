@@ -1,19 +1,30 @@
 from __future__ import annotations
 
 import logging
+import traceback
 from typing import TYPE_CHECKING
 
 import discord
+import mystbin
 from discord.ext import commands
 
-from utils import BlacklistedGuild, BlacklistedUser, Embed, FeatureDisabled, LagContext, UnderMaintenance, better_string
+from utils import (
+    BlacklistedGuild,
+    BlacklistedUser,
+    Embed,
+    FeatureDisabled,
+    LagContext,
+    LagrangeError,
+    UnderMaintenance,
+    better_string,
+)
 
 if TYPE_CHECKING:
     from bot import Lagrange
 log: logging.Logger = logging.getLogger(__name__)
 
 
-class Errors(commands.Cog):
+class CommandErrors(commands.Cog):
     def __init__(self, bot: Lagrange) -> None:
         self.bot = bot
 
@@ -22,16 +33,6 @@ class Errors(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: LagContext, error: commands.CommandError) -> None | discord.Message:
-        if isinstance(error, BlacklistedUser | BlacklistedGuild | UnderMaintenance | FeatureDisabled):
-            if (isinstance(ctx.channel, discord.DMChannel) and isinstance(error, BlacklistedUser)) or isinstance(
-                error,
-                UnderMaintenance | FeatureDisabled,
-            ):
-                await ctx.reply(content=str(error))
-            elif ctx.guild and isinstance(error, BlacklistedGuild):
-                await ctx.guild.leave()
-            return None
-
         error_messages = {
             commands.NoPrivateMessage: 'This command cannot be used in DMs',
             commands.NotOwner: 'You cannot run this command. This command is reserved for the developers of the bot.',
@@ -47,6 +48,17 @@ class Errors(commands.Cog):
             or hasattr(ctx.command, 'on_error')
             or (ctx.cog and ctx.cog._get_overridden_method(ctx.cog.cog_command_error))
         ):
+            return None
+        elif isinstance(error, LagrangeError):
+            if (isinstance(ctx.channel, discord.DMChannel) and isinstance(error, BlacklistedUser)) or isinstance(
+                error,
+                UnderMaintenance | FeatureDisabled,
+            ):
+                await ctx.reply(content=str(error))
+
+            elif ctx.guild and isinstance(error, BlacklistedGuild):
+                await ctx.guild.leave()
+
             return None
 
         elif isinstance(error, commands.CommandOnCooldown):
@@ -94,8 +106,31 @@ class Errors(commands.Cog):
                     colour=0xFF0000,
                 ),
             )
-        return await ctx.reply(f'Placeholder: {error}')
+
+        await ctx.reply(content=str(error) + '\n-# Developers have been informed')
+        exc = ''.join(traceback.format_exception(type(error), error, error.__traceback__))
+        exc_link = (
+            await self.bot.mystbin_cli.create_paste(
+                files=[
+                    mystbin.File(filename='error', content=exc),
+                ],
+            )
+            if len(exc) > 2000
+            else None
+        )
+
+        embed = Embed(title=error.__class__.__name__, description=exc, url=exc_link, colour=0x000000, ctx=ctx)
+        embed.add_field(
+            value=better_string(
+                [
+                    f'> **User :**{ctx.author!s}',
+                    f'> **Server :**{ctx.guild.name if ctx.guild else 'No guild'!s}',
+                    f'> **Command :**{ctx.command.name}',
+                ],
+                seperator='\n',
+            ),
+        )
+        return await ctx.reply(embed=embed)
 
 
-async def setup(bot: Lagrange) -> None:
-    await bot.add_cog(Errors(bot))
+# I.... for one.... am going to cry so fucking hard bro like its actually crazy how fucking low effort this is. Give me some idea I dont wanna be a generic child again man
