@@ -4,17 +4,23 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bot import Lagrange
+    from utils import LagContext
 import contextlib
 
 import discord
 from discord.ext import commands
 
+from .dev import Dev
 from .errors import Errors
 
 
-class Events(Errors, name='Events'):
+class Events(Errors, Dev, name='Events'):
     def __init__(self, bot: Lagrange) -> None:
         self.bot = bot
+
+    @discord.utils.copy_doc(commands.Cog.cog_check)
+    async def cog_check(self, ctx: LagContext) -> bool:
+        return await self.bot.is_owner(ctx.author)
 
     @commands.Cog.listener('on_message_edit')
     async def edit_mechanic(self, _: discord.Message, after: discord.Message) -> None:

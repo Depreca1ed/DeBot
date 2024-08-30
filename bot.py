@@ -24,12 +24,8 @@ from utils import (
     SERVER_INVITE,
     THEME_COLOUR,
     WEBHOOK_URL,
-    AlreadyBlacklisted,
-    BlacklistedGuild,
-    BlackListedTypes,
-    BlacklistedUser,
+    Blacklist,
     LagContext,
-    NotBlacklisted,
     PrefixAlreadyPresent,
     PrefixNotInitialised,
     PrefixNotPresent,
@@ -39,7 +35,6 @@ from utils import (
 if TYPE_CHECKING:
     from discord.ext.commands._types import ContextT  # pyright: ignore[reportMissingTypeStubs]
 
-    from utils.types import BlacklistBase
 
 __all__ = ('Lagrange',)
 
@@ -65,7 +60,7 @@ class Lagrange(commands.Bot):
     mystbin_cli: mystbin.Client
     load_time: datetime.datetime
     prefixes: dict[int, list[str]]
-    blacklist: BlackListedTypes
+    blacklist: Blacklist
     maintenance: bool
     appinfo: discord.AppInfo
     invite_link: discord.Invite
@@ -73,13 +68,6 @@ class Lagrange(commands.Bot):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         intents: discord.Intents = discord.Intents.all()
-        self.token = BOT_TOKEN  # The thing everyone looks for; A way to control their beloved waifu: Lagrange
-        self.session = aiohttp.ClientSession()
-        self.mystbin_cli = mystbin.Client()
-        self.load_time = datetime.datetime.now()
-        self.prefixes: dict[int, list[str]] = {}
-        self.blacklist = {'guild': [], 'user': []}
-        self.maintenance = False
         super().__init__(
             description=DESCRIPTION,
             command_prefix=self.get_prefix,  # pyright: ignore[reportArgumentType]
@@ -91,6 +79,13 @@ class Lagrange(commands.Bot):
             *args,
             **kwargs,
         )
+        self.token = BOT_TOKEN
+        self.session = aiohttp.ClientSession()
+        self.mystbin_cli = mystbin.Client()
+        self.load_time = datetime.datetime.now()
+        self.prefixes: dict[int, list[str]] = {}
+        self.blacklist = Blacklist(self)
+        self.maintenance = False
 
     @discord.utils.copy_doc(commands.Bot.get_prefix)
     async def get_prefix(self, message: discord.Message) -> list[str]:
@@ -138,7 +133,7 @@ class Lagrange(commands.Bot):
         )
         self.prefixes[guild.id].remove(prefix)
         if not self.prefixes[guild.id]:
-            self.prefixes.pop(guild.id)  # NOTE: This is an excessive cleaner. Unsure if it should be present
+            self.prefixes.pop(guild.id)
             return None
         return self.prefixes[guild.id]
 
@@ -157,60 +152,6 @@ class Lagrange(commands.Bot):
 
         return commands.when_mentioned_or(*prefixes)(self, message)
 
-    async def check_blacklist(self, ctx: commands.Context[Self]) -> Literal[True]:
-        if ctx.guild and self.is_blacklisted(ctx.guild):
-            raise BlacklistedGuild(ctx.guild)
-        if ctx.author and self.is_blacklisted(ctx.author):
-            raise BlacklistedUser(ctx.author)
-
-        return True
-
-    def is_blacklisted(self, snowflake: discord.Member | discord.User | discord.Guild) -> bool:  # NOTE:
-        return snowflake.id in [item['snowflake'] for item in self.blacklist['guild'] + self.blacklist['user']]
-
-    async def add_blacklist(
-        self,
-        snowflake: discord.User | discord.Guild,
-        *,
-        reason: str = 'No reason provided',
-        lasts_until: datetime.datetime | None = None,
-    ) -> list[BlacklistBase]:
-        if self.is_blacklisted(snowflake):
-            raise AlreadyBlacklisted(snowflake)
-
-        sql = """INSERT INTO Blacklists (snowflake, reason, lasts_until, blacklist_type) VALUES ($1, $2, $3, $4);"""
-        param = 'user' if isinstance(snowflake, discord.User) else 'guild'
-        await self.pool.execute(
-            sql,
-            snowflake.id,
-            reason,
-            lasts_until,
-            param,
-        )
-        self.blacklist[param].append(
-            {
-                'snowflake': snowflake.id,
-                'reason': reason,
-                'lasts_until': lasts_until,
-            },
-        )
-        return self.blacklist[param]
-
-    async def remove_blacklist(self, snowflake: discord.User | discord.Guild) -> list[BlacklistBase]:
-        if not self.is_blacklisted(snowflake):
-            raise NotBlacklisted(snowflake)
-
-        sql = """DELETE FROM Blacklists WHERE snowflake = $1"""
-        param: str = 'user' if isinstance(snowflake, discord.User) else 'guild'
-        await self.pool.execute(
-            sql,
-            snowflake.id,
-            param,
-        )
-
-        self.blacklist[param].remove(next(item for item in self.blacklist[param] if item['snowflake'] == snowflake.id))
-        return self.blacklist[param]
-
     async def check_maintenance(self, ctx: commands.Context[Self]) -> Literal[True]:
         if self.maintenance is True and not await self.is_owner(ctx.author):
             raise UnderMaintenance
@@ -224,7 +165,6 @@ class Lagrange(commands.Bot):
         return self.maintenance
 
     async def setup_hook(self) -> None:
-        # Close your eyes for the next 6 lines or something and look at https://github.com/itswilliboy/Harmony/blob/master/bot.py#L79-L84 instead
         credentials: dict[str, Any] = POSTGRES_CREDENTIALS
         pool: asyncpg.Pool[asyncpg.Record] | None = await asyncpg.create_pool(**credentials)
         if not pool or pool and pool._closed:
@@ -255,7 +195,6 @@ class Lagrange(commands.Bot):
             else:
                 log.info('Loaded %s ', cog)
 
-        self.check_once(self.check_blacklist)
         self.check_once(self.check_maintenance)
 
     @overload
