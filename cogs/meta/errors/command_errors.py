@@ -108,7 +108,7 @@ class CommandErrors(commands.Cog):
             )
 
         await ctx.reply(content=str(error) + '\n-# Developers have been informed')
-        exc = ''.join(traceback.format_exception(type(error), error, error.__traceback__))
+        exc = f"```py\n{''.join(traceback.format_exception(type(error), error, error.__traceback__))}```"
         exc_link = (
             await self.bot.mystbin_cli.create_paste(
                 files=[
@@ -123,14 +123,14 @@ class CommandErrors(commands.Cog):
         embed.add_field(
             value=better_string(
                 [
-                    f'> **User :**{ctx.author!s}',
-                    f'> **Server :**{ctx.guild.name if ctx.guild else 'No guild'!s}',
-                    f'> **Command :**{ctx.command.name}',
+                    f'> - **User: **{ctx.author!s}',
+                    f'> - **Server: **{ctx.guild.name if ctx.guild else 'No guild'!s}',
+                    f'> - **Command: **{ctx.command.name}',
                 ],
                 seperator='\n',
             ),
         )
-        return await ctx.reply(embed=embed)
+        return await self.bot.logger_webhook.send(embed=embed)
 
 
 # I.... for one.... am going to cry so fucking hard bro like its actually crazy how fucking low effort this is. Give me some idea I dont wanna be a generic child again man

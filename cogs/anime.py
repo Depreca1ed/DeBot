@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import datetime
 from typing import TYPE_CHECKING, Self, cast
 
@@ -10,7 +9,7 @@ from asyncpg.exceptions import UniqueViolationError
 from discord import app_commands
 from discord.ext import commands
 
-from utils import WAIFU_TOKEN, Embed, Image, LagContext, better_string
+from utils import WAIFU_TOKEN, BaseView, Embed, Image, LagContext, better_string
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
     from bot import Lagrange
 
 
-class SmashOrPass(discord.ui.View):
+class SmashOrPass(BaseView):
     message: discord.Message
     current: Image
 
@@ -154,12 +153,6 @@ class SmashOrPass(discord.ui.View):
             return False
 
         return True
-
-    async def on_timeout(self) -> None:
-        with contextlib.suppress(discord.errors.NotFound):
-            if hasattr(self, 'message'):
-                await self.message.edit(view=None)
-        self.stop()
 
 
 class WaifuView(SmashOrPass):
