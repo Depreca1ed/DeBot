@@ -9,7 +9,7 @@ from asyncpg.exceptions import UniqueViolationError
 from discord import app_commands
 from discord.ext import commands
 
-from utils import WAIFU_TOKEN, BaseView, Embed, Image, LagContext, better_string
+from utils import WAIFU_TOKEN, BaseView, Embed, Image, LagContext, better_string  # type: ignore  # noqa: F401, PGH003
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
@@ -158,20 +158,15 @@ class SmashOrPass(BaseView):
 class WaifuView(SmashOrPass):
     async def request(self) -> Image:
         waifu = await self.session.get(
-            'https://api.waifu.im/search',
-            params={
-                'is_nsfw': 'false' if self.nsfw is False else 'null',
-                'token': WAIFU_TOKEN,
-            },
+            'https://safebooru.donmai.us/posts/random.json?tags=solo+1girl&rating=general',
         )
 
         data = await waifu.json()
-        data = data['images'][0]
         current: Image = {
-            'image_id': data['image_id'],
+            'image_id': data['id'],
+            'dominant_color': None,
             'source': data['source'],
-            'dominant_color': data['dominant_color'],
-            'url': data['url'],
+            'url': data['file_url'],
         }
         self.current = current
 
@@ -213,7 +208,7 @@ class Anime(commands.Cog):
     @waifu.command(name='show', hidden=True)
     async def waifu_show(self, ctx: LagContext) -> None:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
-        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='waifu')
+        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='waifu')
         await view.start(ctx, 'waifu')
 
     @commands.hybrid_command(name='pokemon')
