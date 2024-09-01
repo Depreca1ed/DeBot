@@ -43,7 +43,6 @@ log: logging.Logger = logging.getLogger(__name__)
 jishaku.Flags.FORCE_PAGINATOR = True
 jishaku.Flags.HIDE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
-jishaku.Flags.USE_ANSI_ALWAYS = True
 jishaku.Flags.NO_UNDERSCORE = True
 
 EXTERNAL_COGS: list[str] = ['jishaku']
