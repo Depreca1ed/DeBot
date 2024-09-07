@@ -18,31 +18,33 @@ if TYPE_CHECKING:
 
 
 class Blacklist:
-    def __init__(self, bot: Lagrange) -> None:
-        self.blacklist: dict[Snowflake, BlacklistBase] = {}
-        self.bot = bot
-        self.bot.check_once(self.check_blacklist)
+    blacklists: dict[Snowflake, BlacklistBase]
 
-    async def check_blacklist(self, ctx: LagContext) -> Literal[True]:
+    def __init__(self, bot: Lagrange) -> None:
+        self.blacklists = {}
+        self.bot = bot
+        self.bot.check_once(self.check)
+
+    async def check(self, ctx: LagContext) -> Literal[True]:
         if ctx.guild and self.is_blacklisted(ctx.guild):
             raise BlacklistedGuild(
                 ctx.guild,
-                reason=self.blacklist[ctx.guild]['reason'],
-                until=self.blacklist[ctx.guild]['lasts_until'],
+                reason=self.blacklists[ctx.guild]['reason'],
+                until=self.blacklists[ctx.guild]['lasts_until'],
             )
         if ctx.author and self.is_blacklisted(ctx.author):
             raise BlacklistedUser(
                 ctx.author,
-                reason=self.blacklist[ctx.author]['reason'],
-                until=self.blacklist[ctx.author]['lasts_until'],
+                reason=self.blacklists[ctx.author]['reason'],
+                until=self.blacklists[ctx.author]['lasts_until'],
             )
 
         return True
 
     def is_blacklisted(self, snowflake: discord.Member | discord.User | discord.Guild) -> bool:
-        return bool(self.blacklist.get(snowflake))
+        return bool(self.blacklists.get(snowflake))
 
-    async def add_blacklist(
+    async def add(
         self,
         snowflake: discord.User | discord.Guild,
         *,
@@ -52,8 +54,8 @@ class Blacklist:
         if self.is_blacklisted(snowflake):
             raise AlreadyBlacklisted(
                 snowflake,
-                reason=self.blacklist[snowflake]['reason'],
-                until=self.blacklist[snowflake]['lasts_until'],
+                reason=self.blacklists[snowflake]['reason'],
+                until=self.blacklists[snowflake]['lasts_until'],
             )
 
         sql = """INSERT INTO Blacklists (snowflake, reason, lasts_until, blacklist_type) VALUES ($1, $2, $3, $4);"""
@@ -65,10 +67,10 @@ class Blacklist:
             lasts_until,
             param,
         )
-        self.blacklist[snowflake] = {'reason': reason, 'lasts_until': lasts_until, 'blacklist_type': param}
-        return self.blacklist
+        self.blacklists[snowflake] = {'reason': reason, 'lasts_until': lasts_until, 'blacklist_type': param}
+        return self.blacklists
 
-    async def remove_blacklist(self, snowflake: discord.User | discord.Guild) -> dict[Snowflake, BlacklistBase]:
+    async def remove(self, snowflake: discord.User | discord.Guild) -> dict[Snowflake, BlacklistBase]:
         if not self.is_blacklisted(snowflake):
             raise NotBlacklisted(snowflake)
 
@@ -80,5 +82,8 @@ class Blacklist:
             param,
         )
 
-        self.blacklist.pop(snowflake)
-        return self.blacklist
+        self.blacklists.pop(snowflake)
+        return self.blacklists
+
+    def __repr__(self) -> str:
+        return str(self.blacklists)

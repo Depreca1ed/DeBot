@@ -21,7 +21,6 @@ from utils import (
     DESCRIPTION,
     OWNERS_ID,
     POSTGRES_CREDENTIALS,
-    SERVER_INVITE,
     THEME_COLOUR,
     WEBHOOK_URL,
     Blacklist,
@@ -62,8 +61,6 @@ class Lagrange(commands.Bot):
     blacklist: Blacklist
     maintenance: bool
     appinfo: discord.AppInfo
-    invite_link: discord.Invite
-    banner: discord.Asset
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         intents: discord.Intents = discord.Intents.all()
@@ -85,6 +82,7 @@ class Lagrange(commands.Bot):
         self.prefixes: dict[int, list[str]] = {}
         self.blacklist = Blacklist(self)
         self.maintenance = False
+        self.check_once(self.check_maintenance)
 
     @discord.utils.copy_doc(commands.Bot.get_prefix)
     async def get_prefix(self, message: discord.Message) -> list[str]:
@@ -144,41 +142,22 @@ class Lagrange(commands.Bot):
 
         self.prefixes.pop(guild.id)
 
-    async def get_prefix_list(self, message: discord.Message) -> list[str]:
-        prefixes = [BASE_PREFIX]
-        if message.guild and self.prefixes.get(message.guild.id):
-            prefixes.extend(self.prefixes[message.guild.id])
-
-        return commands.when_mentioned_or(*prefixes)(self, message)
-
     async def check_maintenance(self, ctx: commands.Context[Self]) -> Literal[True]:
         if self.maintenance is True and not await self.is_owner(ctx.author):
             raise UnderMaintenance
         return True
 
-    async def toggle_maintenance(self, toggle: bool | None = None) -> bool:
-        if toggle:
-            self.maintenance = toggle
-            return self.maintenance
-        self.maintenance = self.maintenance is False
-        return self.maintenance
-
     async def setup_hook(self) -> None:
         credentials: dict[str, Any] = POSTGRES_CREDENTIALS
         pool: asyncpg.Pool[asyncpg.Record] | None = await asyncpg.create_pool(**credentials)
         if not pool or pool and pool._closed:
-            msg = 'Pool is closed'
-            raise RuntimeError(msg)
+            raise RuntimeError('Pool is closed')  # noqa: EM101, TRY003
         self.pool = pool
 
         with Path('schema.sql').open(encoding='utf-8') as f:  # noqa: ASYNC230
             await self.pool.execute(f.read())
 
         self.appinfo = await self.application_info()
-        self.invite_link = await self.fetch_invite(SERVER_INVITE)
-        banner = (await self.fetch_user(self.user.id)).banner
-        assert banner is not None
-        self.banner = banner
 
         cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
         cogs.extend(EXTERNAL_COGS)
@@ -193,8 +172,6 @@ class Lagrange(commands.Bot):
                 )
             else:
                 log.info('Loaded %s ', cog)
-
-        self.check_once(self.check_maintenance)
 
     @overload
     async def get_context(self, origin: discord.Interaction | discord.Message, /) -> LagContext: ...

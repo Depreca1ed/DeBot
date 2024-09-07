@@ -1,6 +1,6 @@
 Lagrange
 =========
-Hello, this is Lagrange, a discord application based on [Lagrange](https://arcaea.fandom.com/wiki/Lagrange) from a popular game known as [Arcaea](https://arcaea.lowiro.com/). At the moment, the bot does not have many features and mostly used privately but is allowed for public use.
+Hi, this is Lagrange. At the moment, the bot does not have many features and mostly used privately but is allowed for public use.
 
 > Disclaimer: This bot is not affiliated with Arcaea and does not have any features related to it.
 
@@ -50,9 +50,6 @@ THEME_COLOUR = discord.Colour.random() # The colour used in most of the embeds o
 
 
 WEBHOOK_URL = '' # The link to the webhook you wish for the bot to send all its private logging messages to, 
-
-SERVER_INVITE = '' # The preferred "main" guild's invite, this usually refers to support server.
-
 ```
 > Yes I tend to put everything which feels even slightly similar to being a constant value in a config.py file. Just something I prefer to be more comfortable with I suppose
 

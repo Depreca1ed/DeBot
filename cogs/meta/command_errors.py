@@ -31,8 +31,8 @@ class CommandErrors(commands.Cog):
     def clean_error_permission(self, permissions: list[str], *, seperator: str, prefix: str) -> str:
         return better_string((prefix + (perm.replace('_', ' ')).capitalize() for perm in permissions), seperator=seperator)
 
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx: LagContext, error: commands.CommandError) -> None | discord.Message:
+    @commands.Cog.listener('on_command_error')
+    async def error_handler(self, ctx: LagContext, error: commands.CommandError) -> None | discord.Message:
         error_messages = {
             commands.NoPrivateMessage: 'This command cannot be used in DMs',
             commands.NotOwner: 'You cannot run this command. This command is reserved for the developers of the bot.',

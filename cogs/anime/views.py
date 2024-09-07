@@ -4,17 +4,17 @@ import datetime
 from typing import TYPE_CHECKING, Self, cast
 
 import discord
-from aiohttp import ClientSession
 from asyncpg.exceptions import UniqueViolationError
-from discord import app_commands
-from discord.ext import commands
 
-from utils import WAIFU_TOKEN, BaseView, Embed, Image, LagContext, better_string  # type: ignore  # noqa: F401, PGH003
+from utils import BaseView, Embed, Image, LagContext, better_string
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
     from bot import Lagrange
+
+
+__all__ = ('WaifuView', 'SafebooruPokemonView')
 
 
 class SmashOrPass(BaseView):
@@ -188,37 +188,3 @@ class SafebooruPokemonView(SmashOrPass):
         self.current = current
 
         return self.current
-
-
-class Anime(commands.Cog):
-    def __init__(self, bot: Lagrange) -> None:
-        self.bot = bot
-
-    @commands.hybrid_group(name='waifu')
-    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-    @app_commands.allowed_installs(guilds=True, users=True)
-    @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
-    async def waifu(self, ctx: LagContext) -> None:
-        await ctx.invoke(self.waifu_show)
-
-    @waifu.command(name='favourites')
-    async def waifu_favourites(self, ctx: LagContext) -> None:
-        await ctx.reply('test')
-
-    @waifu.command(name='show', hidden=True)
-    async def waifu_show(self, ctx: LagContext) -> None:
-        ctx.channel = cast(discord.TextChannel, ctx.channel)
-        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='waifu')
-        await view.start(ctx, 'waifu')
-
-    @commands.hybrid_command(name='pokemon')
-    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-    @app_commands.allowed_installs(guilds=True, users=True)
-    @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
-    async def pokemon(self, ctx: LagContext) -> None:
-        view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='pokemon')
-        await view.start(ctx, 'pokemon')
-
-
-async def setup(bot: Lagrange) -> None:
-    await bot.add_cog(Anime(bot))
