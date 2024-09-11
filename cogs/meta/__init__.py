@@ -3,12 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .botinfo import BotInformation
+from .userinfo import Userinfo
 
 if TYPE_CHECKING:
     from bot import Lagrange
 
 
-class Meta(BotInformation, name='Meta'):
+class Meta(BotInformation, Userinfo, name='Meta'):
     def __init__(self, bot: Lagrange) -> None:
         super().__init__(bot)
 
