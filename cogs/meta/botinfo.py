@@ -30,7 +30,7 @@ class BotInformation(commands.Cog):
 
     @commands.hybrid_command(
         name='about',
-        aliases=['botinfo', 'info'],
+        aliases=['info'],
         description='Get information about this bot',
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
