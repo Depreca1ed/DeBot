@@ -129,6 +129,3 @@ class ErrorHandler(commands.Cog):
             ),
         )
         return await self.bot.logger_webhook.send(embed=embed)
-
-
-# I.... for one.... am going to cry so fucking hard bro like its actually crazy how fucking low effort this is. Give me some idea I dont wanna be a generic child again man

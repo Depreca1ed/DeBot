@@ -15,7 +15,7 @@ class Developer(commands.Cog):
     def __init__(self, bot: Lagrange) -> None:
         self.bot: Lagrange = bot
 
-    @commands.command(name='reload', aliases=['re'])
+    @commands.command(name='reload', aliases=['re'], hidden=True)
     async def reload_cogs(self, ctx: LagContext) -> None:
         cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
         messages: list[str] = []

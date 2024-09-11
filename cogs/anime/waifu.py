@@ -47,7 +47,3 @@ class Waifu(commands.Cog):
     async def pokemon(self, ctx: LagContext) -> None:
         view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='pokemon')
         await view.start(ctx, 'pokemon')
-
-
-async def setup(bot: Lagrange) -> None:
-    await bot.add_cog(Waifu(bot))

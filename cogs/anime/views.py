@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bot import Lagrange
 
 
-__all__ = ('WaifuView', 'SafebooruPokemonView')
+__all__ = ('WaifuView', 'SafebooruPokemonView', 'WaifuViewBackup')
 
 
 class SmashOrPass(BaseView):
