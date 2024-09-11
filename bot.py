@@ -61,6 +61,7 @@ class Lagrange(commands.Bot):
     blacklist: Blacklist
     maintenance: bool
     appinfo: discord.AppInfo
+    log = log
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         intents: discord.Intents = discord.Intents.all()

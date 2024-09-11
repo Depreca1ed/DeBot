@@ -1,5 +1,3 @@
-"""Hypothetically, this is used a dev cog + event cog but I am not sure what structure it should be."""
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -12,11 +10,11 @@ import contextlib
 import discord
 from discord.ext import commands
 
-from .command_errors import CommandErrors
-from .dev import Dev
+from .dev import Developer
+from .error_handler import ErrorHandler
 
 
-class Events(CommandErrors, Dev, name='Events'):
+class Events(ErrorHandler, Developer, name='Events'):
     def __init__(self, bot: Lagrange) -> None:
         self.bot = bot
 

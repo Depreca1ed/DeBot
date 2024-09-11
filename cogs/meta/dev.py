@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from bot import Lagrange
 
 
-class Dev(commands.Cog):
+class Developer(commands.Cog):
     def __init__(self, bot: Lagrange) -> None:
         self.bot: Lagrange = bot
 
@@ -27,7 +27,3 @@ class Dev(commands.Cog):
             else:
                 messages.append(f'Reloaded {cog}')
         await ctx.send(content=better_string(messages, seperator='\n'))
-
-
-async def setup(bot: Lagrange) -> None:
-    await bot.add_cog(Dev(bot))

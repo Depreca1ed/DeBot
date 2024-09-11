@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from .views import SafebooruPokemonView, WaifuView
+from .views import SafebooruPokemonView, WaifuView, WaifuViewBackup
 
 if TYPE_CHECKING:
     from bot import Lagrange
@@ -33,8 +33,12 @@ class Waifu(commands.Cog):
     @waifu.command(name='show', hidden=True)
     async def waifu_show(self, ctx: LagContext) -> None:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
-        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='waifu')
-        await view.start(ctx, 'waifu')
+        try:
+            view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='waifu')
+            await view.start(ctx, 'waifu')
+        except KeyError:
+            view = WaifuViewBackup(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='waifu')
+            await view.start(ctx, 'waifu')
 
     @commands.hybrid_command(name='pokemon')
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)

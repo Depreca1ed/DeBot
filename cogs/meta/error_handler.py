@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import traceback
 from typing import TYPE_CHECKING
 
@@ -21,10 +20,9 @@ from utils import (
 
 if TYPE_CHECKING:
     from bot import Lagrange
-log: logging.Logger = logging.getLogger(__name__)
 
 
-class CommandErrors(commands.Cog):
+class ErrorHandler(commands.Cog):
     def __init__(self, bot: Lagrange) -> None:
         self.bot = bot
 

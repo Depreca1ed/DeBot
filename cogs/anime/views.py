@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Self, cast
 import discord
 from asyncpg.exceptions import UniqueViolationError
 
-from utils import BaseView, Embed, Image, LagContext, better_string
+from utils import WAIFU_TOKEN, BaseView, Embed, Image, LagContext, better_string
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
@@ -158,15 +158,37 @@ class SmashOrPass(BaseView):
 class WaifuView(SmashOrPass):
     async def request(self) -> Image:
         waifu = await self.session.get(
-            'https://safebooru.donmai.us/posts/random.json?tags=solo+1girl&rating=general',
+            'https://api.waifu.im/search',
+            params={
+                'is_nsfw': 'false' if self.nsfw is False else 'null',
+                'token': WAIFU_TOKEN,
+            },
         )
 
         data = await waifu.json()
+        data = data['images'][0]
         current: Image = {
-            'image_id': data['id'],
-            'dominant_color': None,
+            'image_id': data['image_id'],
             'source': data['source'],
-            'url': data['file_url'],
+            'dominant_color': data['dominant_color'],
+            'url': data['url'],
+        }
+        self.current = current
+
+        return self.current
+
+
+class WaifuViewBackup(SmashOrPass):
+    async def request(self) -> Image:
+        waifu = await self.session.get(f'https://api.waifu.pics/{"nsfw" if self.nsfw is True else "sfw"}/waifu')
+
+        data = await waifu.json()
+
+        current: Image = {
+            'image_id': data['url'],
+            'dominant_color': None,
+            'source': data['url'],
+            'url': data['url'],
         }
         self.current = current
 
