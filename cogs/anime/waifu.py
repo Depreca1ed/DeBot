@@ -22,7 +22,6 @@ class Waifu(commands.Cog):
     @commands.hybrid_group(name='waifu')
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
-    @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
     async def waifu(self, ctx: LagContext) -> None:
         await ctx.invoke(self.waifu_show)
 
@@ -43,7 +42,6 @@ class Waifu(commands.Cog):
     @commands.hybrid_command(name='pokemon')
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
-    @commands.bot_has_permissions(external_emojis=True, embed_links=True, attach_files=True)
     async def pokemon(self, ctx: LagContext) -> None:
         view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='pokemon')
         await view.start(ctx, 'pokemon')
