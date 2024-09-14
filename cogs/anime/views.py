@@ -33,8 +33,12 @@ class SmashOrPass(BaseView):
 
     @classmethod
     async def start(cls, ctx: LagContext, source: str) -> Self:
-        ctx.channel = cast(discord.TextChannel, ctx.channel)
-        inst = cls(ctx.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.nsfw, source=source)
+        inst = cls(
+            ctx.bot.session,
+            for_user=ctx.author.id,
+            nsfw=ctx.channel.nsfw if isinstance(ctx.channel, discord.TextChannel) else False,
+            source=source,
+        )
         data = await inst.request()
 
         embed = inst.embed(data)
