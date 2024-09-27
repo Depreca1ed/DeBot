@@ -1,22 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import ActivityHandler, Embed, LagContext, better_string
-
-if TYPE_CHECKING:
-    from bot import Lagrange
+from utils import ActivityHandler, BaseCog, Embed, LagContext, better_string
 
 
-class Userinfo(commands.Cog):
-    def __init__(self, bot: Lagrange) -> None:
-        self.bot = bot
-
-    @commands.hybrid_command(name='whois', description='Get information about a user', aliases=['userinfo', 'who'])
+class Userinfo(BaseCog):
+    @commands.hybrid_command(name='whois', help='Get information about a user', aliases=['userinfo', 'who'])
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def whois(

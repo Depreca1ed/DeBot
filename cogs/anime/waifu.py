@@ -6,30 +6,29 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from utils import BaseCog
+
 from .views import SafebooruPokemonView, WaifuView, WaifuViewBackup
 
 if TYPE_CHECKING:
-    from bot import Lagrange
     from utils import LagContext
 
 __all__ = ('Waifu',)
 
 
-class Waifu(commands.Cog):
-    def __init__(self, bot: Lagrange) -> None:
-        self.bot = bot
-
-    @commands.hybrid_group(name='waifu')
+class Waifu(BaseCog):
+    @commands.hybrid_group(name='waifu', help='Get waifu images with an option to smash or pass')
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def waifu(self, ctx: LagContext) -> None:
         await ctx.invoke(self.waifu_show)
 
-    @waifu.command(name='favourites')
+    @waifu.command(name='favourites', with_app_command=False)
+    @commands.is_owner()
     async def waifu_favourites(self, ctx: LagContext) -> None:
         await ctx.reply('test')
 
-    @waifu.command(name='show', hidden=True)
+    @waifu.command(name='show', hidden=True, help='Get waifu images with an option to smash or pass')
     async def waifu_show(self, ctx: LagContext) -> None:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
         try:
@@ -39,7 +38,7 @@ class Waifu(commands.Cog):
             view = WaifuViewBackup(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='waifu')
             await view.start(ctx, 'waifu')
 
-    @commands.hybrid_command(name='pokemon')
+    @commands.hybrid_command(name='pokemon', help='Get pokemon images with an option to smash or pass')
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def pokemon(self, ctx: LagContext) -> None:

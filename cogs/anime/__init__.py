@@ -8,9 +8,7 @@ if TYPE_CHECKING:
     from bot import Lagrange
 
 
-class Anime(Waifu, name='Anime & Manga'):
-    def __init__(self, bot: Lagrange) -> None:
-        self.bot = bot
+class Anime(Waifu, name='Anime & Manga'): ...
 
 
 async def setup(bot: Lagrange) -> None:

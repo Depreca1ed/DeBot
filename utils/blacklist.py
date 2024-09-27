@@ -6,6 +6,8 @@ import discord
 
 from .errors import AlreadyBlacklisted, BlacklistedGuild, BlacklistedUser, NotBlacklisted
 
+__all__ = ('Blacklist',)
+
 if TYPE_CHECKING:
     import datetime
 

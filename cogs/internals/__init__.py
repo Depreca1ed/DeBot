@@ -15,9 +15,6 @@ from .error_handler import ErrorHandler
 
 
 class Events(ErrorHandler, Developer, name='Events'):
-    def __init__(self, bot: Lagrange) -> None:
-        self.bot = bot
-
     @discord.utils.copy_doc(commands.Cog.cog_check)
     async def cog_check(self, ctx: LagContext) -> bool:
         return await self.bot.is_owner(ctx.author)

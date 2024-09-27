@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING
 
 import discord
 import mystbin
 from discord.ext import commands
 
 from utils import (
+    BaseCog,
     BlacklistedGuild,
     BlacklistedUser,
     Embed,
@@ -18,14 +18,8 @@ from utils import (
     better_string,
 )
 
-if TYPE_CHECKING:
-    from bot import Lagrange
 
-
-class ErrorHandler(commands.Cog):
-    def __init__(self, bot: Lagrange) -> None:
-        self.bot = bot
-
+class ErrorHandler(BaseCog):
     def clean_error_permission(self, permissions: list[str], *, seperator: str, prefix: str) -> str:
         return better_string((prefix + (perm.replace('_', ' ')).capitalize() for perm in permissions), seperator=seperator)
 

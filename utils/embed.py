@@ -31,7 +31,7 @@ class Embed(discord.Embed):
                 text=f'Requested by {ctx.author}',
                 icon_url=ctx.author.display_avatar.url or None,
             )
-        super().__init__(colour=colour, **kwargs)
+        super().__init__(colour=colour if colour != discord.Colour.default() else THEME_COLOUR, **kwargs)
         for n, v in fields:
             self.add_field(name=n, value=v, inline=field_inline)
 

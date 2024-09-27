@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 import importlib.metadata
 import platform
-from typing import TYPE_CHECKING
 
 import discord
 import humanize
@@ -11,10 +10,7 @@ import psutil
 from discord import app_commands
 from discord.ext import commands
 
-if TYPE_CHECKING:
-    from bot import Lagrange
-
-from utils import Embed, LagContext, better_string
+from utils import BaseCog, Embed, LagContext, better_string
 
 try:
     from importlib.metadata import distribution, packages_distributions
@@ -24,14 +20,11 @@ except ImportError:
 import importlib
 
 
-class BotInformation(commands.Cog):
-    def __init__(self, bot: Lagrange) -> None:
-        self.bot = bot
-
+class BotInformation(BaseCog):
     @commands.hybrid_command(
         name='about',
         aliases=['info'],
-        description='Get information about this bot',
+        help='Get information about this bot',
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
