@@ -71,5 +71,4 @@ class Anime(BaseCog):
                 seperator='\n',
             ),
         )
-        print(json.dumps(data, indent=4))
         await ctx.reply(embed=embed)
