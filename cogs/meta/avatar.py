@@ -25,7 +25,7 @@ class Avatar(BaseCog):
             else discord.asset.VALID_ASSET_FORMATS
         )
         filetypes = set(filetypes)
-        filetypes.discard("jpg")
+        filetypes.discard('jpg')
         view = discord.ui.View()
         comps: list[discord.ui.Button[discord.ui.View]] = [
             discord.ui.Button(
@@ -53,7 +53,7 @@ class Avatar(BaseCog):
         embed = Embed(title=f"{user_}'s avatar", ctx=ctx).set_image(url=av.url)
         filetypes = discord.asset.VALID_STATIC_FORMATS if av.is_animated() is False else discord.asset.VALID_ASSET_FORMATS
         filetypes = set(filetypes)
-        filetypes.discard("jpg")
+        filetypes.discard('jpg')
         view = discord.ui.View()
         comps: list[discord.ui.Button[discord.ui.View]] = [
             discord.ui.Button(
@@ -79,7 +79,7 @@ class Avatar(BaseCog):
         embed = Embed(title=f"{ctx.guild}'s icon", ctx=ctx).set_image(url=icon.url)
         filetypes = discord.asset.VALID_STATIC_FORMATS if icon.is_animated() is False else discord.asset.VALID_ASSET_FORMATS
         filetypes = set(filetypes)
-        filetypes.discard("jpg")
+        filetypes.discard('jpg')
         view = discord.ui.View()
         comps: list[discord.ui.Button[discord.ui.View]] = [
             discord.ui.Button(
