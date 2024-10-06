@@ -13,21 +13,21 @@ if TYPE_CHECKING:
 
     from discord.abc import Snowflake
 
-    from bot import Lagrange
+    from bot import DeBot
 
-    from .context import LagContext
+    from .context import DeContext
     from .types import BlacklistBase
 
 
 class Blacklist:
     blacklists: dict[Snowflake, BlacklistBase]
 
-    def __init__(self, bot: Lagrange) -> None:
+    def __init__(self, bot: DeBot) -> None:
         self.blacklists = {}
         self.bot = bot
         self.bot.check_once(self.check)
 
-    async def check(self, ctx: LagContext) -> Literal[True]:
+    async def check(self, ctx: DeContext) -> Literal[True]:
         if ctx.guild and self.is_blacklisted(ctx.guild):
             raise BlacklistedGuild(
                 ctx.guild,

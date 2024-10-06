@@ -4,12 +4,12 @@ from pkgutil import iter_modules
 
 from discord.ext import commands
 
-from utils import BaseCog, LagContext, better_string
+from utils import BaseCog, DeContext, better_string
 
 
 class Developer(BaseCog):
     @commands.command(name='reload', aliases=['re'], hidden=True)
-    async def reload_cogs(self, ctx: LagContext) -> None:
+    async def reload_cogs(self, ctx: DeContext) -> None:
         cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
         messages: list[str] = []
         for cog in cogs:

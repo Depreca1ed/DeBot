@@ -11,7 +11,7 @@ from utils import BaseCog
 from .views import SafebooruPokemonView, WaifuView, WaifuViewBackup
 
 if TYPE_CHECKING:
-    from utils import LagContext
+    from utils import DeContext
 
 __all__ = ('Waifu',)
 
@@ -20,16 +20,16 @@ class Waifu(BaseCog):
     @commands.hybrid_group(name='waifu', help='Get waifu images with an option to smash or pass')
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
-    async def waifu(self, ctx: LagContext) -> None:
+    async def waifu(self, ctx: DeContext) -> None:
         await ctx.invoke(self.waifu_show)
 
     @waifu.command(name='favourites', with_app_command=False)
     @commands.is_owner()
-    async def waifu_favourites(self, ctx: LagContext) -> None:
+    async def waifu_favourites(self, ctx: DeContext) -> None:
         await ctx.reply('test')
 
     @waifu.command(name='show', hidden=True, help='Get waifu images with an option to smash or pass')
-    async def waifu_show(self, ctx: LagContext) -> None:
+    async def waifu_show(self, ctx: DeContext) -> None:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
         try:
             view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='waifu')
@@ -41,6 +41,6 @@ class Waifu(BaseCog):
     @commands.hybrid_command(name='pokemon', help='Get pokemon images with an option to smash or pass')
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
-    async def pokemon(self, ctx: LagContext) -> None:
+    async def pokemon(self, ctx: DeContext) -> None:
         view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='pokemon')
         await view.start(ctx, 'pokemon')

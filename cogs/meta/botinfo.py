@@ -10,7 +10,7 @@ import psutil
 from discord import app_commands
 from discord.ext import commands
 
-from utils import BaseCog, Embed, LagContext, better_string
+from utils import BaseCog, Embed, DeContext, better_string
 
 try:
     from importlib.metadata import distribution, packages_distributions
@@ -28,7 +28,7 @@ class BotInformation(BaseCog):
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
-    async def botinfo(self, ctx: LagContext) -> None:
+    async def botinfo(self, ctx: DeContext) -> None:
         bot = self.bot
         embed = Embed(title=str(bot.user.name), description=bot.description, ctx=ctx)
         embed.set_author(

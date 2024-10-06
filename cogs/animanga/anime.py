@@ -12,7 +12,7 @@ from discord.ext import commands
 from utils import BaseCog, Embed, better_string
 
 if TYPE_CHECKING:
-    from utils import LagContext
+    from utils import DeContext
 
 BASIC_QUERY = """
 query ($search: String, $type: MediaType) {
@@ -50,7 +50,7 @@ bruh = re.compile(r'</?\w+/?>')
 class Anime(BaseCog):
     @commands.command(name='anime')
     @commands.is_owner()
-    async def anime(self, ctx: LagContext, anime: str):
+    async def anime(self, ctx: DeContext, anime: str):
         resp = await self.bot.session.post(
             'https://graphql.anilist.co/',
             json={

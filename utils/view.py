@@ -12,7 +12,7 @@ from utils import Embed, better_string
 if TYPE_CHECKING:
     from discord.ui.item import Item
 
-    from bot import Lagrange
+    from bot import DeBot
 
 __all__ = ('BaseView',)
 
@@ -28,7 +28,7 @@ class BaseView(discord.ui.View):
 
     async def on_error(
         self,
-        interaction: discord.Interaction[Lagrange],
+        interaction: discord.Interaction[DeBot],
         error: Exception,
         _: Item[Any],
     ) -> None:

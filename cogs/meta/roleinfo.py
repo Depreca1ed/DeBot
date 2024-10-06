@@ -9,7 +9,7 @@ from discord.ext import commands
 from utils import BaseCog, Embed, better_string
 
 if TYPE_CHECKING:
-    from utils import LagContext
+    from utils import DeContext
 
 
 class RoleInfo(BaseCog):
@@ -17,7 +17,7 @@ class RoleInfo(BaseCog):
     @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
     @app_commands.allowed_installs(guilds=True, users=True)
     @commands.guild_only()
-    async def roleinfo(self, ctx: LagContext, role: discord.Role) -> discord.Message:
+    async def roleinfo(self, ctx: DeContext, role: discord.Role) -> discord.Message:
         embed = Embed(title=f'{role.name} {role.unicode_emoji if role.unicode_emoji else ''}', colour=role.colour, ctx=ctx)
         embed.description = better_string(
             (

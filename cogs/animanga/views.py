@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, Self, cast
 import discord
 from asyncpg.exceptions import UniqueViolationError
 
-from utils import WAIFU_TOKEN, BaseView, Embed, Image, LagContext, better_string
+from utils import WAIFU_TOKEN, BaseView, Embed, Image, DeContext, better_string
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
-    from bot import Lagrange
+    from bot import DeBot
 
 
 __all__ = ('WaifuView', 'SafebooruPokemonView', 'WaifuViewBackup')
@@ -32,7 +32,7 @@ class SmashOrPass(BaseView):
         self.passers: set[discord.User | discord.Member] = set()
 
     @classmethod
-    async def start(cls, ctx: LagContext, source: str) -> Self:
+    async def start(cls, ctx: DeContext, source: str) -> Self:
         inst = cls(
             ctx.bot.session,
             for_user=ctx.author.id,
@@ -74,7 +74,7 @@ class SmashOrPass(BaseView):
         emoji='<:smash:1276874474628583497>',
         style=discord.ButtonStyle.green,
     )
-    async def smash(self, interaction: discord.Interaction[Lagrange], _: discord.ui.Button[Self]) -> None:
+    async def smash(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
         if interaction.user in self.smashers:
             interaction.channel = cast(discord.TextChannel, interaction.channel)
             try:
@@ -112,7 +112,7 @@ class SmashOrPass(BaseView):
         emoji='<:pass:1276874515296813118>',
         style=discord.ButtonStyle.red,
     )
-    async def passbutton(self, interaction: discord.Interaction[Lagrange], _: discord.ui.Button[Self]) -> None:
+    async def passbutton(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
         if interaction.user in self.passers:
             return await interaction.response.defer()
 
@@ -130,7 +130,7 @@ class SmashOrPass(BaseView):
         return None
 
     @discord.ui.button(emoji='🔁', style=discord.ButtonStyle.grey)
-    async def _next(self, interaction: discord.Interaction[Lagrange], _: discord.ui.Button[Self]) -> None:
+    async def _next(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
         self.smashers.clear()
         self.passers.clear()
         try:

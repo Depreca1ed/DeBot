@@ -1,12 +1,10 @@
-Lagrange
+DeBot
 =========
-Hi, this is Lagrange. At the moment, the bot does not have many features and mostly used privately but is allowed for public use.
-
-> Disclaimer: This bot is not affiliated with Arcaea and does not have any features related to it.
+DeBot!
 
 Where can I use the bot & How can I host it?
 ============================================
-Lagrange is currently not hosted 24/7 and is self-hosted by me when in use. This might change in the future and depends on if I am confident with what the codebase will be.
+You can use it in the support server. Unfortunately you need to put in effort and find the link to it in the code. 
 
 As for how you can host it:
 - [Clone the repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
@@ -54,7 +52,3 @@ WEBHOOK_URL = '' # The link to the webhook you wish for the bot to send all its 
 > Yes I tend to put everything which feels even slightly similar to being a constant value in a config.py file. Just something I prefer to be more comfortable with I suppose
 
 - After setting up all of the above, you can run the bot by running the `__main__.py` file. 
-
-Have any suggestions? Want to contribute? Wanna get bored by random words from yours truly?
-===========================================================================================
-DM me on discord(`deprecating`) or..... just look hard enough since the server link is somewhat public but due to the obvious placement of this README, I will not be putting it here.

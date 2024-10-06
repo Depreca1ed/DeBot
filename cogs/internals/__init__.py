@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bot import Lagrange
-    from utils import LagContext
+    from bot import DeBot
+    from utils import DeContext
 import contextlib
 
 import discord
@@ -16,7 +16,7 @@ from .error_handler import ErrorHandler
 
 class Events(ErrorHandler, Developer, name='Events'):
     @discord.utils.copy_doc(commands.Cog.cog_check)
-    async def cog_check(self, ctx: LagContext) -> bool:
+    async def cog_check(self, ctx: DeContext) -> bool:
         return await self.bot.is_owner(ctx.author)
 
     @commands.Cog.listener('on_message_edit')
@@ -36,5 +36,5 @@ class Events(ErrorHandler, Developer, name='Events'):
                 await reaction.message.delete()
 
 
-async def setup(bot: Lagrange) -> None:
+async def setup(bot: DeBot) -> None:
     await bot.add_cog(Events(bot))

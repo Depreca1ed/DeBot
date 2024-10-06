@@ -9,7 +9,7 @@ from .config import THEME_COLOUR
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from .context import LagContext
+    from .context import DeContext
 
 __all__ = ('Embed',)
 
@@ -23,7 +23,7 @@ class Embed(discord.Embed):
         fields: Iterable[tuple[str, str]] = (),
         *,
         field_inline: bool = False,
-        ctx: LagContext | None = None,
+        ctx: DeContext | None = None,
         **kwargs: Any,
     ) -> None:
         if ctx:

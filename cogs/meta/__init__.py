@@ -9,11 +9,11 @@ from .serverinfo import ServerInfo
 from .userinfo import Userinfo
 
 if TYPE_CHECKING:
-    from bot import Lagrange
+    from bot import DeBot
 
 
 class Meta(Avatar, BotInformation, RoleInfo, Userinfo, ServerInfo, name='Meta'): ...
 
 
-async def setup(bot: Lagrange) -> None:
+async def setup(bot: DeBot) -> None:
     await bot.add_cog(Meta(bot))

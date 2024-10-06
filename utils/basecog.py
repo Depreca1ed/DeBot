@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 from discord.ext import commands
 
 if TYPE_CHECKING:
-    from bot import Lagrange
+    from bot import DeBot
 
 
 class BaseCog(commands.Cog):
-    bot: Lagrange
+    bot: DeBot
 
-    def __init__(self, bot: Lagrange) -> None:
+    def __init__(self, bot: DeBot) -> None:
         self.bot = bot

@@ -24,7 +24,7 @@ from utils import (
     THEME_COLOUR,
     WEBHOOK_URL,
     Blacklist,
-    LagContext,
+    DeContext,
     PrefixAlreadyPresent,
     PrefixNotInitialised,
     PrefixNotPresent,
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from discord.ext.commands._types import ContextT  # pyright: ignore[reportMissingTypeStubs]
 
 
-__all__ = ('Lagrange',)
+__all__ = ('DeBot',)
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ jishaku.Flags.NO_UNDERSCORE = True
 EXTERNAL_COGS: list[str] = ['jishaku']
 
 
-class Lagrange(commands.Bot):
+class DeBot(commands.Bot):
     prefix: ClassVar[list[str]] = [
         ''.join(capitalization) for capitalization in product(*zip(BASE_PREFIX.lower(), BASE_PREFIX.upper(), strict=False))
     ]
@@ -175,7 +175,7 @@ class Lagrange(commands.Bot):
                 log.info('Loaded %s ', cog)
 
     @overload
-    async def get_context(self, origin: discord.Interaction | discord.Message, /) -> LagContext: ...
+    async def get_context(self, origin: discord.Interaction | discord.Message, /) -> DeContext: ...
 
     @overload
     async def get_context(self, origin: discord.Interaction | discord.Message, /, *, cls: type[ContextT]) -> ContextT: ...
@@ -188,7 +188,7 @@ class Lagrange(commands.Bot):
         cls: type[ContextT] = discord.utils.MISSING,
     ) -> ContextT:
         if cls is discord.utils.MISSING:
-            cls = LagContext  # pyright: ignore[reportAssignmentType]
+            cls = DeContext  # pyright: ignore[reportAssignmentType]
         return await super().get_context(origin, cls=cls)
 
     @discord.utils.copy_doc(commands.Bot.is_owner)

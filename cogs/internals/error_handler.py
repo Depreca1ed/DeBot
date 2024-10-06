@@ -12,8 +12,8 @@ from utils import (
     BlacklistedUser,
     Embed,
     FeatureDisabled,
-    LagContext,
-    LagrangeError,
+    DeContext,
+    DeBotError,
     UnderMaintenance,
     better_string,
 )
@@ -24,7 +24,7 @@ class ErrorHandler(BaseCog):
         return better_string((prefix + (perm.replace('_', ' ')).capitalize() for perm in permissions), seperator=seperator)
 
     @commands.Cog.listener('on_command_error')
-    async def error_handler(self, ctx: LagContext, error: commands.CommandError) -> None | discord.Message:
+    async def error_handler(self, ctx: DeContext, error: commands.CommandError) -> None | discord.Message:
         error_messages = {
             commands.NoPrivateMessage: 'This command cannot be used in DMs',
             commands.NotOwner: 'You cannot run this command. This command is reserved for the developers of the bot.',
@@ -41,7 +41,7 @@ class ErrorHandler(BaseCog):
             or (ctx.cog and ctx.cog._get_overridden_method(ctx.cog.cog_command_error))
         ):
             return None
-        elif isinstance(error, LagrangeError):
+        elif isinstance(error, DeBotError):
             if (isinstance(ctx.channel, discord.DMChannel) and isinstance(error, BlacklistedUser)) or isinstance(
                 error,
                 UnderMaintenance | FeatureDisabled,

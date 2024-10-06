@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 import discord
 
-from bot import Lagrange
+from bot import DeBot
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     with setup_logging():
 
         async def run_bot() -> None:
-            async with Lagrange() as bot:
+            async with DeBot() as bot:
                 await bot.start(bot.token)
 
         asyncio.run(run_bot())
