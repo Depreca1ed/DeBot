@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import ActivityHandler, BaseCog, Embed, DeContext, better_string
+from utils import ActivityHandler, BaseCog, DeContext, Embed, better_string
 
 
 class Userinfo(BaseCog):

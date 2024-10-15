@@ -10,7 +10,7 @@ import psutil
 from discord import app_commands
 from discord.ext import commands
 
-from utils import BaseCog, Embed, DeContext, better_string
+from utils import BaseCog, DeContext, Embed, better_string
 
 try:
     from importlib.metadata import distribution, packages_distributions

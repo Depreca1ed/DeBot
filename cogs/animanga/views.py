@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Self, cast
 import discord
 from asyncpg.exceptions import UniqueViolationError
 
-from utils import WAIFU_TOKEN, BaseView, Embed, Image, DeContext, better_string
+from utils import WAIFU_TOKEN, BaseView, DeContext, Embed, Image, better_string
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession

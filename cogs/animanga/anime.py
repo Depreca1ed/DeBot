@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import json
+import datetime
 import re
 from typing import TYPE_CHECKING
+
 import humanize
-import datetime
-import discord
-from discord import app_commands
 from discord.ext import commands
 
 from utils import BaseCog, Embed, better_string
@@ -50,7 +48,7 @@ bruh = re.compile(r'</?\w+/?>')
 class Anime(BaseCog):
     @commands.command(name='anime')
     @commands.is_owner()
-    async def anime(self, ctx: DeContext, anime: str):
+    async def anime(self, ctx: DeContext, anime: str) -> None:
         resp = await self.bot.session.post(
             'https://graphql.anilist.co/',
             json={
