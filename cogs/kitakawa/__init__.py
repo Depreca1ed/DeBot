@@ -23,7 +23,7 @@ class KitaKawa(BaseCog, name='KitaKawa'):
         ch = self.bot.get_channel(1277813689092804653)
         assert isinstance(ch, discord.TextChannel)
         if ch:
-            await ch.send('<@632129181542776832> read kitakawa smh')
+            await ch.send('<@&1295851367902089266> read kitakawa smh')
 
 async def setup(bot: DeBot) -> None:
     await bot.add_cog(KitaKawa(bot))
