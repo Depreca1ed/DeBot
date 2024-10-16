@@ -21,7 +21,6 @@ class KitaKawa(BaseCog, name='KitaKawa'):
 
     @tasks.loop(hours=6)
     async def mention_loop(self) -> None:
-        return
         ch = self.bot.get_channel(1277813689092804653)
         if ch:
             assert isinstance(ch, discord.TextChannel)
