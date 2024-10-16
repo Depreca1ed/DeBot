@@ -32,7 +32,9 @@ from utils import (
 )
 
 if TYPE_CHECKING:
-    from discord.ext.commands._types import ContextT  # pyright: ignore[reportMissingTypeStubs]
+    from discord.ext.commands._types import (
+        ContextT,
+    )  # pyright: ignore[reportMissingTypeStubs]
 
 
 __all__ = ('DeBot',)

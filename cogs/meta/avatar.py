@@ -46,7 +46,10 @@ class Avatar(BaseCog):
     async def avatar_slash(self, ctx: DeContext, user: discord.User | discord.Member | None) -> discord.Message:
         return await ctx.invoke(self.avatar, user)
 
-    @avatar.command(name='user', help="Get your or user's profile avatar. This does not include server avatars")
+    @avatar.command(
+        name='user',
+        help="Get your or user's profile avatar. This does not include server avatars",
+    )
     async def avatar_norm(self, ctx: DeContext, user: discord.User | None) -> discord.Message:
         user_ = user or ctx.author
         av = user_.avatar or user_.default_avatar

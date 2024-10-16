@@ -36,7 +36,7 @@ class SmashOrPass(BaseView):
         inst = cls(
             ctx.bot.session,
             for_user=ctx.author.id,
-            nsfw=ctx.channel.nsfw if isinstance(ctx.channel, discord.TextChannel) else False,
+            nsfw=(ctx.channel.nsfw if isinstance(ctx.channel, discord.TextChannel) else False),
             source=source,
         )
         data = await inst.request()
@@ -57,13 +57,13 @@ class SmashOrPass(BaseView):
             title='Smash or Pass',
             description=better_string(
                 [
-                    f'> [#{data["image_id"]}]({data["source"]})' if data['image_id'] and data['source'] else None,
+                    (f'> [#{data["image_id"]}]({data["source"]})' if data['image_id'] and data['source'] else None),
                     '<:smash:1276874474628583497> **Smashers:** ' + smasher,
                     '<:pass:1276874515296813118> **Passers:** ' + passer,
                 ],
                 seperator='\n',
             ),
-            colour=discord.Colour.from_str(data['dominant_color']) if data['dominant_color'] else None,
+            colour=(discord.Colour.from_str(data['dominant_color']) if data['dominant_color'] else None),
         )
 
         embed.set_image(url=data['url'])

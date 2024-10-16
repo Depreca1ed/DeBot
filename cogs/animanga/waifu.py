@@ -28,14 +28,23 @@ class Waifu(BaseCog):
     async def waifu_favourites(self, ctx: DeContext) -> None:
         await ctx.reply('test')
 
-    @waifu.command(name='show', hidden=True, help='Get waifu images with an option to smash or pass')
+    @waifu.command(
+        name='show',
+        hidden=True,
+        help='Get waifu images with an option to smash or pass',
+    )
     async def waifu_show(self, ctx: DeContext) -> None:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
         try:
             view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='waifu')
             await view.start(ctx, 'waifu')
         except KeyError:
-            view = WaifuViewBackup(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='waifu')
+            view = WaifuViewBackup(
+                self.bot.session,
+                for_user=ctx.author.id,
+                nsfw=ctx.channel.is_nsfw(),
+                source='waifu',
+            )
             await view.start(ctx, 'waifu')
 
     @commands.hybrid_command(name='pokemon', help='Get pokemon images with an option to smash or pass')

@@ -34,16 +34,20 @@ class ActivityHandler:
             [
                 'Streaming',
                 f'`{[activity.game]}`' if activity.game else None,
-                f'**[{activity.name}]({activity.url})**'
-                if activity.url
-                else f'**{activity.name}**'
-                if activity.name
-                else None,
+                (
+                    f'**[{activity.name}]({activity.url})**'
+                    if activity.url
+                    else f'**{activity.name}**'
+                    if activity.name
+                    else None
+                ),
                 f'on `{activity.platform}`' if activity.platform else None,
                 f'as **{activity.twitch_name}**' if activity.twitch_name else None,
-                f'since **{humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - activity.created_at.timestamp())}**'
-                if activity.created_at
-                else None,
+                (
+                    f'since **{humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - activity.created_at.timestamp())}**'
+                    if activity.created_at
+                    else None
+                ),
             ],
             seperator=' ',
         )
@@ -53,9 +57,11 @@ class ActivityHandler:
             [
                 f'Playing **{activity.name}**',
                 f'on `{activity.platform}`' if activity.platform else None,
-                f'since **{humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - activity.created_at.timestamp())}**'
-                if activity.created_at
-                else None,
+                (
+                    f'since **{humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - activity.created_at.timestamp())}**'
+                    if activity.created_at
+                    else None
+                ),
             ],
             seperator=' ',
         )
@@ -80,14 +86,18 @@ class ActivityHandler:
         return better_string(
             [
                 f'{activity.type.name.title()}',
-                f'**[{activity.name}]({activity.url})**'
-                if activity.url
-                else f'**{activity.name}**'
-                if activity.name
-                else None,
-                f'since **{humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - (instance_datetime.timestamp()))}**'
-                if (instance_datetime)
-                else '',
+                (
+                    f'**[{activity.name}]({activity.url})**'
+                    if activity.url
+                    else f'**{activity.name}**'
+                    if activity.name
+                    else None
+                ),
+                (
+                    f'since **{humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - (instance_datetime.timestamp()))}**'
+                    if (instance_datetime)
+                    else ''
+                ),
             ],
             seperator=' ',
         )

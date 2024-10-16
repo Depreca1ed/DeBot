@@ -4,7 +4,12 @@ from typing import TYPE_CHECKING, Literal
 
 import discord
 
-from .errors import AlreadyBlacklisted, BlacklistedGuild, BlacklistedUser, NotBlacklisted
+from .errors import (
+    AlreadyBlacklisted,
+    BlacklistedGuild,
+    BlacklistedUser,
+    NotBlacklisted,
+)
 
 __all__ = ('Blacklist',)
 
@@ -69,7 +74,11 @@ class Blacklist:
             lasts_until,
             param,
         )
-        self.blacklists[snowflake] = {'reason': reason, 'lasts_until': lasts_until, 'blacklist_type': param}
+        self.blacklists[snowflake] = {
+            'reason': reason,
+            'lasts_until': lasts_until,
+            'blacklist_type': param,
+        }
         return self.blacklists
 
     async def remove(self, snowflake: discord.User | discord.Guild) -> dict[Snowflake, BlacklistBase]:

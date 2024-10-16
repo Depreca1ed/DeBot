@@ -21,7 +21,10 @@ from utils import (
 
 class ErrorHandler(BaseCog):
     def clean_error_permission(self, permissions: list[str], *, seperator: str, prefix: str) -> str:
-        return better_string((prefix + (perm.replace('_', ' ')).capitalize() for perm in permissions), seperator=seperator)
+        return better_string(
+            (prefix + (perm.replace('_', ' ')).capitalize() for perm in permissions),
+            seperator=seperator,
+        )
 
     @commands.Cog.listener('on_command_error')
     async def error_handler(self, ctx: DeContext, error: commands.CommandError) -> None | discord.Message:
@@ -111,12 +114,18 @@ class ErrorHandler(BaseCog):
             else None
         )
 
-        embed = Embed(title=error.__class__.__name__, description=exc, url=exc_link, colour=0x000000, ctx=ctx)
+        embed = Embed(
+            title=error.__class__.__name__,
+            description=exc,
+            url=exc_link,
+            colour=0x000000,
+            ctx=ctx,
+        )
         embed.add_field(
             value=better_string(
                 [
                     f'> - **User: **{ctx.author!s}',
-                    f'> - **Server: **{ctx.guild.name if ctx.guild else 'No guild'!s}',
+                    f"> - **Server: **{ctx.guild.name if ctx.guild else 'No guild'!s}",
                     f'> - **Command: **{ctx.command.name}',
                 ],
                 seperator='\n',

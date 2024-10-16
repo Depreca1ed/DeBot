@@ -47,7 +47,12 @@ class PrefixNotPresent(commands.CommandError, DeBotError):
 
 
 class BlacklistedUser(commands.CheckFailure, DeBotError):
-    def __init__(self, snowflake: discord.User | discord.Member, reason: str, until: datetime | None) -> None:
+    def __init__(
+        self,
+        snowflake: discord.User | discord.Member,
+        reason: str,
+        until: datetime | None,
+    ) -> None:
         super().__init__(f'{snowflake} is blacklisted for {reason} until {until}')
 
 
@@ -57,7 +62,12 @@ class BlacklistedGuild(commands.CheckFailure, DeBotError):
 
 
 class AlreadyBlacklisted(commands.CommandError, DeBotError):
-    def __init__(self, snowflake: discord.User | discord.Guild, reason: str, until: datetime | None) -> None:
+    def __init__(
+        self,
+        snowflake: discord.User | discord.Guild,
+        reason: str,
+        until: datetime | None,
+    ) -> None:
         super().__init__(f'{snowflake} is already blacklisted for {reason} until {until}')
 
 

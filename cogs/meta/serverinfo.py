@@ -44,15 +44,17 @@ class ServerInfo(BaseCog):
                 [
                     f'- **Members:** `{guild.member_count}`',
                     f'- **Channels:** `{len(guild.channels)}`',
-                    better_string(
-                        [
-                            f"- **Roles: ** {', '.join(valid_roles) if len(valid_roles) <= 3 else ', '.join(valid_roles[:3]) + f' + {len(valid_roles)-3} roles'}",
-                            f"- **Emojis: ** {' '.join(emojis) if len(emojis) <= 3 else ' '.join(emojis[:3]) + f' + {len(emojis)-3} emojis'} (`{len(guild.emojis)}/{guild.emoji_limit}`)",
-                        ],
-                        seperator='\n',
-                    )
-                    if valid_roles
-                    else None,
+                    (
+                        better_string(
+                            [
+                                f"- **Roles: ** {', '.join(valid_roles) if len(valid_roles) <= 3 else ', '.join(valid_roles[:3]) + f' + {len(valid_roles)-3} roles'}",
+                                f"- **Emojis: ** {' '.join(emojis) if len(emojis) <= 3 else ' '.join(emojis[:3]) + f' + {len(emojis)-3} emojis'} (`{len(guild.emojis)}/{guild.emoji_limit}`)",
+                            ],
+                            seperator='\n',
+                        )
+                        if valid_roles
+                        else None
+                    ),
                 ],
                 seperator='\n',
             ),
@@ -63,7 +65,7 @@ class ServerInfo(BaseCog):
                 str(a.mention)
                 for a in sorted(
                     guild.premium_subscribers,
-                    key=lambda m: m.premium_since if m.premium_since else (m.joined_at or m.created_at),
+                    key=lambda m: (m.premium_since if m.premium_since else (m.joined_at or m.created_at)),
                 )
             ]
 
@@ -72,9 +74,11 @@ class ServerInfo(BaseCog):
                 value=better_string(
                     [
                         f'> **{guild.name}** has `{guild.premium_subscription_count}` boosts and is at **Level `{guild.premium_tier}`**',
-                        f'- **Booster Role: ** {guild.premium_subscriber_role.mention}'
-                        if guild.premium_subscriber_role
-                        else None,
+                        (
+                            f'- **Booster Role: ** {guild.premium_subscriber_role.mention}'
+                            if guild.premium_subscriber_role
+                            else None
+                        ),
                         (
                             f"- **Boosters: ** {', '.join(boosters) if len(boosters) <= 5 else ', '.join(boosters[:5]) + f' + {len(boosters)-5} boosters'}"
                             if valid_roles

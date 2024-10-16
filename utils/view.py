@@ -45,12 +45,17 @@ class BaseView(discord.ui.View):
             else None
         )
 
-        embed = Embed(title=error.__class__.__name__, description=exc, url=exc_link, colour=0x000000)
+        embed = Embed(
+            title=error.__class__.__name__,
+            description=exc,
+            url=exc_link,
+            colour=0x000000,
+        )
         embed.add_field(
             value=better_string(
                 [
                     f'> - **User: **{interaction.user!s}',
-                    f'> - **Server: **{interaction.guild.name if interaction.guild else 'No guild'!s}',
+                    f"> - **Server: **{interaction.guild.name if interaction.guild else 'No guild'!s}",
                     f'> - **View: **{self.__class__.__name__}',
                 ],
                 seperator='\n',

@@ -60,7 +60,10 @@ class Anime(BaseCog):
             },
         )
         data = (await resp.json())['data']['Media']
-        embed = Embed(title=f"{data['title']['english']} ({data['format']})", description=bruh.sub('', data['description']))
+        embed = Embed(
+            title=f"{data['title']['english']} ({data['format']})",
+            description=bruh.sub('', data['description']),
+        )
         embed.add_field(
             value=better_string(
                 (

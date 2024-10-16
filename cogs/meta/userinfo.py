@@ -17,7 +17,11 @@ class Userinfo(BaseCog):
         user: discord.Member | discord.User | None,
     ) -> None:
         user = user or ctx.author
-        embed = Embed(title=str(user), colour=user.colour if user.colour != discord.Colour.default() else None, ctx=ctx)
+        embed = Embed(
+            title=str(user),
+            colour=user.colour if user.colour != discord.Colour.default() else None,
+            ctx=ctx,
+        )
 
         embed.set_author(
             name=f"{user.global_name or user.name} {f'({user.nick} in {user.guild.name})' if isinstance(user, discord.Member) and user.nick and user.guild.name else ''}",

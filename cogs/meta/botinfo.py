@@ -41,9 +41,11 @@ class BotInformation(BaseCog):
                 [
                     f'- **Servers :** `{len(bot.guilds)}`',
                     f'- **Users :** `{len(bot.users)}`',
-                    f'  - **Installed by :** `{self.bot.appinfo.approximate_user_install_count}` users'
-                    if self.bot.appinfo.approximate_user_install_count
-                    else None,
+                    (
+                        f'  - **Installed by :** `{self.bot.appinfo.approximate_user_install_count}` users'
+                        if self.bot.appinfo.approximate_user_install_count
+                        else None
+                    ),
                 ],
                 seperator='\n',
             ),
@@ -79,11 +81,13 @@ class BotInformation(BaseCog):
             value=better_string(
                 [
                     (
-                        f'-# [Privacy Policy]({bot.appinfo.privacy_policy_url})\n'
-                        f'-# [Terms of Service]({bot.appinfo.terms_of_service_url})'
-                    )
-                    if bot.appinfo.terms_of_service_url and bot.appinfo.privacy_policy_url
-                    else None,
+                        (
+                            f'-# [Privacy Policy]({bot.appinfo.privacy_policy_url})\n'
+                            f'-# [Terms of Service]({bot.appinfo.terms_of_service_url})'
+                        )
+                        if bot.appinfo.terms_of_service_url and bot.appinfo.privacy_policy_url
+                        else None
+                    ),
                     f'-# [Invite the bot]({discord.utils.oauth_url(bot.user.id)})',
                     '-# [Support Server](https://discord.gg/eJBG7beVhX)',
                 ],
@@ -92,6 +96,6 @@ class BotInformation(BaseCog):
         )
 
         embed.set_thumbnail(url=bot.user.avatar.url if bot.user.avatar else None)
-        embed.set_image(url=bot.user.banner if bot.user.banner else (await bot.fetch_user(bot.user.id)).banner)
+        embed.set_image(url=(bot.user.banner if bot.user.banner else (await bot.fetch_user(bot.user.id)).banner))
 
         await ctx.send(embed=embed)
