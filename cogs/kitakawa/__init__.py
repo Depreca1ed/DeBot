@@ -19,7 +19,7 @@ class KitaKawa(BaseCog, name='KitaKawa'):
     def cog_unload(self) -> None:
         self.mention_loop.cancel()
 
-    @tasks.loop(hours=6)
+    @tasks.loop(hours=4)
     async def mention_loop(self) -> None:
         ch = self.bot.get_channel(1277813689092804653)
         if ch:
