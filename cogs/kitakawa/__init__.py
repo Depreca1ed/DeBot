@@ -50,10 +50,12 @@ class KitaKawa(BaseCog, name='KitaKawa'):
 
     @tasks.loop(time=datetime.time(hour=2, tzinfo=datetime.timezone.utc))
     async def venting_purge(self) -> None:
-        ch = self.get_channel(1277890430004105329)
+        ch = self.get_channel(1295861867754819715)
         if ch:
             assert isinstance(ch, discord.TextChannel)
-            await ch.send('Venting purge timer triggered')
+            await ch.purge(limit=None)
+            msg = await ch.send("https://findahelpline.com/i/iasp")
+            await msg.pin()
 
 
 async def setup(bot: DeBot) -> None:
