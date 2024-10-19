@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import datetime
 from typing import TYPE_CHECKING
 
 import discord
@@ -15,9 +16,11 @@ if TYPE_CHECKING:
 class KitaKawa(BaseCog, name='KitaKawa'):
     def cog_load(self) -> None:
         self.mention_loop.start()
+        self.venting_purge.start()
 
     def cog_unload(self) -> None:
         self.mention_loop.cancel()
+        self.venting_purge.cencel()
 
     @tasks.loop(hours=4)
     async def mention_loop(self) -> None:
@@ -41,7 +44,16 @@ class KitaKawa(BaseCog, name='KitaKawa'):
             and payload.message_id == 1278029325765185588
         ):
             with contextlib.suppress(discord.HTTPException):
+                msg = await ch.fetch_message(payload.message_id)
+                await msg.remove_reaction(payload.emoji, payload.member)
                 await payload.member.kick(reason='Yoshimis are bad')
+
+    @tasks.loop(time=datetime.time(hour=2, tzinfo=discord.timezone.utc))
+    async def venting_purge(self) -> None:
+        ch = self.get_channel(1277890430004105329)
+        if ch:
+            assert isinstance(ch, discord.TextChannel)
+            await ch.send('Venting purge timer triggered')
 
 
 async def setup(bot: DeBot) -> None:
