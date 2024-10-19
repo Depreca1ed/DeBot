@@ -48,7 +48,7 @@ class KitaKawa(BaseCog, name='KitaKawa'):
                 await msg.remove_reaction(payload.emoji, payload.member)
                 await payload.member.kick(reason='Yoshimis are bad')
 
-    @tasks.loop(time=datetime.time(hour=2, tzinfo=discord.timezone.utc))
+    @tasks.loop(time=datetime.time(hour=2, tzinfo=datetime.timezone.utc))
     async def venting_purge(self) -> None:
         ch = self.get_channel(1277890430004105329)
         if ch:
