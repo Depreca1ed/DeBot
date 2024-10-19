@@ -20,7 +20,7 @@ class KitaKawa(BaseCog, name='KitaKawa'):
 
     def cog_unload(self) -> None:
         self.mention_loop.cancel()
-        self.venting_purge.cencel()
+        self.venting_purge.cancel()
 
     @tasks.loop(hours=4)
     async def mention_loop(self) -> None:
@@ -44,17 +44,18 @@ class KitaKawa(BaseCog, name='KitaKawa'):
             and payload.message_id == 1278029325765185588
         ):
             with contextlib.suppress(discord.HTTPException):
+                assert isinstance(ch, discord.TextChannel)
                 msg = await ch.fetch_message(payload.message_id)
                 await msg.remove_reaction(payload.emoji, payload.member)
                 await payload.member.kick(reason='Yoshimis are bad')
 
-    @tasks.loop(time=datetime.time(hour=2, tzinfo=datetime.timezone.utc))
+    @tasks.loop(time=datetime.time(hour=2, tzinfo=datetime.UTC))
     async def venting_purge(self) -> None:
-        ch = self.get_channel(1295861867754819715)
+        ch = self.bot.get_channel(1295861867754819715)
         if ch:
             assert isinstance(ch, discord.TextChannel)
             await ch.purge(limit=None)
-            msg = await ch.send("https://findahelpline.com/i/iasp")
+            msg = await ch.send('https://findahelpline.com/i/iasp')
             await msg.pin()
 
 
