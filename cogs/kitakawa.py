@@ -20,7 +20,7 @@ READ_KITAKAWA = (
     "{role}!! Why haven't you read Kitakawa yet? You fool. You worthless human being.",
     '{role}! You must read Kitakawa',
     '{role}. According to raegan, you are not worth a dime unless you read kitakawa.',
-    '{role} did you know reading kitakawa makes yourr life better?',
+    '{role} did you know reading kitakawa makes your life better?',
 )
 
 
