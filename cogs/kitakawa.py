@@ -102,10 +102,13 @@ class Kitakawa(BaseCog, name='Kitakawa'):
             await ch.purge(limit=None)
             embed = Embed(
                 title='Welcome to the venting channel.',
-                description=(
-                    'This is a safe space for anyone to talk about whatever may be troubling them. ',
-                    "We're here for you! Please be respectful and mindful towards other members",
-                    ', and always reach out to the [proper hotline](https://findahelpline.com/i/iasp) if needed. Thank you!!!',
+                description=better_string(
+                    (
+                        'This is a safe space for anyone to talk about whatever may be troubling them. ',
+                        "We're here for you! Please be respectful and mindful towards other members",
+                        ', and always reach out to the [proper hotline](https://findahelpline.com/i/iasp) if needed. Thank you!!!',
+                    ),
+                    seperator='\n',
                 ),
                 colour=0x000000,
             )
