@@ -108,7 +108,7 @@ class Kitakawa(BaseCog, name='Kitakawa'):
                         "We're here for you! Please be respectful and mindful towards other members",
                         ', and always reach out to the [proper hotline](https://findahelpline.com/i/iasp) if needed. Thank you!!!',
                     ),
-                    seperator='\n',
+                    seperator='',
                 ),
                 colour=0x000000,
             )
