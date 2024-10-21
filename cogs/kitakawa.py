@@ -81,7 +81,7 @@ class Kitakawa(BaseCog, name='Kitakawa'):
         if not role or (role and not role.members):
             return
         content = random.choice(READ_KITAKAWA)
-        content = content.replace('{role}', str(role))
+        content = content.replace('{role}', str(role.mention))
         await ch.send(
             content,
             allowed_mentions=discord.AllowedMentions.all(),
