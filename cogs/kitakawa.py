@@ -17,21 +17,21 @@ if TYPE_CHECKING:
 YOSHIMI_EMOJI = discord.PartialEmoji(name='YoshimiCreepy', animated=False, id=1277968074062168064)
 
 READ_KITAKAWA = (
-    "{role}!! Why haven't you read KitaKawa yet? You fool. You worthless human being.",
-    '{role}! You must read KitaKawa',
+    "{role}!! Why haven't you read Kitakawa yet? You fool. You worthless human being.",
+    '{role}! You must read Kitakawa',
     '{role}. According to raegan, you are not worth a dime unless you read kitakawa.',
     '{role} did you know reading kitakawa makes yourr life better?',
 )
 
 
-# Server here refers to the KitaKawa server.
+# Server here refers to the Kitakawa server.
 
 # Warning to reviewers of this code, content after this may contain sensitive topics on some parts due to the nature of the one or more features.
 # If this server doesn't involve you in any way, do not check this code or at least do not question the features. They are there as they were requested.
 # Lastly, I will ban you if you cause trouble or I dont feel comfortable with you in the server. Thank you for reading this warning :D
 
 
-class KitaKawa(BaseCog, name='KitaKawa'):
+class Kitakawa(BaseCog, name='Kitakawa'):
     def cog_load(self) -> None:
         self.mention_loop.start()
         self.venting_purge.start()
@@ -81,7 +81,7 @@ class KitaKawa(BaseCog, name='KitaKawa'):
         if not role or (role and not role.members):
             return
         content = random.choice(READ_KITAKAWA)
-        content.replace('{role}', str(role))
+        content = content.replace('{role}', str(role))
         await ch.send(
             content,
             allowed_mentions=discord.AllowedMentions.all(),
@@ -145,4 +145,4 @@ class KitaKawa(BaseCog, name='KitaKawa'):
 
 
 async def setup(bot: DeBot) -> None:
-    await bot.add_cog(KitaKawa(bot))
+    await bot.add_cog(Kitakawa(bot))
