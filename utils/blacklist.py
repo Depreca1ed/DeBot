@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, reveal_type
 
 import discord
 
@@ -93,8 +93,8 @@ class Blacklist:
             sql,
             snowflake.id,
         )
-
-        self.blacklists.pop(snowflake)
+        if snowflake in self.blacklists:
+            self.blacklists.pop(snowflake)
         return self.blacklists
 
     def __repr__(self) -> str:
