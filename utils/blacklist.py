@@ -85,8 +85,9 @@ class Blacklist:
         if not self.is_blacklisted(snowflake):
             bsql = """SELECT * FROM Blacklists WHERE snowflake = $1"""
             check = await self.bot.pool.execute(bsql, snowflake.id)
-            if not check:
-                raise NotBlacklisted(snowflake)
+            if check:
+                pass
+        raise NotBlacklisted(snowflake)
 
         sql = """DELETE FROM Blacklists WHERE snowflake = $1"""
         await self.bot.pool.execute(
