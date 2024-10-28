@@ -83,7 +83,10 @@ class Blacklist:
 
     async def remove(self, snowflake: discord.User | discord.Guild) -> dict[Snowflake, BlacklistBase]:
         if not self.is_blacklisted(snowflake):
-            raise NotBlacklisted(snowflake)
+            bsql = """SELECT * FROM Blacklists WHERE snowflake = $1"""
+            check = await self.bot.pool.execute(bsql, snowflake.id)
+            if not check:
+                raise NotBlacklisted(snowflake)
 
         sql = """DELETE FROM Blacklists WHERE snowflake = $1"""
         await self.bot.pool.execute(
