@@ -86,11 +86,9 @@ class Blacklist:
             raise NotBlacklisted(snowflake)
 
         sql = """DELETE FROM Blacklists WHERE snowflake = $1"""
-        param: str = 'user' if isinstance(snowflake, discord.User) else 'guild'
         await self.bot.pool.execute(
             sql,
             snowflake.id,
-            param,
         )
 
         self.blacklists.pop(snowflake)
