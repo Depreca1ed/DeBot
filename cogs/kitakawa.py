@@ -21,6 +21,7 @@ READ_KITAKAWA = (
     '{role}! You must read Kitakawa',
     '{role}. According to raegan, you are not worth a dime unless you read kitakawa.',
     '{role} did you know reading kitakawa makes your life better?',
+    '{role} https://tenor.com/view/satou-matsuzaka-happy-sugar-life-brown-role-brown-gif-14210576818940762055',
 )
 
 
