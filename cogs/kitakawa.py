@@ -71,7 +71,7 @@ class Kitakawa(BaseCog, name='Kitakawa'):
                 )
                 await payload.member.kick(reason='[AUTOKICK] | They choose yoshimi role.')
 
-    @tasks.loop(hours=12)
+    @tasks.loop(hours=18)
     async def mention_loop(self) -> None:
         ch = self.bot.get_channel(1277813689092804653)
         if not ch:
