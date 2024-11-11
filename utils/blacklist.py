@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, reveal_type
+from typing import TYPE_CHECKING, Literal
 
 import discord
 
