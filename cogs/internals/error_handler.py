@@ -116,7 +116,7 @@ class ErrorHandler(BaseCog):
 
         embed = Embed(
             title=error.__class__.__name__,
-            description=exc,
+            description=exc if len(exc) < 2000 else 'Error was too big for this embed.',
             url=exc_link,
             colour=0x000000,
             ctx=ctx,
