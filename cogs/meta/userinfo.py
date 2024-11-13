@@ -64,7 +64,7 @@ class Userinfo(BaseCog):
                 for perm in user.guild_permissions
                 if perm in [subperm for subperm in discord.Permissions.elevated() if subperm[1] is True] and perm[1] is True
             ]:
-                acknoledgements.append('<:discordstaff:1250444441727008850> Server Staff')
+                acknoledgements.append('Server Staff')
         embed.add_field(value=basic_user_listing)
         if acknoledgements:
             embed.add_field(name='Acknowledgements', value='\n'.join(acknoledgements), inline=False)
