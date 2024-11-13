@@ -72,7 +72,7 @@ class ErrorHandler(BaseCog):
             )
             embed = Embed(
                 ctx=ctx,
-                title='<:redTick:1237048136527249510> | Missing argument',
+                title='Missing argument',
                 description=content,
                 colour=0xFF0000,
             )
@@ -87,7 +87,7 @@ class ErrorHandler(BaseCog):
             )
             embed = Embed(
                 ctx=ctx,
-                title='<:redTick:1237048136527249510> | Missing Permissions',
+                title='Missing Permissions',
                 description=content,
                 colour=0xFF0000,
             )
@@ -96,7 +96,7 @@ class ErrorHandler(BaseCog):
             return await ctx.send(
                 embed=Embed(
                     ctx=ctx,
-                    title='<:status_dnd:1237048172174643200> | Cannot run command',
+                    title='Cannot run command',
                     description=f'{error_messages[type(error)]}',
                     colour=0xFF0000,
                 ),
