@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "ms-python.black-formatter",
-        "ms-python.isort"
+        "charliermarsh.ruff"
     ]
 }
