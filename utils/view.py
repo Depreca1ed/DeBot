@@ -16,6 +16,8 @@ if TYPE_CHECKING:
 
 __all__ = ('BaseView',)
 
+CHAR_LIMIT = 2000
+
 
 class BaseView(discord.ui.View):
     message: discord.Message
@@ -41,7 +43,7 @@ class BaseView(discord.ui.View):
                     mystbin.File(filename='error', content=exc),
                 ],
             )
-            if len(exc) > 2000
+            if len(exc) > CHAR_LIMIT
             else None
         )
 

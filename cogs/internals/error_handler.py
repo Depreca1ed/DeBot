@@ -8,15 +8,17 @@ from discord.ext import commands
 
 from utils import (
     BaseCog,
-    BlacklistedGuild,
-    BlacklistedUser,
+    BlacklistedGuildError,
+    BlacklistedUserError,
     DeBotError,
     DeContext,
     Embed,
-    FeatureDisabled,
-    UnderMaintenance,
+    FeatureDisabledError,
+    UnderMaintenanceError,
     better_string,
 )
+
+CHAR_LIMIT = 2000
 
 
 class ErrorHandler(BaseCog):
@@ -27,7 +29,7 @@ class ErrorHandler(BaseCog):
         )
 
     @commands.Cog.listener('on_command_error')
-    async def error_handler(self, ctx: DeContext, error: commands.CommandError) -> None | discord.Message:
+    async def error_handler(self, ctx: DeContext, error: commands.CommandError) -> None | discord.Message:  # noqa: PLR0911
         error_messages = {
             commands.NoPrivateMessage: 'This command cannot be used in DMs',
             commands.NotOwner: 'You cannot run this command. This command is reserved for the developers of the bot.',
@@ -41,28 +43,28 @@ class ErrorHandler(BaseCog):
         if (
             not ctx.command
             or hasattr(ctx.command, 'on_error')
-            or (ctx.cog and ctx.cog._get_overridden_method(ctx.cog.cog_command_error))
+            or (ctx.cog and ctx.cog._get_overridden_method(ctx.cog.cog_command_error))  # noqa: SLF001
         ):
             return None
-        elif isinstance(error, DeBotError):
-            if (isinstance(ctx.channel, discord.DMChannel) and isinstance(error, BlacklistedUser)) or isinstance(
+        if isinstance(error, DeBotError):
+            if (isinstance(ctx.channel, discord.DMChannel) and isinstance(error, BlacklistedUserError)) or isinstance(
                 error,
-                UnderMaintenance | FeatureDisabled,
+                UnderMaintenanceError | FeatureDisabledError,
             ):
                 await ctx.reply(content=str(error))
 
-            elif ctx.guild and isinstance(error, BlacklistedGuild):
+            elif ctx.guild and isinstance(error, BlacklistedGuildError):
                 await ctx.guild.leave()
 
             return None
 
-        elif isinstance(error, commands.CommandOnCooldown):
+        if isinstance(error, commands.CommandOnCooldown):
             return await ctx.send(
                 f'Command on cooldown! You can use this command after {error.retry_after:.2f} seconds.',
                 delete_after=error.retry_after,
             )
 
-        elif isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, commands.MissingRequiredArgument):
             content = better_string(
                 (
                     f'You did not provide a {error.param.name} argument.',
@@ -77,10 +79,11 @@ class ErrorHandler(BaseCog):
                 colour=0xFF0000,
             )
             return await ctx.send(embed=embed)
-        elif isinstance(error, commands.MissingPermissions | commands.BotMissingPermissions):
+        if isinstance(error, commands.MissingPermissions | commands.BotMissingPermissions):
+            person = 'You' if isinstance(error, commands.MissingPermissions) else 'I'
             content = better_string(
                 (
-                    f'{"You" if isinstance(error, commands.MissingPermissions) else "I"} are missing the following permissions to run this command:',
+                    f'{person} are missing the following permissions to run this command:',
                     self.clean_error_permission(list(error.missing_permissions), seperator='\n', prefix='- '),
                 ),
                 seperator='\n',
@@ -92,7 +95,7 @@ class ErrorHandler(BaseCog):
                 colour=0xFF0000,
             )
             return await ctx.reply(embed=embed)
-        elif isinstance(error, tuple(error_messages.keys())):
+        if isinstance(error, tuple(error_messages.keys())):
             return await ctx.send(
                 embed=Embed(
                     ctx=ctx,
@@ -110,13 +113,13 @@ class ErrorHandler(BaseCog):
                     mystbin.File(filename='error', content=exc),
                 ],
             )
-            if len(exc) > 2000
+            if len(exc) > CHAR_LIMIT
             else None
         )
 
         embed = Embed(
             title=error.__class__.__name__,
-            description=exc if len(exc) < 2000 else 'Error was too big for this embed.',
+            description=exc if len(exc) < CHAR_LIMIT else 'Error was too big for this embed.',
             url=exc_link,
             colour=0x000000,
             ctx=ctx,

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Self
 
 import discord
 
-from .config import THEME_COLOUR
+from . import THEME_COLOUR
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

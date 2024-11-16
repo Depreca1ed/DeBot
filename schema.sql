@@ -38,3 +38,4 @@ CREATE TABLE IF NOT EXISTS Waifus (
 );
 
 COMMIT;
+

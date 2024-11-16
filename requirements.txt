@@ -15,3 +15,4 @@ topggpy
 pyright
 pillow
 importlib_metadata
+configparser

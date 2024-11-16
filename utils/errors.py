@@ -10,15 +10,15 @@ if TYPE_CHECKING:
     import discord
 
 __all__ = (
-    'BlacklistedGuild',
-    'BlacklistedUser',
-    'FeatureDisabled',
-    'AlreadyBlacklisted',
-    'PrefixAlreadyPresent',
-    'PrefixNotInitialised',
-    'PrefixNotPresent',
-    'NotBlacklisted',
-    'UnderMaintenance',
+    'BlacklistedGuildError',
+    'BlacklistedUserError',
+    'FeatureDisabledError',
+    'AlreadyBlacklistedError',
+    'PrefixAlreadyPresentError',
+    'PrefixNotInitialisedError',
+    'PrefixNotPresentError',
+    'NotBlacklistedError',
+    'UnderMaintenanceError',
     'DeBotError',
 )
 
@@ -26,27 +26,27 @@ __all__ = (
 class DeBotError(Exception): ...
 
 
-class FeatureDisabled(commands.CheckFailure, DeBotError):
+class FeatureDisabledError(commands.CheckFailure, DeBotError):
     def __init__(self) -> None:
         super().__init__('This feature is not enabled in this server.')
 
 
-class PrefixNotInitialised(commands.CommandError, DeBotError):
+class PrefixNotInitialisedError(commands.CommandError, DeBotError):
     def __init__(self, guild: discord.Guild) -> None:
         super().__init__(f'Prefixes were not initialised for {guild.id}')
 
 
-class PrefixAlreadyPresent(commands.CommandError, DeBotError):
+class PrefixAlreadyPresentError(commands.CommandError, DeBotError):
     def __init__(self, prefix: str) -> None:
         super().__init__(f"'{prefix} is an already present prefix.'")
 
 
-class PrefixNotPresent(commands.CommandError, DeBotError):
+class PrefixNotPresentError(commands.CommandError, DeBotError):
     def __init__(self, prefix: str, guild: discord.Guild) -> None:
         super().__init__(f'{prefix} is not present in guild: {guild.id}')
 
 
-class BlacklistedUser(commands.CheckFailure, DeBotError):
+class BlacklistedUserError(commands.CheckFailure, DeBotError):
     def __init__(
         self,
         snowflake: discord.User | discord.Member,
@@ -56,12 +56,12 @@ class BlacklistedUser(commands.CheckFailure, DeBotError):
         super().__init__(f'{snowflake} is blacklisted for {reason} until {until}')
 
 
-class BlacklistedGuild(commands.CheckFailure, DeBotError):
+class BlacklistedGuildError(commands.CheckFailure, DeBotError):
     def __init__(self, snowflake: discord.Guild, reason: str, until: datetime | None) -> None:
         super().__init__(f'{snowflake} is blacklisted for {reason} until {until}')
 
 
-class AlreadyBlacklisted(commands.CommandError, DeBotError):
+class AlreadyBlacklistedError(commands.CommandError, DeBotError):
     def __init__(
         self,
         snowflake: discord.User | discord.Guild,
@@ -71,14 +71,14 @@ class AlreadyBlacklisted(commands.CommandError, DeBotError):
         super().__init__(f'{snowflake} is already blacklisted for {reason} until {until}')
 
 
-class NotBlacklisted(commands.CommandError, DeBotError):
+class NotBlacklistedError(commands.CommandError, DeBotError):
     def __init__(self, snowflake: discord.User | discord.Guild) -> None:
         super().__init__(f'{snowflake} is not blacklisted.')
 
 
-class UnderMaintenance(commands.CheckFailure, DeBotError):
+class UnderMaintenanceError(commands.CheckFailure, DeBotError):
     def __init__(self) -> None:
         super().__init__('The bot is currently under maintenance.')
 
 
-# TODO(Depreca1ed): All of these are not supposed to be commands.CommandError. Change them to actual errors which mostly likely suit their use case
+# TODO(Depreca1ed): All of these are not supposed to be CommandError. Change them to actual errors  # noqa: FIX002, TD003

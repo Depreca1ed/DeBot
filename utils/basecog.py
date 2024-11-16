@@ -7,6 +7,8 @@ from discord.ext import commands
 if TYPE_CHECKING:
     from bot import DeBot
 
+__all__ = ('BaseCog',)
+
 
 class BaseCog(commands.Cog):
     bot: DeBot
