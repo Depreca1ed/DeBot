@@ -30,6 +30,11 @@ class ActivityHandler:
         return self.activity(activity)
 
     def streaming(self, activity: discord.Streaming) -> str:
+        duration = (
+            humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - activity.created_at.timestamp())
+            if activity.created_at
+            else None
+        )
         return better_string(
             [
                 'Streaming',
@@ -43,25 +48,22 @@ class ActivityHandler:
                 ),
                 f'on `{activity.platform}`' if activity.platform else None,
                 f'as **{activity.twitch_name}**' if activity.twitch_name else None,
-                (
-                    f'since **{humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - activity.created_at.timestamp())}**'
-                    if activity.created_at
-                    else None
-                ),
+                (f'since **{duration}**' if duration else None),
             ],
             seperator=' ',
         )
 
     def game(self, activity: discord.Game) -> str:
+        duration = (
+            humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - activity.created_at.timestamp())
+            if activity.created_at
+            else None
+        )
         return better_string(
             [
                 f'Playing **{activity.name}**',
                 f'on `{activity.platform}`' if activity.platform else None,
-                (
-                    f'since **{humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - activity.created_at.timestamp())}**'
-                    if activity.created_at
-                    else None
-                ),
+                (f'since **{duration}**' if duration else None),
             ],
             seperator=' ',
         )
@@ -78,11 +80,14 @@ class ActivityHandler:
         )
 
     def activity(self, activity: discord.BaseActivity) -> str:
-        assert isinstance(
-            activity,
-            discord.Activity,
-        )
+        if not isinstance(activity, discord.Activity):
+            return 'Activity is not discord.Activity I guess???'  # NOTE: WHAT THE FUCK AM I SUPPOSED TO DO HERE?????
         instance_datetime = activity.start or activity.created_at
+        duration = (
+            humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - (instance_datetime.timestamp()))
+            if instance_datetime
+            else ''
+        )
         return better_string(
             [
                 f'{activity.type.name.title()}',
@@ -93,11 +98,7 @@ class ActivityHandler:
                     if activity.name
                     else None
                 ),
-                (
-                    f'since **{humanize.naturaldelta(datetime.datetime.now(datetime.UTC).timestamp() - (instance_datetime.timestamp()))}**'
-                    if (instance_datetime)
-                    else ''
-                ),
+                (duration),
             ],
             seperator=' ',
         )

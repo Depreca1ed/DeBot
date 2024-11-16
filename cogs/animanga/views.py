@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Self, cast
 import discord
 from asyncpg.exceptions import UniqueViolationError
 
-from utils import WAIFU_TOKEN, BaseView, DeContext, Embed, Image, better_string
+from utils import BaseView, DeContext, Embed, Image, better_string
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
@@ -21,12 +21,13 @@ class SmashOrPass(BaseView):
     message: discord.Message
     current: Image
 
-    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool, source: str) -> None:
+    def __init__(self, token: str, session: ClientSession, *, for_user: int, nsfw: bool, source: str) -> None:
         super().__init__(timeout=500.0)
         self.session = session
         self.for_user = for_user
         self.nsfw = nsfw
         self.source = source
+        self.token = token
 
         self.smashers: set[discord.User | discord.Member] = set()
         self.passers: set[discord.User | discord.Member] = set()
@@ -34,6 +35,7 @@ class SmashOrPass(BaseView):
     @classmethod
     async def start(cls, ctx: DeContext, source: str) -> Self:
         inst = cls(
+            ctx.bot.config.get('bot', 'waifu'),
             ctx.bot.session,
             for_user=ctx.author.id,
             nsfw=(ctx.channel.nsfw if isinstance(ctx.channel, discord.TextChannel) else False),
@@ -83,7 +85,7 @@ class SmashOrPass(BaseView):
                     self.current['url'],
                     interaction.user.id,
                     interaction.channel.is_nsfw(),
-                    datetime.datetime.now(),
+                    datetime.datetime.now(tz=datetime.UTC),
                 )
             except UniqueViolationError:
                 return await interaction.response.send_message(
@@ -100,7 +102,16 @@ class SmashOrPass(BaseView):
 
         self.smashers.add(interaction.user)
         await interaction.client.pool.execute(
-            """INSERT INTO Waifus (id, smashes, nsfw, type) VALUES ($1, 1, $2, $3) ON CONFLICT(id, type) DO UPDATE SET smashes = Waifus.smashes + 1""",
+            """
+                INSERT INTO
+                    Waifus (id, smashes, nsfw, type)
+                VALUES
+                    ($1, 1, $2, $3)
+                ON CONFLICT (id, type) DO
+                UPDATE
+                SET
+                    smashes = Waifus.smashes + 1
+            """,
             self.current['image_id'],
             self.nsfw,
             self.source,
@@ -121,7 +132,16 @@ class SmashOrPass(BaseView):
 
         self.passers.add(interaction.user)
         await interaction.client.pool.execute(
-            """INSERT INTO Waifus (id, passes, nsfw, type) VALUES ($1, 1, $2, $3) ON CONFLICT(id, type) DO UPDATE SET passes = Waifus.passes + 1""",
+            """
+                INSERT INTO
+                    Waifus (id, passes, nsfw, type)
+                VALUES
+                    ($1, 1, $2, $3)
+                ON CONFLICT (id, type) DO
+                UPDATE
+                SET
+                    passes = Waifus.passes + 1
+                """,
             self.current['image_id'],
             self.nsfw,
             self.source,
@@ -165,7 +185,7 @@ class WaifuView(SmashOrPass):
             'https://api.waifu.im/search',
             params={
                 'is_nsfw': 'false' if self.nsfw is False else 'null',
-                'token': WAIFU_TOKEN,
+                'token': self.token,
             },
         )
 

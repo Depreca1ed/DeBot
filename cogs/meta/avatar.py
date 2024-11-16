@@ -42,7 +42,7 @@ class Avatar(BaseCog):
     @avatar.command(
         name='show',
         help=avatar.help,
-    )  # This is supposed to basically be the slash for avatar command since group base are not really created as a slash command
+    )  # This is supposed to basically be the slash for avatar command since group base are not really created as a slash
     async def avatar_slash(self, ctx: DeContext, user: discord.User | discord.Member | None) -> discord.Message:
         return await ctx.invoke(self.avatar, user)
 
@@ -75,7 +75,9 @@ class Avatar(BaseCog):
     @app_commands.allowed_installs(guilds=True, users=False)
     @commands.guild_only()
     async def guild_avatar(self, ctx: DeContext) -> discord.Message:
-        assert ctx.guild is not None
+        if not ctx.guild:
+            msg = 'Guild not found'
+            raise commands.GuildNotFound(msg)
         icon = ctx.guild.icon
         if not icon:
             return await ctx.reply(content=f'{commands.clean_content().convert(ctx, str(ctx.guild))} does not have an icon.')

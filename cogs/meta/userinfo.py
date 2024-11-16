@@ -22,33 +22,38 @@ class Userinfo(BaseCog):
             colour=user.colour if user.colour != discord.Colour.default() else None,
             ctx=ctx,
         )
-
+        name = (
+            f'{user.global_name or user.name}' + ' ' + f'({user.nick} in {user.guild.name})'
+            if isinstance(user, discord.Member) and user.nick and user.guild.name
+            else ''
+        )
         embed.set_author(
-            name=f"{user.global_name or user.name} {f'({user.nick} in {user.guild.name})' if isinstance(user, discord.Member) and user.nick and user.guild.name else ''}",
+            name=name,
             icon_url=user.avatar.url if user.avatar else user.default_avatar.url,
         )
 
         basic_user_listing = better_string(
             [
                 f'- **ID:** {user.id}',
-                f"- **Created:** {discord.utils.format_dt(user.created_at, 'D')} ({discord.utils.format_dt(user.created_at, 'R')})",
+                f"- **Created:** {discord.utils.format_dt(user.created_at, 'D')} ({discord.utils.format_dt(user.created_at, 'R')})",  # noqa: E501 # Im gonna kill myself
             ],
             seperator='\n',
         )
-
+        base_shown_count = 5
         acknoledgements: list[str] = []
         if isinstance(user, discord.Member):
             valid_roles = [role.mention for role in user.roles if role is not user.guild.default_role]
             valid_roles.reverse()
+
             member_listing = better_string(
                 [
                     (
-                        f"- **Joined:** {discord.utils.format_dt(user.joined_at, 'D')} ({discord.utils.format_dt(user.joined_at, 'R')})"
+                        f"- **Joined:** {discord.utils.format_dt(user.joined_at, 'D')} ({discord.utils.format_dt(user.joined_at, 'R')})"  # noqa: E501
                         if user.joined_at
                         else None
                     ),
                     (
-                        f"- **Roles: ** {', '.join(valid_roles) if len(valid_roles) <= 5 else ', '.join(valid_roles[:5]) + f' + {len(valid_roles)-5} roles'}"
+                        f"- **Roles: ** {', '.join(valid_roles) if len(valid_roles) <= base_shown_count else ', '.join(valid_roles[:5]) + f' + {len(valid_roles)-base_shown_count} roles'}"  # noqa: E501
                         if valid_roles
                         else None
                     ),
@@ -57,7 +62,7 @@ class Userinfo(BaseCog):
             )
             basic_user_listing += f'\n{member_listing}'
             for message in ActivityHandler.status_message_generator(user.activities):
-                if len(embed.fields) <= 5:
+                if len(embed.fields) <= base_shown_count:
                     embed.add_field(value=message)
             if [r for r in user.roles if r] and [
                 perm

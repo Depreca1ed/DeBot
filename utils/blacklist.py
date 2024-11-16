@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Literal
 import discord
 
 from .errors import (
-    AlreadyBlacklisted,
-    BlacklistedGuild,
-    BlacklistedUser,
-    NotBlacklisted,
+    AlreadyBlacklistedError,
+    BlacklistedGuildError,
+    BlacklistedUserError,
+    NotBlacklistedError,
 )
 
 __all__ = ('Blacklist',)
@@ -34,13 +34,13 @@ class Blacklist:
 
     async def check(self, ctx: DeContext) -> Literal[True]:
         if ctx.guild and self.is_blacklisted(ctx.guild):
-            raise BlacklistedGuild(
+            raise BlacklistedGuildError(
                 ctx.guild,
                 reason=self.blacklists[ctx.guild]['reason'],
                 until=self.blacklists[ctx.guild]['lasts_until'],
             )
         if ctx.author and self.is_blacklisted(ctx.author):
-            raise BlacklistedUser(
+            raise BlacklistedUserError(
                 ctx.author,
                 reason=self.blacklists[ctx.author]['reason'],
                 until=self.blacklists[ctx.author]['lasts_until'],
@@ -59,7 +59,7 @@ class Blacklist:
         lasts_until: datetime.datetime | None = None,
     ) -> dict[Snowflake, BlacklistBase]:
         if self.is_blacklisted(snowflake):
-            raise AlreadyBlacklisted(
+            raise AlreadyBlacklistedError(
                 snowflake,
                 reason=self.blacklists[snowflake]['reason'],
                 until=self.blacklists[snowflake]['lasts_until'],
@@ -87,7 +87,7 @@ class Blacklist:
             check = await self.bot.pool.execute(bsql, snowflake.id)
             if check:
                 pass
-        raise NotBlacklisted(snowflake)
+            raise NotBlacklistedError(snowflake)
 
         sql = """DELETE FROM Blacklists WHERE snowflake = $1"""
         await self.bot.pool.execute(

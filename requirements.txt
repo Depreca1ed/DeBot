@@ -16,3 +16,4 @@ pyright
 pillow
 importlib_metadata
 pre-commit
+configparser

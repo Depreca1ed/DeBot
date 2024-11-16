@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import configparser
 import datetime
 import functools
 import logging
@@ -17,18 +18,15 @@ from discord.ext import commands
 
 from utils import (
     BASE_PREFIX,
-    BOT_TOKEN,
     DESCRIPTION,
     OWNERS_ID,
-    POSTGRES_CREDENTIALS,
     THEME_COLOUR,
-    WEBHOOK_URL,
     Blacklist,
     DeContext,
-    PrefixAlreadyPresent,
-    PrefixNotInitialised,
-    PrefixNotPresent,
-    UnderMaintenance,
+    PrefixAlreadyPresentError,
+    PrefixNotInitialisedError,
+    PrefixNotPresentError,
+    UnderMaintenanceError,
 )
 
 if TYPE_CHECKING:
@@ -43,6 +41,7 @@ jishaku.Flags.FORCE_PAGINATOR = True
 jishaku.Flags.HIDE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
 jishaku.Flags.NO_UNDERSCORE = True
+
 
 EXTERNAL_COGS: list[str] = ['jishaku']
 
@@ -63,7 +62,7 @@ class DeBot(commands.Bot):
     appinfo: discord.AppInfo
     log = log
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self) -> None:
         intents: discord.Intents = discord.Intents.all()
         super().__init__(
             description=DESCRIPTION,
@@ -73,13 +72,11 @@ class DeBot(commands.Bot):
             intents=intents,
             max_messages=5000,
             allowed_mentions=discord.AllowedMentions(everyone=False, users=True, roles=False, replied_user=True),
-            *args,
-            **kwargs,
         )
-        self.token = BOT_TOKEN
+        self.token = str(self.config.get('bot', 'token'))
         self.session = aiohttp.ClientSession()
         self.mystbin_cli = mystbin.Client()
-        self.load_time = datetime.datetime.now()
+        self.load_time = datetime.datetime.now(tz=datetime.UTC)
         self.prefixes: dict[int, list[str]] = {}
         self.blacklist = Blacklist(self)
         self.maintenance = False
@@ -107,7 +104,7 @@ class DeBot(commands.Bot):
 
     async def add_prefix(self, guild: discord.Guild, prefix: str) -> list[str]:
         if prefix in self.prefix:
-            raise PrefixAlreadyPresent(prefix)
+            raise PrefixAlreadyPresentError(prefix)
 
         await self.pool.execute("""INSERT INTO Prefixes VALUES ($1, $2)""", guild.id, prefix)
         if not self.prefixes.get(guild.id):
@@ -119,10 +116,10 @@ class DeBot(commands.Bot):
 
     async def remove_prefix(self, guild: discord.Guild, prefix: str) -> list[str] | None:
         if not self.prefixes.get(guild.id):
-            raise PrefixNotInitialised(guild)
+            raise PrefixNotInitialisedError(guild)
 
         if prefix not in self.prefixes[guild.id]:
-            raise PrefixNotPresent(prefix, guild)
+            raise PrefixNotPresentError(prefix, guild)
 
         await self.pool.execute(
             """DELETE FROM Prefixes WHERE guild = $1 AND prefix = $2""",
@@ -137,7 +134,7 @@ class DeBot(commands.Bot):
 
     async def clear_prefix(self, guild: discord.Guild) -> None:
         if not self.prefixes.get(guild.id):
-            raise PrefixNotInitialised(guild)
+            raise PrefixNotInitialisedError(guild)
 
         await self.pool.execute("""DELETE FROM Prefixes WHERE guild = $1""", guild.id)
 
@@ -145,14 +142,21 @@ class DeBot(commands.Bot):
 
     async def check_maintenance(self, ctx: commands.Context[Self]) -> Literal[True]:
         if self.maintenance is True and not await self.is_owner(ctx.author):
-            raise UnderMaintenance
+            raise UnderMaintenanceError
         return True
 
     async def setup_hook(self) -> None:
-        credentials: dict[str, Any] = POSTGRES_CREDENTIALS
+        credentials: dict[str, Any] = {
+            'user': str(self.config.get('database', 'user')),
+            'password': str(self.config.get('database', 'password')),
+            'database': str(self.config.get('database', 'database')),
+            'host': str(self.config.get('database', 'host')),
+            'port': str(self.config.get('database', 'port')),
+        }
         pool: asyncpg.Pool[asyncpg.Record] | None = await asyncpg.create_pool(**credentials)
-        if not pool or pool and pool._closed:
-            raise RuntimeError('Pool is closed')  # noqa: EM101, TRY003
+        if not pool or pool and pool.is_closing():
+            msg = 'Pool is closed'
+            raise RuntimeError(msg)
         self.pool = pool
 
         with Path('schema.sql').open(encoding='utf-8') as f:  # noqa: ASYNC230
@@ -191,24 +195,34 @@ class DeBot(commands.Bot):
             cls = DeContext  # pyright: ignore[reportAssignmentType]
         return await super().get_context(origin, cls=cls)
 
+    @property
+    def config(self) -> configparser.ConfigParser:
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        return config
+
     @discord.utils.copy_doc(commands.Bot.is_owner)
     async def is_owner(self, user: discord.abc.User) -> bool:
         return bool(user.id in OWNERS_ID)
 
     @functools.cached_property
     def logger_webhook(self) -> discord.Webhook:
-        return discord.Webhook.from_url(WEBHOOK_URL, session=self.session, bot_token=self.token)
+        return discord.Webhook.from_url(str(self.config.get('bot', 'webhook')), session=self.session, bot_token=self.token)
 
     @property
     def guild(self) -> discord.Guild:
         guild = self.get_guild(1262409199552430170)
-        assert guild is not None
+        if not guild:
+            msg = 'Support server not found'
+            raise commands.GuildNotFound(msg)
         return guild
 
     @property
     def user(self) -> discord.ClientUser:
         user = super().user
-        assert user is not None
+        if not user:
+            msg = "Bot's user not found"
+            raise commands.UserNotFound(msg)
         return user
 
     async def close(self) -> None:

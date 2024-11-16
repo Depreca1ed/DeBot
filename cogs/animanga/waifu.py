@@ -36,10 +36,17 @@ class Waifu(BaseCog):
     async def waifu_show(self, ctx: DeContext) -> None:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
         try:
-            view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='waifu')
+            view = WaifuView(
+                ctx.bot.config.get('bot', 'waifu'),
+                self.bot.session,
+                for_user=ctx.author.id,
+                nsfw=False,
+                source='waifu',
+            )
             await view.start(ctx, 'waifu')
         except KeyError:
             view = WaifuViewBackup(
+                ctx.bot.config.get('bot', 'waifu'),
                 self.bot.session,
                 for_user=ctx.author.id,
                 nsfw=ctx.channel.is_nsfw(),
@@ -51,5 +58,11 @@ class Waifu(BaseCog):
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def pokemon(self, ctx: DeContext) -> None:
-        view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=False, source='pokemon')
+        view = SafebooruPokemonView(
+            ctx.bot.config.get('bot', 'waifu'),
+            self.bot.session,
+            for_user=ctx.author.id,
+            nsfw=False,
+            source='pokemon',
+        )
         await view.start(ctx, 'pokemon')
