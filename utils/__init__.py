@@ -4,16 +4,16 @@ from .config import BASE_PREFIX, DESCRIPTION, OWNERS_ID, THEME_COLOUR
 from .context import DeContext
 from .embed import Embed
 from .errors import (
-                     AlreadyBlacklistedError,
-                     BlacklistedGuildError,
-                     BlacklistedUserError,
-                     DeBotError,
-                     FeatureDisabledError,
-                     NotBlacklistedError,
-                     PrefixAlreadyPresentError,
-                     PrefixNotInitialisedError,
-                     PrefixNotPresentError,
-                     UnderMaintenanceError,
+    AlreadyBlacklistedError,
+    BlacklistedGuildError,
+    BlacklistedUserError,
+    DeBotError,
+    FeatureDisabledError,
+    NotBlacklistedError,
+    PrefixAlreadyPresentError,
+    PrefixNotInitialisedError,
+    PrefixNotPresentError,
+    UnderMaintenanceError,
 )
 from .helper_functions import ActivityHandler, better_string
 from .types import BlacklistBase, Image
