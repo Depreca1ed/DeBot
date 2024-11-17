@@ -52,3 +52,12 @@ WEBHOOK_URL = '' # The link to the webhook you wish for the bot to send all its 
 > Yes I tend to put everything which feels even slightly similar to being a constant value in a config.py file. Just something I prefer to be more comfortable with I suppose
 
 - After setting up all of the above, you can run the bot by running the `__main__.py` file. 
+
+If you are collaborating...
+===========================
+Run the below after installing the dependencies to activate auto-formatting pre-commit hooks:
+```sh
+pre-commit install
+```
+
+- After setting up all of the above, you can run the bot by running the `__main__.py` file.
