@@ -23,9 +23,13 @@ class Userinfo(BaseCog):
             ctx=ctx,
         )
         name = (
-            f'{user.global_name or user.name}' + ' ' + f'({user.nick} in {user.guild.name})'
-            if isinstance(user, discord.Member) and user.nick and user.guild.name
-            else ''
+            f'{user.global_name or user.name}'
+            + ' '
+            + (
+                f'({user.nick} in {user.guild.name})'
+                if isinstance(user, discord.Member) and user.nick and user.guild.name
+                else ''
+            )
         )
         embed.set_author(
             name=name,
