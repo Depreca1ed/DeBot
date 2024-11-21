@@ -40,7 +40,7 @@ class Waifu(BaseCog):
                 ctx.bot.config.get('bot', 'waifu'),
                 self.bot.session,
                 for_user=ctx.author.id,
-                nsfw=False,
+                nsfw=ctx.channel.is_nsfw(),
                 source='waifu',
             )
             await view.start(ctx, 'waifu')
@@ -58,11 +58,12 @@ class Waifu(BaseCog):
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
     async def pokemon(self, ctx: DeContext) -> None:
+        ctx.channel = cast(discord.TextChannel, ctx.channel)
         view = SafebooruPokemonView(
             ctx.bot.config.get('bot', 'waifu'),
             self.bot.session,
             for_user=ctx.author.id,
-            nsfw=False,
+            nsfw=ctx.channel.is_nsfw(),
             source='pokemon',
         )
         await view.start(ctx, 'pokemon')

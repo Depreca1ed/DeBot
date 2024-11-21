@@ -222,7 +222,7 @@ class WaifuViewBackup(SmashOrPass):
 class SafebooruPokemonView(SmashOrPass):
     async def request(self) -> Image:
         waifu = await self.session.get(
-            'https://safebooru.donmai.us/posts/random.json?tags=solo+pokemon_(creature)',
+                f'https://safebooru.donmai.us/posts/random.json?tags=solo+pokemon_(creature)+rating:{"e,q,s" if self.nsfw is True else "g"}',
         )
         data = await waifu.json()
         current: Image = {
