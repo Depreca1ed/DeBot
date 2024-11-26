@@ -22,14 +22,10 @@ class Userinfo(BaseCog):
             colour=user.colour if user.colour != discord.Colour.default() else None,
             ctx=ctx,
         )
-        name = (
-            f'{user.global_name or user.name}'
-            + ' '
-            + (
-                f'({user.nick} in {user.guild.name})'
-                if isinstance(user, discord.Member) and user.nick and user.guild.name
-                else ''
-            )
+        name = f'{user.global_name or user.name} ' + (
+            f'({user.nick} in {user.guild.name})'
+            if isinstance(user, discord.Member) and user.nick and user.guild.name
+            else ''
         )
         embed.set_author(
             name=name,
