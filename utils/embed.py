@@ -15,7 +15,7 @@ __all__ = ('Embed',)
 
 
 class Embed(discord.Embed):
-    """Main purpose is to get the usual setup of Embed for a command or an error embed"""
+    """Main purpose is to get the usual setup of Embed for a command or an error embed."""
 
     def __init__(
         self,
