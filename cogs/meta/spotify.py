@@ -56,4 +56,4 @@ class Spotify(BaseCog):
         act = [a for a in user.activities if isinstance(a, discord.Spotify)][0]
         actimg = await (await ctx.bot.session.get(act.album_cover_url)).read()
         x = await spotify_img(act, ctx.bot, actimg)
-        await ctx.reply(file=discord.File(fp=x, filename="file.png")
+        await ctx.reply(file=discord.File(fp=x, filename="file.png"))
