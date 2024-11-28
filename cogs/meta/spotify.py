@@ -17,7 +17,7 @@ from utils import BaseCog
 
 
 @executor_function
-async def spotify_img(activity: discord.Spotify, bot: DeBot, d)->discord.File:
+async def spotify_img(activity: discord.Spotify, bot: DeBot, d):
     act = activity
     spim = Image.open(BytesIO(d)).resize((512,512))
     x=spim.resize((1,1)).getpixel((0,0))
@@ -47,13 +47,13 @@ async def spotify_img(activity: discord.Spotify, bot: DeBot, d)->discord.File:
     buffer = BytesIO()
     im.save(buffer, 'png')
     buffer.seek(0)
-    return discord.File(fp=buffer, filename='file.png')
+    return buffer
 
 class Spotify(BaseCog):
     @commands.command(name='spotify')
     async def spotify(self, ctx: DeContext, user: discord.Member=None) -> None:
         user = user or ctx.author
         act = [a for a in user.activities if isinstance(a, discord.Spotify)][0]
-        actimg = await (await ctx.bot.session.get(act.album_cover_url)).read() 
+        actimg = await (await ctx.bot.session.get(act.album_cover_url)).read()
         x = await spotify_img(act, ctx.bot, actimg)
-        await ctx.reply(file=x)
+        await ctx.reply(file=discord.File(fp=x, filename="file.png")
