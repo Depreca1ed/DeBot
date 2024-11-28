@@ -17,7 +17,7 @@ from utils import BaseCog
 
 
 @executor_function
-async def spotify_img(activity: discord.Spotify, bot: DeBot, d):
+def spotify_img(activity: discord.Spotify, bot: DeBot, d):
     act = activity
     spim = Image.open(BytesIO(d)).resize((512,512))
     x=spim.resize((1,1)).getpixel((0,0))
