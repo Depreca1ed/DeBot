@@ -10,16 +10,16 @@ if TYPE_CHECKING:
     import discord
 
 __all__ = (
+    'AlreadyBlacklistedError',
     'BlacklistedGuildError',
     'BlacklistedUserError',
+    'DeBotError',
     'FeatureDisabledError',
-    'AlreadyBlacklistedError',
+    'NotBlacklistedError',
     'PrefixAlreadyPresentError',
     'PrefixNotInitialisedError',
     'PrefixNotPresentError',
-    'NotBlacklistedError',
     'UnderMaintenanceError',
-    'DeBotError',
 )
 
 

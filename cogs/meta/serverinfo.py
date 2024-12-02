@@ -50,8 +50,8 @@ class ServerInfo(BaseCog):
                     (
                         better_string(
                             [
-                                f"- **Roles: ** {', '.join(valid_roles) if len(valid_roles) <= base_show_count else ', '.join(valid_roles[:3]) + f' + {len(valid_roles)-base_show_count} roles'}",  # noqa: E501
-                                f"- **Emojis: ** {' '.join(emojis) if len(emojis) <= base_show_count else ' '.join(emojis[:3]) + f' + {len(emojis)-3} emojis'} (`{len(guild.emojis)}/{guild.emoji_limit}`)",  # noqa: E501
+                                f"- **Roles: ** {', '.join(valid_roles) if len(valid_roles) <= base_show_count else ', '.join(valid_roles[:3]) + f' + {len(valid_roles) - base_show_count} roles'}",  # noqa: E501
+                                f"- **Emojis: ** {' '.join(emojis) if len(emojis) <= base_show_count else ' '.join(emojis[:3]) + f' + {len(emojis) - 3} emojis'} (`{len(guild.emojis)}/{guild.emoji_limit}`)",  # noqa: E501
                             ],
                             seperator='\n',
                         )
@@ -68,7 +68,7 @@ class ServerInfo(BaseCog):
                 str(a.mention)
                 for a in sorted(
                     guild.premium_subscribers,
-                    key=lambda m: (m.premium_since if m.premium_since else (m.joined_at or m.created_at)),
+                    key=lambda m: (m.premium_since or (m.joined_at or m.created_at)),
                 )
             ]
 
@@ -83,7 +83,7 @@ class ServerInfo(BaseCog):
                             else None
                         ),
                         (
-                            f"- **Boosters: ** {', '.join(boosters) if len(boosters) <= base_show_count else ', '.join(boosters[:3]) + f' + {len(boosters)-base_show_count} boosters'}"  # noqa: E501
+                            f"- **Boosters: ** {', '.join(boosters) if len(boosters) <= base_show_count else ', '.join(boosters[:3]) + f' + {len(boosters) - base_show_count} boosters'}"  # noqa: E501
                             if valid_roles
                             else None
                         ),

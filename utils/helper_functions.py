@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator, Iterable
 
 
-__all__ = ('better_string', 'ActivityHandler')
+__all__ = ('ActivityHandler', 'better_string')
 
 
 def better_string(data: Iterable[str | None], *, seperator: str) -> str:

@@ -19,7 +19,7 @@ class RoleInfo(BaseCog):
     @commands.guild_only()
     async def roleinfo(self, ctx: DeContext, role: discord.Role) -> discord.Message:
         embed = Embed(
-            title=f"{role.name} {role.unicode_emoji if role.unicode_emoji else ''}",
+            title=f"{role.name} {role.unicode_emoji or ''}",
             colour=role.colour,
             ctx=ctx,
         )

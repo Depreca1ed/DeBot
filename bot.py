@@ -154,7 +154,7 @@ class DeBot(commands.Bot):
             'port': str(self.config.get('database', 'port')),
         }
         pool: asyncpg.Pool[asyncpg.Record] | None = await asyncpg.create_pool(**credentials)
-        if not pool or pool and pool.is_closing():
+        if not pool or (pool and pool.is_closing()):
             msg = 'Pool is closed'
             raise RuntimeError(msg)
         self.pool = pool

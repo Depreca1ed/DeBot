@@ -70,7 +70,7 @@ class BotInformation(BaseCog):
                     [
                         f'> Made in `Python {platform.python_version()}` using `{dist_version}`',
                         f'- **Uptime :** {humanize.naturaldelta(datetime.timedelta(seconds=datetime.datetime.now(datetime.UTC).timestamp() - bot.load_time.timestamp()))}',  # noqa: E501
-                        f'- **Memory :** `{round((memory/1024)/1024)}/{round(((psutil.virtual_memory().total)/1024)/1024)} MB` (`{round(proc.memory_percent(), 2)}%`)',  # noqa: E501
+                        f'- **Memory :** `{round((memory / 1024) / 1024)}/{round(((psutil.virtual_memory().total) / 1024) / 1024)} MB` (`{round(proc.memory_percent(), 2)}%`)',  # noqa: E501
                     ],
                     seperator='\n',
                 ),
@@ -96,6 +96,6 @@ class BotInformation(BaseCog):
         )
 
         embed.set_thumbnail(url=bot.user.avatar.url if bot.user.avatar else None)
-        embed.set_image(url=(bot.user.banner if bot.user.banner else (await bot.fetch_user(bot.user.id)).banner))
+        embed.set_image(url=(bot.user.banner or (await bot.fetch_user(bot.user.id)).banner))
 
         await ctx.send(embed=embed)

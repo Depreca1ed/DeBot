@@ -53,7 +53,7 @@ class Userinfo(BaseCog):
                         else None
                     ),
                     (
-                        f"- **Roles: ** {', '.join(valid_roles) if len(valid_roles) <= base_shown_count else ', '.join(valid_roles[:5]) + f' + {len(valid_roles)-base_shown_count} roles'}"  # noqa: E501
+                        f"- **Roles: ** {', '.join(valid_roles) if len(valid_roles) <= base_shown_count else ', '.join(valid_roles[:5]) + f' + {len(valid_roles) - base_shown_count} roles'}"  # noqa: E501
                         if valid_roles
                         else None
                     ),

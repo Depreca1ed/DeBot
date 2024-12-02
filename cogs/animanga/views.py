@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bot import DeBot
 
 
-__all__ = ('WaifuView', 'SafebooruPokemonView', 'WaifuViewBackup')
+__all__ = ('SafebooruPokemonView', 'WaifuView', 'WaifuViewBackup')
 
 
 class SmashOrPass(BaseView):
