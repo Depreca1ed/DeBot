@@ -1,18 +1,33 @@
-name: Ruff Check
-on: push
+name: lint
+on: 
+  push:
+  pull_requests:
+        types: [ opened, reopened, synchronize ]
+
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install ruff
-      # Update output format to enable automatic inline annotations.
+          pip install pyright
+
+      - name: Setup node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Run Pyright
+        uses: jakebailey/pyright-action@v1
+
       - name: Run Ruff
-        run: ruff check --output-format=github .
+        uses: astral-sh/ruff-action@v1
