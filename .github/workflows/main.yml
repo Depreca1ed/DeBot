@@ -22,6 +22,15 @@ jobs:
           pip install pyright
           pip install -r requirements.txt
 
+      - name: Ruff Ruff Formatter
+        uses: astral-sh/ruff-action@v1
+        with:
+          args: "format --check"
+          changed-files: "true"
+
+      - name: Run Ruff
+        uses: astral-sh/ruff-action@v1
+
       - name: Setup node.js
         uses: actions/setup-node@v3
         with:
@@ -29,6 +38,3 @@ jobs:
 
       - name: Run Pyright
         uses: jakebailey/pyright-action@v1
-
-      - name: Run Ruff
-        uses: astral-sh/ruff-action@v1
