@@ -6,14 +6,13 @@ from .avatar import Avatar
 from .botinfo import BotInformation
 from .roleinfo import RoleInfo
 from .serverinfo import ServerInfo
-from .spotify import Spotify
 from .userinfo import Userinfo
 
 if TYPE_CHECKING:
     from bot import DeBot
 
 
-class Meta(Avatar, BotInformation, RoleInfo, Userinfo, ServerInfo, Spotify, name='Meta'): ...
+class Meta(Avatar, BotInformation, RoleInfo, Userinfo, ServerInfo, name='Meta'): ...
 
 
 async def setup(bot: DeBot) -> None:
