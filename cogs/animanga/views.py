@@ -217,9 +217,12 @@ class WaifuSearchView(SmashOrPass):
                     [
                         'solo',
                         self.query,
-                        'rating:' + better_string(['explicit', 'questionable', 'sensitive'], seperator=',')
-                        if self.nsfw is True
-                        else 'general',
+                        'rating:'
+                        + (
+                            better_string(['explicit', 'questionable', 'sensitive'], seperator=',')
+                            if self.nsfw is True
+                            else 'general'
+                        ),
                     ],
                     seperator=' ',
                 ),
@@ -246,9 +249,12 @@ class SafebooruPokemonView(SmashOrPass):
                     [
                         'solo',
                         'pokemon_(creature)',
-                        'rating:' + better_string(['explicit', 'questionable', 'sensitive'], seperator=',')
-                        if self.nsfw is True
-                        else 'general',
+                        'rating:'
+                        + (
+                            better_string(['explicit', 'questionable', 'sensitive'], seperator=',')
+                            if self.nsfw is True
+                            else 'general'
+                        ),
                     ],
                     seperator=' ',
                 ),

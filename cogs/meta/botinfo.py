@@ -54,7 +54,7 @@ class BotInformation(BaseCog):
         distributions: list[str] = [
             dist
             for dist in packages_distributions()['discord']
-            if any(file.parts == ('discord', '__init__.py') for file in distribution(dist).files)  # type: ignore[reportOptionalIterable]
+            if any(file.parts == ('discord', '__init__.py') for file in distribution(dist).files)  # pyright: ignore[reportOptionalIterable]
         ]
 
         if distributions:

@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 import contextlib
 
 import discord
-import starlight
+import starlight  # pyright: ignore[reportMissingTypeStubs]
 from discord.ext import commands
 
 from .dev import Developer
