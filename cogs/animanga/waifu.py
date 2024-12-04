@@ -32,7 +32,7 @@ async def waifu_autocomplete(
     )
     data = await req.json()
     characters = [(str(obj['label']), str(obj['value'])) for obj in data if obj['category'] == CHARACTER_ID]
-    return [app_commands.Choice(name=char[0], value=char[1]) for char in characters]
+    return [app_commands.Choice(name=char[0].title(), value=char[1]) for char in characters]
 
 
 class Waifu(BaseCog):
@@ -71,7 +71,7 @@ class Waifu(BaseCog):
             view = WaifuSearchView(
                 self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='waifusearch', query=waifu
             )
-            await view.start(ctx, 'waifusearchh', query=waifu)
+            await view.start(ctx, 'waifusearch', query=waifu)
             return
         view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='waifu')
         await view.start(ctx, 'waifu', query=waifu)
