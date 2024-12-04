@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING, Self, cast
 
 import discord
@@ -81,11 +80,10 @@ class SmashOrPass(BaseView):
             interaction.channel = cast(discord.TextChannel, interaction.channel)
             try:
                 await interaction.client.pool.execute(
-                    """INSERT INTO WaifuFavourites VALUES ($1, $2, $3, $4)""",
+                    """INSERT INTO WaifuFavourites VALUES ($1, $2, $3)""",
                     self.current['url'],
                     interaction.user.id,
                     interaction.channel.is_nsfw(),
-                    datetime.datetime.now(tz=datetime.UTC),
                 )
             except UniqueViolationError:
                 return await interaction.response.send_message(
