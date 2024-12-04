@@ -210,7 +210,6 @@ class WaifuView(SmashOrPass):
 
 class WaifuSearchView(SmashOrPass):
     async def request(self) -> Image:
-        print(self.nsfw)
         waifu = await self.session.get(
             'https://danbooru.donmai.us/posts/random.json',
             params={
