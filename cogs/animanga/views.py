@@ -213,10 +213,16 @@ class WaifuSearchView(SmashOrPass):
         waifu = await self.session.get(
             'https://danbooru.donmai.us/posts/random.json',
             params={
-                'tags': better_string(['solo', self.query], seperator=' '),
-                'rating': better_string(['explicit', 'questionable', 'sensitive'], seperator=',')
-                if self.nsfw is True
-                else 'general',
+                'tags': better_string(
+                    [
+                        'solo',
+                        self.query,
+                        'rating:' + better_string(['explicit', 'questionable', 'sensitive'], seperator=',')
+                        if self.nsfw is True
+                        else 'general',
+                    ],
+                    seperator=' ',
+                ),
             },
         )
         data = await waifu.json()
@@ -236,10 +242,16 @@ class SafebooruPokemonView(SmashOrPass):
         waifu = await self.session.get(
             'https://danbooru.donmai.us/posts/random.json',
             params={
-                'tags': better_string(['solo', 'pokemon_(creature)'], seperator=' '),
-                'rating': better_string(['explicit', 'questionable', 'sensitive'], seperator=',')
-                if self.nsfw is True
-                else 'general',
+                'tags': better_string(
+                    [
+                        'solo',
+                        'pokemon_(creature)',
+                        'rating:' + better_string(['explicit', 'questionable', 'sensitive'], seperator=',')
+                        if self.nsfw is True
+                        else 'general',
+                    ],
+                    seperator=' ',
+                ),
             },
         )
         data = await waifu.json()
