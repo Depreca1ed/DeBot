@@ -1,4 +1,5 @@
 discord.py @ git+https://github.com/rapptz/discord.py
+https://github.com/InterStella0/starlight-dpy
 git+https://github.com/rapptz/discord-ext-menus
 git+https://github.com/gorialis/jishaku
 cachetools
