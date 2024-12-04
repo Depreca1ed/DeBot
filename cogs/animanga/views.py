@@ -13,33 +13,41 @@ if TYPE_CHECKING:
     from bot import DeBot
 
 
-__all__ = ('SafebooruPokemonView', 'WaifuView', 'WaifuViewBackup')
+__all__ = (
+    'SafebooruPokemonView',
+    'WaifuView',
+)
 
 
 class SmashOrPass(BaseView):
     message: discord.Message
     current: Image
+    token: str
 
-    def __init__(self, token: str, session: ClientSession, *, for_user: int, nsfw: bool, source: str) -> None:
+    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool, source: str, query: None | str = None) -> None:
         super().__init__(timeout=500.0)
         self.session = session
         self.for_user = for_user
         self.nsfw = nsfw
         self.source = source
-        self.token = token
+        self.query = query
 
         self.smashers: set[discord.User | discord.Member] = set()
         self.passers: set[discord.User | discord.Member] = set()
 
     @classmethod
-    async def start(cls, ctx: DeContext, source: str) -> Self:
+    async def start(cls, ctx: DeContext, source: str, *, query: None | str = None) -> Self:
+        ctx.channel = cast(discord.TextChannel, ctx.channel)
+
         inst = cls(
-            ctx.bot.config.get('bot', 'waifu'),
             ctx.bot.session,
             for_user=ctx.author.id,
-            nsfw=(ctx.channel.nsfw if isinstance(ctx.channel, discord.TextChannel) else False),
+            nsfw=ctx.channel.is_nsfw(),
             source=source,
+            query=query,
         )
+        inst.token = ctx.bot.config.get('bot', 'waifu')
+
         data = await inst.request()
 
         embed = inst.embed(data)
@@ -200,17 +208,24 @@ class WaifuView(SmashOrPass):
         return self.current
 
 
-class WaifuViewBackup(SmashOrPass):
+class WaifuSearchView(SmashOrPass):
     async def request(self) -> Image:
-        waifu = await self.session.get(f'https://api.waifu.pics/{"nsfw" if self.nsfw is True else "sfw"}/waifu')
-
+        print(self.nsfw)
+        waifu = await self.session.get(
+            'https://danbooru.donmai.us/posts/random.json',
+            params={
+                'tags': better_string(['solo', self.query], seperator=' '),
+                'rating': better_string(['explicit', 'questionable', 'sensitive'], seperator=',')
+                if self.nsfw is True
+                else 'general',
+            },
+        )
         data = await waifu.json()
-
         current: Image = {
-            'image_id': data['url'],
+            'image_id': data['id'],
             'dominant_color': None,
-            'source': data['url'],
-            'url': data['url'],
+            'source': data['source'],
+            'url': data['file_url'],
         }
         self.current = current
 
