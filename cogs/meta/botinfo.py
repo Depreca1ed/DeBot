@@ -88,8 +88,8 @@ class BotInformation(BaseCog):
                         if bot.appinfo.terms_of_service_url and bot.appinfo.privacy_policy_url
                         else None
                     ),
-                    f'-# [Invite the bot]({discord.utils.oauth_url(bot.user.id)})',
-                    '-# [Support Server](https://discord.gg/eJBG7beVhX)',
+                    f'-# [Invite the bot](https://discord.com/oauth2/authorize?client_id=1260312970890842182)',
+                    '-# [Support Server](https://discord.gg/mtWF6sWMex)',
                 ],
                 seperator='\n',
             ),
