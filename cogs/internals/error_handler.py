@@ -27,7 +27,7 @@ CHAR_LIMIT = 2000
 # Have withstood virginlife to say gex many times
 # Yet this life never received gex
 
-So as I pray, infinite gex works.
+# So as I pray, infinite gex works.
 class ErrorHandler(BaseCog):
     def clean_error_permission(self, permissions: list[str], *, seperator: str, prefix: str) -> str:
         return better_string(
