@@ -68,8 +68,8 @@ class SmashOrPass(BaseView):
             description=better_string(
                 [
                     (f'> [#{data["image_id"]}]({data["source"]})' if data['image_id'] and data['source'] else None),
-                    '<:smash:1276874474628583497> **Smashers:** ' + smasher,
-                    '<:pass:1276874515296813118> **Passers:** ' + passer,
+                    '<:MafuyuBlush:1314149745794617365> **Smashers:** ' + smasher,
+                    '<:MafuyuUnamused:1314149535043293215> **Passers:** ' + passer,
                 ],
                 seperator='\n',
             ),
