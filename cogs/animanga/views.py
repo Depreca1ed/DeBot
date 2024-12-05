@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     'SafebooruPokemonView',
+    'WaifuSearchView',
     'WaifuView',
 )
 
@@ -80,7 +81,7 @@ class SmashOrPass(BaseView):
         return embed
 
     @discord.ui.button(
-        emoji='<:smash:1276874474628583497>',
+        emoji='<:MafuyuBlush:1314149745794617365>',
         style=discord.ButtonStyle.green,
     )
     async def smash(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
@@ -126,7 +127,7 @@ class SmashOrPass(BaseView):
         return None
 
     @discord.ui.button(
-        emoji='<:pass:1276874515296813118>',
+        emoji='<:MafuyuUnamused:1314149535043293215>',
         style=discord.ButtonStyle.red,
     )
     async def passbutton(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
