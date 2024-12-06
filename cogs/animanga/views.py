@@ -22,6 +22,7 @@ __all__ = (
 
 class SmashOrPass(BaseView):
     message: discord.Message
+    ctx: DeContext
     current: Image
     token: str
 
@@ -50,10 +51,11 @@ class SmashOrPass(BaseView):
             query=query,
         )
         inst.token = ctx.bot.config.get('bot', 'waifu')
+        inst.ctx = ctx
 
         data = await inst.request()
 
-        embed = inst.embed(data)
+        embed = inst.embed(ctx, data)
         inst.message = await ctx.reply(embed=embed, view=inst)
 
         return inst
@@ -76,6 +78,7 @@ class SmashOrPass(BaseView):
                 seperator='\n',
             ),
             colour=(discord.Colour.from_str(data['dominant_color']) if data['dominant_color'] else None),
+            ctx=ctx,
         )
 
         embed.set_image(url=data['url'])
