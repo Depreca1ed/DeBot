@@ -78,7 +78,7 @@ class SmashOrPass(BaseView):
                 seperator='\n',
             ),
             colour=(discord.Colour.from_str(data['dominant_color']) if data['dominant_color'] else None),
-            ctx=ctx,
+            ctx=self.ctx,
         )
 
         embed.set_image(url=data['url'])
