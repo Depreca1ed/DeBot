@@ -55,7 +55,7 @@ class SmashOrPass(BaseView):
 
         data = await inst.request()
 
-        embed = inst.embed(ctx, data)
+        embed = inst.embed(data)
         inst.message = await ctx.reply(embed=embed, view=inst)
 
         return inst
