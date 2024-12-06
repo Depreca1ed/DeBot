@@ -43,7 +43,9 @@ class SmashOrPass(BaseView):
         inst = cls(
             ctx.bot.session,
             for_user=ctx.author.id,
-            nsfw=ctx.channel.is_nsfw(),
+            nsfw=ctx.channel.is_nsfw()
+            if not isinstance(ctx.channel, discord.DMChannel | discord.GroupChannel | discord.PartialMessageable)
+            else False,
             source=source,
             query=query,
         )

@@ -69,11 +69,24 @@ class Waifu(BaseCog):
         ctx.channel = cast(discord.TextChannel, ctx.channel)
         if waifu:
             view = WaifuSearchView(
-                self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='waifusearch', query=waifu
+                self.bot.session,
+                for_user=ctx.author.id,
+                nsfw=ctx.channel.is_nsfw()
+                if not isinstance(ctx.channel, discord.DMChannel | discord.GroupChannel | discord.PartialMessageable)
+                else False,
+                source='waifusearch',
+                query=waifu,
             )
             await view.start(ctx, 'waifusearch', query=waifu)
             return
-        view = WaifuView(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='waifu')
+        view = WaifuView(
+            self.bot.session,
+            for_user=ctx.author.id,
+            nsfw=ctx.channel.is_nsfw()
+            if not isinstance(ctx.channel, discord.DMChannel | discord.GroupChannel | discord.PartialMessageable)
+            else False,
+            source='waifu',
+        )
         await view.start(ctx, 'waifu', query=waifu)
 
     @commands.hybrid_command(name='pokemon', help='Get pokemon images with an option to smash or pass')
@@ -81,5 +94,12 @@ class Waifu(BaseCog):
     @app_commands.allowed_installs(guilds=True, users=True)
     async def pokemon(self, ctx: DeContext) -> None:
         ctx.channel = cast(discord.TextChannel, ctx.channel)
-        view = SafebooruPokemonView(self.bot.session, for_user=ctx.author.id, nsfw=ctx.channel.is_nsfw(), source='pokemon')
+        view = SafebooruPokemonView(
+            self.bot.session,
+            for_user=ctx.author.id,
+            nsfw=ctx.channel.is_nsfw()
+            if not isinstance(ctx.channel, discord.DMChannel | discord.GroupChannel | discord.PartialMessageable)
+            else False,
+            source='pokemon',
+        )
         await view.start(ctx, 'pokemon')
