@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self, cast
+from typing import TYPE_CHECKING, Self
 
 import discord
 from asyncpg.exceptions import UniqueViolationError
@@ -39,8 +39,6 @@ class SmashOrPass(BaseView):
 
     @classmethod
     async def start(cls, ctx: DeContext, source: str, *, query: None | str = None) -> Self:
-        ctx.channel = cast(discord.TextChannel, ctx.channel)
-
         inst = cls(
             ctx.bot.session,
             for_user=ctx.author.id,
@@ -93,7 +91,6 @@ class SmashOrPass(BaseView):
     )
     async def smash(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
         if interaction.user in self.smashers:
-            interaction.channel = cast(discord.TextChannel, interaction.channel)
             try:
                 await interaction.client.pool.execute(
                     """INSERT INTO WaifuFavourites VALUES ($1, $2, $3)""",
