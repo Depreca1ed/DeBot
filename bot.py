@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
 __all__ = ('DeBot',)
 
-log: logging.Logger = logging.getLogger(__name__)
+log: logging.Logger = logging.getLogger('discord')
 
 jishaku.Flags.FORCE_PAGINATOR = True
 jishaku.Flags.HIDE = True
@@ -170,13 +170,13 @@ class DeBot(commands.Bot):
             try:
                 await self.load_extension(str(cog))
             except commands.ExtensionError as error:
-                log.exception(
+                self.log.exception(
                     'Ignoring exception in loading %s',
                     cog,
                     exc_info=error,
                 )
             else:
-                log.info('Loaded %s ', cog)
+                self.log.info('Loaded %s ', cog)
 
     @overload
     async def get_context(self, origin: discord.Interaction | discord.Message, /) -> DeContext: ...

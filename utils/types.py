@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Literal, TypedDict
+from typing import Literal, NamedTuple, TypedDict
 
-__all__ = ('BlacklistBase', 'Image')
+__all__ = ('BlacklistBase', 'WaifuResult')
 
 
 class BlacklistBase(TypedDict):
@@ -10,7 +10,8 @@ class BlacklistBase(TypedDict):
     blacklist_type: Literal['guild', 'user']
 
 
-class Image(TypedDict):
+class WaifuResult(NamedTuple):
+    name: str | None
     dominant_color: str | None
     image_id: str | int
     source: str | None

@@ -8,7 +8,8 @@ if TYPE_CHECKING:
     from bot import DeBot
 
 
-class AniManga(Waifu, name='Anime & Manga'): ...
+class AniManga(Waifu, name='Anime & Manga'):
+    """For everything related to Anime or Manga."""
 
 
 async def setup(bot: DeBot) -> None:

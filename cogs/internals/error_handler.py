@@ -15,6 +15,7 @@ from utils import (
     Embed,
     FeatureDisabledError,
     UnderMaintenanceError,
+    WaifuNotFoundError,
     better_string,
 )
 
@@ -46,6 +47,7 @@ class ErrorHandler(BaseCog):
             commands.PrivateMessageOnly: 'This command can only be used in DMs.',
             commands.BadArgument: str(error),
             commands.TooManyArguments: str(error),
+            WaifuNotFoundError: str(error),
         }
 
         if (
@@ -114,20 +116,21 @@ class ErrorHandler(BaseCog):
             )
 
         await ctx.reply(content=str(error) + '\n-# Developers have been informed')
-        exc = f"```py\n{''.join(traceback.format_exception(type(error), error, error.__traceback__))}```"
+        exc = ''.join(traceback.format_exception(type(error), error, error.__traceback__))
         exc_link = (
             await self.bot.mystbin_cli.create_paste(
                 files=[
-                    mystbin.File(filename='error', content=exc),
+                    mystbin.File(filename=f'{error.__class__.__name__}.py', content=exc),
                 ],
             )
             if len(exc) > CHAR_LIMIT
             else None
         )
+        formatted_exc = '```py\n' + exc + '```'
 
         embed = Embed(
             title=error.__class__.__name__,
-            description=exc if len(exc) < CHAR_LIMIT else 'Error was too big for this embed.',
+            description=formatted_exc if len(formatted_exc) < CHAR_LIMIT else 'Error was too big for this embed.',
             url=exc_link,
             colour=0x000000,
             ctx=ctx,
@@ -142,4 +145,10 @@ class ErrorHandler(BaseCog):
                 seperator='\n',
             ),
         )
-        return await self.bot.logger_webhook.send(embed=embed)
+        await self.bot.logger_webhook.send(embed=embed)
+        self.bot.log.exception(
+            'Ignoring exception in command %s',
+            ctx.command,
+            exc_info=error,
+        )
+        return None

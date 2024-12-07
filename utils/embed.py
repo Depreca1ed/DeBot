@@ -32,7 +32,7 @@ class Embed(discord.Embed):
                 icon_url=ctx.author.display_avatar.url or None,
             )
         super().__init__(
-            colour=colour if colour != discord.Colour.default() else THEME_COLOUR,
+            colour=colour if colour and colour != discord.Colour.default() else THEME_COLOUR,
             **kwargs,
         )
         for n, v in fields:

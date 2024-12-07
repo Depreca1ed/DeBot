@@ -81,4 +81,12 @@ class UnderMaintenanceError(commands.CheckFailure, DeBotError):
         super().__init__('The bot is currently under maintenance.')
 
 
+class WaifuNotFoundError(DeBotError):
+    def __init__(self, waifu: str | None = None) -> None:
+        if waifu:
+            waifu = waifu.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
+            super().__init__(f'Could not find any results for {waifu}')
+        super().__init__('Could not find any results')
+
+
 # TODO(Depreca1ed): All of these are not supposed to be CommandError. Change them to actual errors  # noqa: FIX002, TD003

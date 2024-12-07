@@ -12,7 +12,8 @@ if TYPE_CHECKING:
     from bot import DeBot
 
 
-class Meta(Avatar, BotInformation, RoleInfo, Userinfo, ServerInfo, name='Meta'): ...
+class Meta(Avatar, BotInformation, RoleInfo, Userinfo, ServerInfo, name='Meta'):
+    """For everything related to Discord."""
 
 
 async def setup(bot: DeBot) -> None:

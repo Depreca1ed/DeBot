@@ -15,7 +15,7 @@ from .dev import Developer
 from .error_handler import ErrorHandler
 
 
-class Events(ErrorHandler, Developer, name='Events'):
+class Internals(ErrorHandler, Developer, name='Internals'):
     def cog_load(self) -> None:
         self.bot.help_command = starlight.MenuHelpCommand(
             per_page=10, accent_color=self.bot.colour, error_color=discord.Color.red()
@@ -46,4 +46,4 @@ class Events(ErrorHandler, Developer, name='Events'):
 
 
 async def setup(bot: DeBot) -> None:
-    await bot.add_cog(Events(bot))
+    await bot.add_cog(Internals(bot))

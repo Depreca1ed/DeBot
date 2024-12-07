@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import discord
 import humanize
@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 __all__ = ('ActivityHandler', 'better_string')
 
 
-def better_string(data: Iterable[str | None], *, seperator: str) -> str:
-    return seperator.join(subdata for subdata in data if subdata)
+def better_string(data: Iterable[str | Any | None], *, seperator: str) -> str:
+    return seperator.join(str(subdata) for subdata in data if subdata) or discord.utils.MISSING
 
 
 class ActivityHandler:

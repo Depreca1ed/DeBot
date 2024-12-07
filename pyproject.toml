@@ -25,6 +25,7 @@ ignore = [
     "A005",
     "RUF036",
 ]
+preview = true
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = true

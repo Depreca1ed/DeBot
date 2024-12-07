@@ -14,9 +14,10 @@ from .errors import (
     PrefixNotInitialisedError,
     PrefixNotPresentError,
     UnderMaintenanceError,
+    WaifuNotFoundError,
 )
 from .helper_functions import ActivityHandler, better_string
-from .types import BlacklistBase, Image
+from .types import BlacklistBase, WaifuResult
 from .view import BaseView
 
 __all__ = (
@@ -36,11 +37,12 @@ __all__ = (
     'DeContext',
     'Embed',
     'FeatureDisabledError',
-    'Image',
     'NotBlacklistedError',
     'PrefixAlreadyPresentError',
     'PrefixNotInitialisedError',
     'PrefixNotPresentError',
     'UnderMaintenanceError',
+    'WaifuNotFoundError',
+    'WaifuResult',
     'better_string',
 )
