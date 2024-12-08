@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from utils import BaseCog
+from utils.errors import WaifuNotFoundError
 
 from .views import SafebooruPokemonView, WaifuSearchView, WaifuView
 
@@ -103,3 +104,8 @@ class Waifu(BaseCog):
             source='pokemon',
         )
         await view.start(ctx, 'pokemon')
+
+    @commands.Cog.listener('on_cog_command_error')
+    async def waifu_error_handler(self, ctx: DeContext, error: commands.CommandError) -> None:
+        if isinstance(error, WaifuNotFoundError):
+            await ctx.reply(str(error))

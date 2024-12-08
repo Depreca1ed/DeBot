@@ -14,7 +14,7 @@ __all__ = ('ActivityHandler', 'better_string')
 
 
 def better_string(data: Iterable[str | Any | None], *, seperator: str) -> str:
-    return seperator.join(str(subdata) for subdata in data if subdata) or discord.utils.MISSING
+    return seperator.join(str(subdata) for subdata in data if subdata)
 
 
 class ActivityHandler:

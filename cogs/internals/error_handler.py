@@ -15,9 +15,9 @@ from utils import (
     Embed,
     FeatureDisabledError,
     UnderMaintenanceError,
-    WaifuNotFoundError,
     better_string,
 )
+from utils.errors import WaifuNotFoundError
 
 CHAR_LIMIT = 2000
 
@@ -50,11 +50,7 @@ class ErrorHandler(BaseCog):
             WaifuNotFoundError: str(error),
         }
 
-        if (
-            not ctx.command
-            or hasattr(ctx.command, 'on_error')
-            or (ctx.cog and ctx.cog._get_overridden_method(ctx.cog.cog_command_error))  # noqa: SLF001
-        ):
+        if not ctx.command or hasattr(ctx.command, 'on_error') or (ctx.cog and ctx.cog.has_error_handler()):
             return None
         if isinstance(error, DeBotError):
             if (isinstance(ctx.channel, discord.DMChannel) and isinstance(error, BlacklistedUserError)) or isinstance(

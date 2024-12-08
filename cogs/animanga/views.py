@@ -38,7 +38,7 @@ class SmashOrPass(BaseView):
         self.passers: set[discord.User | discord.Member] = set()
 
     @classmethod
-    async def start(cls, ctx: DeContext, source: str, *, query: None | str = None) -> Self:
+    async def start(cls, ctx: DeContext, source: str, *, query: None | str = None) -> Self | None:
         inst = cls(
             ctx.bot.session,
             for_user=ctx.author.id,
@@ -50,10 +50,7 @@ class SmashOrPass(BaseView):
         )
         inst.token = ctx.bot.config.get('bot', 'waifu')
         inst.ctx = ctx
-        try:
-            data = await inst.request()
-        except KeyError:
-            raise WaifuNotFoundError(query) from None
+        data = await inst.request()
 
         embed = inst.embed(data)
         inst.message = await ctx.reply(embed=embed, view=inst)
@@ -64,8 +61,8 @@ class SmashOrPass(BaseView):
         raise NotImplementedError
 
     def embed(self, data: WaifuResult) -> discord.Embed:
-        smasher = better_string([user.mention for user in self.smashers], seperator=', ')
-        passer = better_string([user.mention for user in self.passers], seperator=', ')
+        smasher = better_string([user.mention for user in self.smashers], seperator=', ') or discord.utils.MISSING
+        passer = better_string([user.mention for user in self.passers], seperator=', ') or discord.utils.MISSING
 
         embed = Embed(
             title='Smash or Pass',
@@ -234,12 +231,15 @@ class WaifuSearchView(SmashOrPass):
                 ),
             },
         )
+        success = 200
+        if waifu.status != success:
+            raise WaifuNotFoundError(self.query)
         data = await waifu.json()
         current = WaifuResult(
             name=self.query,
             image_id=data['id'],
             dominant_color=None,
-            source=data['url'],
+            source=data['source'],
             url=data['file_url'],
         )
         self.current = current
@@ -272,7 +272,7 @@ class SafebooruPokemonView(SmashOrPass):
             name=self.query,
             image_id=data['id'],
             dominant_color=None,
-            source=data['url'],
+            source=data['source'],
             url=data['file_url'],
         )
         self.current = current
