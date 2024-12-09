@@ -86,8 +86,8 @@ class WaifuNotFoundError(commands.CommandError, DeBotError):
         if waifu:
             waifu = waifu.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
             super().__init__(f'Could not find any results for {waifu}')
-            return
-        super().__init__('Could not find any results')
+        else:
+            super().__init__(message='Could not find any results')
 
 
 # TODO(Depreca1ed): All of these are not supposed to be CommandError. Change them to actual errors  # noqa: FIX002, TD003

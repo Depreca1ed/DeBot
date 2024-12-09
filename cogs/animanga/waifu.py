@@ -50,6 +50,9 @@ class Waifu(BaseCog):
                 },
             )
             data = await req.json()
+            success = 200
+            if req.status != success or not data:
+                raise WaifuNotFoundError(waifu)
             characters = [(str(obj['label']), str(obj['value'])) for obj in data if obj['category'] == CHARACTER_ID]
             waifu = characters[0][1]  # Points to the value of the first result
 
@@ -104,8 +107,3 @@ class Waifu(BaseCog):
             source='pokemon',
         )
         await view.start(ctx, 'pokemon')
-
-    @commands.Cog.listener('on_cog_command_error')
-    async def waifu_error_handler(self, ctx: DeContext, error: commands.CommandError) -> None:
-        if isinstance(error, WaifuNotFoundError):
-            await ctx.reply(str(error))

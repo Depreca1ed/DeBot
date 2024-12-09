@@ -231,10 +231,10 @@ class WaifuSearchView(SmashOrPass):
                 ),
             },
         )
-        success = 200
-        if waifu.status != success:
-            raise WaifuNotFoundError(self.query)
         data = await waifu.json()
+        success = 200
+        if waifu.status != success or not data:
+            raise WaifuNotFoundError(self.query)
         current = WaifuResult(
             name=self.query,
             image_id=data['id'],
