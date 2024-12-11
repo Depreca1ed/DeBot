@@ -50,7 +50,7 @@ class BaseView(discord.ui.View):
         embed = Embed(
             title=error.__class__.__name__,
             description=exc,
-            url=exc_link,
+            url=str(exc_link),
             colour=0x000000,
         )
         embed.add_field(
