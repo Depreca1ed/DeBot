@@ -32,7 +32,7 @@ class RoleInfo(BaseCog):
             seperator='\n',
         )
         embed.set_thumbnail(url=role.icon.url if role.icon else None)
-        if role.tags:
+        if role.is_premium_subscriber() or role.is_integration() or role.is_bot_managed():
             embed.add_field(
                 value=better_string(
                     (

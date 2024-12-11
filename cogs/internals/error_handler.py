@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import contextlib
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 import discord
 from discord.ext import commands
 
-from bot import DeBot
 from utils import BaseCog, BaseView, DeContext, better_string
+
+if TYPE_CHECKING:
+    from bot import DeBot
 
 CHAR_LIMIT = 2000
 
