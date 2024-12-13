@@ -31,6 +31,7 @@ class Blacklist:
         self.blacklists = {}
         self.bot = bot
         self.bot.check_once(self.check)
+        super().__init__()
 
     async def check(self, ctx: DeContext) -> Literal[True]:
         if ctx.guild and self.is_blacklisted(ctx.guild):

@@ -37,5 +37,14 @@ CREATE TABLE IF NOT EXISTS Waifus (
     PRIMARY KEY (id, type)
 );
 
-COMMIT;
+CREATE TABLE IF NOT EXISTS Errors (
+    id BIGINT SERIAL PRIMARY KEY,
+    command TEXT NOT NULL,
+    user BIGINT NOT NULL,
+    guild BIGINT,
+    error_type TEXT NOT NULL,
+    full_error TEXT NOT NULL,
+    message_url TEXT NOT NULL
+);
 
+COMMIT;
