@@ -61,6 +61,8 @@ class ErrorHandler(BaseCog):
         if (ctx.command and ctx.command.has_error_handler()) or (ctx.cog and ctx.cog.has_error_handler()):
             return
 
+        error = getattr(error, "original", error)
+
         if isinstance(error, commands.CommandNotFound) or not ctx.command:
             cmd = ctx.invoked_with
             if not cmd:
