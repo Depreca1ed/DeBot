@@ -42,9 +42,10 @@ CREATE TABLE IF NOT EXISTS Errors (
     command TEXT NOT NULL,
     user BIGINT NOT NULL,
     guild BIGINT,
-    error_type TEXT NOT NULL,
+    error TEXT NOT NULL,
     full_error TEXT NOT NULL,
-    message_url TEXT NOT NULL
+    message_url TEXT NOT NULL,
+    fixed BOOLEAN NOT NULl,
 );
 
 COMMIT;
