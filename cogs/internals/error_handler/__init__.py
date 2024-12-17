@@ -124,4 +124,12 @@ async def error_handler(ctx: DeContext, error: commands.CommandError) -> None:
         ctx.command,
         exc_info=error,
     )
+
+    check = await ctx.bot.pool.fetchrow(
+        """SELECT * FROM Errors WHERE command = $1 AND error = $2 AND fixed = $3""",
+        ctx.command.qualified_name,
+        str(error),
+        False,
+    )
+
     # Temp.

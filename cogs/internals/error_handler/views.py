@@ -6,11 +6,14 @@ from typing import TYPE_CHECKING, Self
 
 import discord
 
-from utils import BaseView, DeContext
+from utils import BaseView, DeContext, Embed, better_string
 
-from .constants import HANDLER_EMOJIS
+from .constants import ERROR_COLOUR, HANDLER_EMOJIS
 
 if TYPE_CHECKING:
+    import datetime
+
+    import asyncpg
     from discord.ext import commands
 
     from bot import DeBot
@@ -75,3 +78,30 @@ class MissingArgumentHandler(BaseView):
         )
         modal.prev_message = self.prev_message
         await interaction.response.send_modal(modal)
+
+
+class ErrorView(BaseView):
+    def __init__(self, error: asyncpg.Record, ctx: DeContext, *, timeout: float | None = 180) -> None:
+        self.error = error  # The wording is strongly terrible here, its a record of error not the error itself
+        self.ctx = ctx
+        super().__init__(timeout=timeout)
+
+    @discord.ui.button(label='Wanna know more?', emoji=HANDLER_EMOJIS['grey_tick'], style=discord.ButtonStyle.grey)
+    async def inform_button(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
+        embed = Embed(
+            title=f"Error #{self.error['id']}",
+            description=f'```py\n{self.error['error']}```',
+            colour=ERROR_COLOUR,
+        )
+        error_timestamp: datetime.datetime = self.error['occured_when']
+        is_fixed = 'is not' if self.error['fixed'] is False else 'is'
+        embed.add_field(
+            value=better_string(
+                [
+                    f'>>> The error was discovered **{discord.utils.format_dt(error_timestamp, 'R')}**.',
+                    f'in the **{self.error['command']}** command and **{is_fixed}** fixed',
+                ],
+                seperator='\n',
+            )
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)

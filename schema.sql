@@ -41,11 +41,17 @@ CREATE TABLE IF NOT EXISTS Errors (
     id BIGINT SERIAL PRIMARY KEY,
     command TEXT NOT NULL,
     user BIGINT NOT NULL,
-    guild BIGINT,
+    guild BIGINT NOT NULL,
     error TEXT NOT NULL,
     full_error TEXT NOT NULL,
     message_url TEXT NOT NULL,
-    fixed BOOLEAN NOT NULl,
+    occured_when TIMESTAMP NOT NULL,
+    fixed BOOLEAN NOT NULL,
 );
 
+CREATE TABLE IF NOT EXISTS ErrorReminders (
+    id BIGINT references Errors (id),
+    user BIGINT NOT NULL,
+    PRIMARY KEY (id, user)
+)
 COMMIT;
