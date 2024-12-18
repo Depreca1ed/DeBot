@@ -26,10 +26,16 @@ ignore = [
     "RUF029",
     "RUF036",
     "FBT003",
+    "DTZ005",
 ]
+
+[tool.ruff.lint.mccabe]
+# Flag errors (`C901`) whenever the complexity level exceeds 5.
+max-complexity = 15
 
 [tool.ruff.lint.pylint]
 max-returns = 10
+max-locals = 20
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = true

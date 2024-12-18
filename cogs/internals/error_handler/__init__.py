@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import datetime
 import difflib
+import traceback
 
+import discord
+import mystbin
 from discord.ext import commands
 
-from utils import DeContext, better_string
+from utils import DeContext, Embed, better_string
 
 from .helpers import clean_error, generate_error_objects, make_embed
-from .views import MissingArgumentHandler
+from .views import ErrorView, MissingArgumentHandler
 
 defaults = (
     commands.UserInputError,
@@ -111,15 +115,15 @@ async def error_handler(ctx: DeContext, error: commands.CommandError) -> None:
 
     # From here we handle unexpected errors.
     # The process is as follows
-    # > Check if error has happened before
-    # > If not, register the error
-    # > Else, dont register
+    # > Check if error has happened before [DONE]
+    # > If not, register the error [DONE]
+    # > Else, dont register [DONE]
     # Additional functionality include:
-    # > Allowing the user to know when what is fixed or will be fixed
-    # > Allow user to see the error. If they wish to fix it then allow them to PR (requires getsource wrt github)
-    # > Lastly do all of this in a good manner
+    # > Allowing the user to know when what is fixed or will be fixed [DONE]
+    # > Allow user to see the error. If they wish to fix it then allow them to PR (requires getsource wrt github) [CANCELLED]
+    # > Lastly do all of this in a good manner [KITAEHFACE]
 
-    ctx.bot.log.exception(
+    ctx.bot.log.error(
         'Ignoring exception in running %s',
         ctx.command,
         exc_info=error,
@@ -131,5 +135,84 @@ async def error_handler(ctx: DeContext, error: commands.CommandError) -> None:
         str(error),
         False,
     )
+
+    if check:
+        view = ErrorView(check, ctx)
+        view.message = await ctx.reply(
+            embed=make_embed(title='Known error occured.', description='This is an already unknown error.', ctx=ctx),
+            view=view,
+        )
+        return
+
+    error_string = ''.join(traceback.format_exception(type(error), error, error.__traceback__))
+
+    error_record = await ctx.bot.pool.fetchrow(
+        """
+            INSERT INTO
+                Errors (
+                    command,
+                    user_id,
+                    guild,
+                    error,
+                    full_error,
+                    message_url,
+                    occured_when,
+                    fixed
+                )
+            VALUES
+                ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING *
+    """,
+        ctx.command.qualified_name,
+        ctx.author.id,
+        ctx.guild.id if ctx.guild else None,
+        str(error),
+        ''.join(traceback.format_exception(type(error), error, error.__traceback__)),
+        ctx.message.jump_url,
+        datetime.datetime.now(tz=None),
+        False,
+    )
+    if not error_record:
+        msg = "Expected a Record but got None. This shouldn't happen"
+        raise TypeError(msg)
+
+    view = ErrorView(error_record, ctx)
+    view.message = await ctx.reply(
+        embed=make_embed(title='Unknown error occured', description='The developers have been informed.', ctx=ctx),
+        view=view,
+    )
+
+    error_link = await ctx.bot.mystbin_cli.create_paste(
+        files=(
+            mystbin.File(
+                filename=f'error{error_record['id']}.py',
+                content=error_string,
+            ),
+        )
+    )
+
+    logger_embed = Embed(
+        title=error.__class__.__name__,
+        description=f"""```py\n{error_string}```""",
+        colour=0xFFFFFF,
+        url=error_link.url,
+        ctx=ctx,
+    )
+    logger_embed.add_field(
+        value=better_string(
+            (
+                f'- **ID:** {error_record['id']}',
+                f'- **Command:** `{ctx.command.qualified_name}`',
+                f'- **User:** {ctx.author}',
+                f'- **Guild:** {ctx.guild or "No guild"}',
+                f'- **URL: ** [Jump to message]({ctx.message.jump_url})',
+                f'- **Occured: ** {discord.utils.format_dt(datetime.datetime.now(tz=None), "f")}',
+            ),
+            seperator='\n',
+        )
+    )
+    await ctx.bot.logger_webhook.send(embed=logger_embed)
+
+    return
 
     # Temp.

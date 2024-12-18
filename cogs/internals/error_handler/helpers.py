@@ -37,15 +37,15 @@ def clean_error(objects: list[str] | str, *, seperator: str, prefix: str) -> str
     )
 
 
-def make_embed(*, title: str | None, description: str | None, ctx: DeContext | None = None) -> Embed:
+def make_embed(*, title: str | None = None, description: str | None = None, ctx: DeContext | None = None) -> Embed:
     """
     Generate an embed for error handler responses.
 
     Parameters
     ----------
-    title : str | None
+    title : str | None, optional
         The title for the embed
-    description : str | None
+    description : str | None, optional
         The description for the embed
     ctx : DeContext | None, optional
         The context for the embed, if applicable

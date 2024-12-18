@@ -38,20 +38,21 @@ CREATE TABLE IF NOT EXISTS Waifus (
 );
 
 CREATE TABLE IF NOT EXISTS Errors (
-    id BIGINT SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     command TEXT NOT NULL,
-    user BIGINT NOT NULL,
-    guild BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    guild BIGINT,
     error TEXT NOT NULL,
     full_error TEXT NOT NULL,
     message_url TEXT NOT NULL,
     occured_when TIMESTAMP NOT NULL,
-    fixed BOOLEAN NOT NULL,
+    fixed BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS ErrorReminders (
     id BIGINT references Errors (id),
-    user BIGINT NOT NULL,
-    PRIMARY KEY (id, user)
-)
+    user_id BIGINT NOT NULL,
+    PRIMARY KEY (id, user_id)
+);
+
 COMMIT;
