@@ -81,12 +81,12 @@ async def error_handler(ctx: DeContext, error: commands.CommandError) -> None:
         | commands.BotMissingRole,
     ):
         person = (
-            'You'
+            'You are'
             if isinstance(
                 error,
                 commands.MissingPermissions | commands.MissingAnyRole | commands.MissingRole,
             )
-            else 'I'
+            else 'I am'
         )
         error_type_wording = (
             'permissions' if isinstance(error, commands.MissingPermissions | commands.BotMissingPermissions) else 'roles'
@@ -95,7 +95,7 @@ async def error_handler(ctx: DeContext, error: commands.CommandError) -> None:
 
         content = better_string(
             (
-                f'{person} are missing the following {error_type_wording} to run this command:',
+                f'{person} missing the following {error_type_wording} to run this command:',
                 clean_error(final_iter, seperator='\n', prefix='- '),
             ),
             seperator='\n',
