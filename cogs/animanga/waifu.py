@@ -51,9 +51,9 @@ class Waifu(BaseCog):
             )
             data = await req.json()
             success = 200
-            if req.status != success or not data:
-                raise WaifuNotFoundError(waifu)
             characters = [(str(obj['label']), str(obj['value'])) for obj in data if obj['category'] == CHARACTER_ID]
+            if req.status != success or not data or not characters:
+                raise WaifuNotFoundError(waifu)
             waifu = characters[0][1]  # Points to the value of the first result
 
         await ctx.invoke(self.waifu_show, waifu)
