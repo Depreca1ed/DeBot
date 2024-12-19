@@ -204,5 +204,3 @@ async def error_handler(ctx: DeContext, error: commands.CommandError) -> None:
     await ctx.bot.logger_webhook.send(embed=logger_embed)
 
     return
-
-    # Temp.
