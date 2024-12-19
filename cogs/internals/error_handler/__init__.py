@@ -113,16 +113,6 @@ async def error_handler(ctx: DeContext, error: commands.CommandError) -> None:
         await ctx.reply(str(error), delete_after=getattr(error, 'retry_after', None))
         return
 
-    # From here we handle unexpected errors.
-    # The process is as follows
-    # > Check if error has happened before [DONE]
-    # > If not, register the error [DONE]
-    # > Else, dont register [DONE]
-    # Additional functionality include:
-    # > Allowing the user to know when what is fixed or will be fixed [DONE]
-    # > Allow user to see the error. If they wish to fix it then allow them to PR (requires getsource wrt github) [CANCELLED]
-    # > Lastly do all of this in a good manner [KITAEHFACE]
-
     ctx.bot.log.error(
         'Ignoring exception in running %s',
         ctx.command,
