@@ -8,22 +8,13 @@ if TYPE_CHECKING:
 import contextlib
 
 import discord
-import starlight  # pyright: ignore[reportMissingTypeStubs]
 from discord.ext import commands
 
 from .dev import Developer
-from .error_handler import ErrorHandler
+from .error_handler import error_handler
 
 
-class Internals(ErrorHandler, Developer, name='Internals'):
-    def cog_load(self) -> None:
-        self.bot.help_command = starlight.MenuHelpCommand(
-            per_page=10, accent_color=self.bot.colour, error_color=discord.Color.red()
-        )
-
-    def cog_unload(self) -> None:
-        self.bot.help_command = commands.DefaultHelpCommand()
-
+class Internals(Developer, name='Internals'):
     @discord.utils.copy_doc(commands.Cog.cog_check)
     async def cog_check(self, ctx: DeContext) -> bool:
         return await self.bot.is_owner(ctx.author)
@@ -46,4 +37,9 @@ class Internals(ErrorHandler, Developer, name='Internals'):
 
 
 async def setup(bot: DeBot) -> None:
+    bot.add_listener(error_handler, 'on_command_error')
     await bot.add_cog(Internals(bot))
+
+
+async def teardown(bot: DeBot) -> None:
+    bot.remove_listener(error_handler, 'on_command_error')

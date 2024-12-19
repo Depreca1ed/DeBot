@@ -15,3 +15,4 @@ class BaseCog(commands.Cog):
 
     def __init__(self, bot: DeBot) -> None:
         self.bot = bot
+        super().__init__()
