@@ -89,7 +89,7 @@ class ErrorView(BaseView):
     @discord.ui.button(label='Wanna know more?', emoji=HANDLER_EMOJIS['grey_tick'], style=discord.ButtonStyle.grey)
     async def inform_button(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
         embed = Embed(
-            description=f'```py\n{self.error['error']}```',
+            description=f'```py\n{self.error["error"]}```',
             colour=ERROR_COLOUR,
         )
         error_timestamp: datetime.datetime = self.error['occured_when']

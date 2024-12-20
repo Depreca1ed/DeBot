@@ -11,10 +11,10 @@ import discord
 from discord.ext import commands
 
 from .dev import Developer
-from .error_handler import error_handler
+from .error_handler import ErrorHandler
 
 
-class Internals(Developer, name='Internals'):
+class Internals(Developer, ErrorHandler, name='Internals'):
     @discord.utils.copy_doc(commands.Cog.cog_check)
     async def cog_check(self, ctx: DeContext) -> bool:
         return await self.bot.is_owner(ctx.author)
@@ -37,9 +37,4 @@ class Internals(Developer, name='Internals'):
 
 
 async def setup(bot: DeBot) -> None:
-    bot.add_listener(error_handler, 'on_command_error')
     await bot.add_cog(Internals(bot))
-
-
-async def teardown(bot: DeBot) -> None:
-    bot.remove_listener(error_handler, 'on_command_error')

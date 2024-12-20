@@ -103,18 +103,22 @@ def generate_error_objects(
         if isinstance(error, commands.MissingAnyRole | commands.BotMissingAnyRole)
         else None
     )
+
     missing_role = (
         str(f'<@&{error.missing_role}>' if error.missing_role is int else error.missing_role)
         if isinstance(error, commands.MissingRole | commands.BotMissingRole)
         else None
     )
+
     missing_permissions = (
         error.missing_permissions
         if isinstance(error, commands.MissingPermissions | commands.BotMissingPermissions)
         else None
     )
-    final_iter = missing_roles or missing_role or missing_permissions
-    if not final_iter:
+
+    missings = missing_roles or missing_role or missing_permissions
+    if not missings:
         msg = 'Expected Not-None value'
         raise ValueError(msg)
-    return final_iter
+
+    return missings
