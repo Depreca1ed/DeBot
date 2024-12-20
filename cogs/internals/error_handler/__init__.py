@@ -50,7 +50,7 @@ class ErrorHandler(BaseCog):
         guild: discord.Guild | None = None,
     ) -> asyncpg.Record:
         formatted_error = self._format_tb(error)
-        time_occured = discord.utils.utcnow()
+        time_occured = datetime.datetime.now()
 
         record = await self.bot.pool.fetchrow(
             """
