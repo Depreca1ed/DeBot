@@ -12,6 +12,7 @@ class Developer(BaseCog):
     async def reload_cogs(self, ctx: DeContext) -> None:
         cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
         messages: list[str] = []
+
         for cog in cogs:
             try:
                 await self.bot.reload_extension(str(cog))
@@ -19,4 +20,5 @@ class Developer(BaseCog):
                 messages.append(f'Failed to reload {cog}\n```py{error}```')
             else:
                 messages.append(f'Reloaded {cog}')
+
         await ctx.send(content=better_string(messages, seperator='\n'))
