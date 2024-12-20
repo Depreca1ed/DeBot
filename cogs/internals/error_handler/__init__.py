@@ -71,7 +71,7 @@ class ErrorHandler(BaseCog):
         """,
             name,
             author.id,
-            guild,
+            guild.id if guild else None,
             str(error),
             formatted_error,
             message.jump_url,
@@ -142,9 +142,6 @@ class ErrorHandler(BaseCog):
     async def error_handler(self, ctx: DeContext, error: commands.CommandError) -> None | discord.Message:
         if (ctx.command and ctx.command.has_error_handler()) or (ctx.cog and ctx.cog.has_error_handler()):
             return None
-
-        if not ctx.command:
-            return None  # command will always exist
 
         error = getattr(error, 'original', error)
 
