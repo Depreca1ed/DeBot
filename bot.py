@@ -4,7 +4,7 @@ import configparser
 import datetime
 import functools
 import logging
-import sys
+import os
 from itertools import product
 from pathlib import Path
 from pkgutil import iter_modules
@@ -47,7 +47,7 @@ jishaku.Flags.NO_UNDERSCORE = True
 
 EXTERNAL_COGS: list[str] = ['jishaku']
 
-PREFIX = BASE_PREFIX if 'production' in sys.argv else TEST_PREFIX
+PREFIX = BASE_PREFIX if str(os.name) == 'posix' else TEST_PREFIX
 
 
 class DeBot(commands.Bot):
