@@ -1,6 +1,6 @@
 from .basecog import BaseCog
 from .blacklist import Blacklist
-from .config import BASE_PREFIX, DESCRIPTION, OWNERS_ID, THEME_COLOUR
+from .config import BASE_PREFIX, DESCRIPTION, OWNERS_ID, TEST_PREFIX, THEME_COLOUR
 from .context import DeContext
 from .embed import Embed
 from .errors import (
@@ -24,6 +24,7 @@ __all__ = (
     'BASE_PREFIX',
     'DESCRIPTION',
     'OWNERS_ID',
+    'TEST_PREFIX',
     'THEME_COLOUR',
     'ActivityHandler',
     'AlreadyBlacklistedError',

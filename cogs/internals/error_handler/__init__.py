@@ -3,12 +3,14 @@ from __future__ import annotations
 import datetime
 import difflib
 import traceback
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
 import mystbin
 from discord.ext import commands
 
+from cogs.internals.error_handler.constants import CHAR_LIMIT
 from utils import BaseCog, DeContext, Embed, better_string
 
 from .helpers import clean_error, generate_error_objects, make_embed
@@ -39,7 +41,42 @@ class ErrorHandler(BaseCog):
         )
 
     def _format_tb(self, error: Exception) -> str:
-        return ''.join(traceback.format_exception(type(error), error, error.__traceback__))
+        return ''.join(traceback.format_exception(type(error), error, error.__traceback__)).replace(
+            str(Path.cwd()), f'/{self.bot.user.name}'
+        )
+
+    async def _logger_embed(self, record: asyncpg.Record) -> Embed:
+        error_link = await self.bot.mystbin_cli.create_paste(
+            files=(
+                mystbin.File(
+                    filename=f'error{record["id"]}.py',
+                    content=record['full_error'],
+                ),
+            )
+        )
+
+        logger_embed = Embed(
+            title=f'Error #{record["id"]}',
+            description=f"""```py\n{record['full_error']}```"""
+            if len(record['full_error']) < CHAR_LIMIT
+            else 'Error message was too long to be shown',
+            colour=0xFF0000 if record['fixed'] is False else 0x00FF00,
+            url=error_link.url,
+        )
+
+        logger_embed.add_field(
+            value=better_string(
+                (
+                    f'- **Command:** `{record['command']}`',
+                    f'- **User:** {self.bot.get_user(record['user_id'])}',
+                    f'- **Guild:** {self.bot.get_guild(record['guild']) if record['guild'] else "N/A"}',
+                    f'- **URL: ** [Jump to message]({record['message_url']})',
+                    f'- **Occured: ** {discord.utils.format_dt(record['occured_when'], "f")}',
+                ),
+                seperator='\n',
+            )
+        )
+        return logger_embed
 
     async def _log_error(
         self,
@@ -83,35 +120,7 @@ class ErrorHandler(BaseCog):
         if not record:
             raise ValueError
 
-        error_link = await self.bot.mystbin_cli.create_paste(
-            files=(
-                mystbin.File(
-                    filename=f'error{record["id"]}.py',
-                    content=formatted_error,
-                ),
-            )
-        )
-
-        logger_embed = Embed(
-            title=error.__class__.__name__,
-            description=f"""```py\n{formatted_error}```""",
-            colour=0xFFFFFF,
-            url=error_link.url,
-        )
-
-        logger_embed.add_field(
-            value=better_string(
-                (
-                    f'- **ID:** {record["id"]}',
-                    f'- **Command:** `{name}`',
-                    f'- **User:** {author}',
-                    f'- **Guild:** {guild.name if guild else "N/A"}',
-                    f'- **URL: ** [Jump to message]({message.jump_url})',
-                    f'- **Occured: ** {discord.utils.format_dt(time_occured, "f")}',
-                ),
-                seperator='\n',
-            )
-        )
+        logger_embed = await self._logger_embed(record)
 
         await self.bot.logger_webhook.send(embed=logger_embed)
 
@@ -264,3 +273,23 @@ class ErrorHandler(BaseCog):
             )
 
         return None
+
+    @commands.group(
+        name='error',
+        description='Handles all things related to error handler logging.',
+        hidden=True,
+        invoke_without_command=True,
+    )
+    async def errorcmd_base(self, ctx: DeContext) -> None:
+        await ctx.send_help(ctx.command)
+
+    @errorcmd_base.command(name='show', description='Shows the embed for a certain error')
+    async def error_show(self, ctx: DeContext, error_id: int | None = None) -> None:
+        if error_id:
+            error_record = await self.bot.pool.fetchrow("""SELECT * FROM Errors WHERE id = $1""", error_id)
+            if not error_record:
+                await ctx.reply('Error not found.')
+                return
+            logger_embed = await self._logger_embed(error_record)
+            await ctx.reply(embed=logger_embed)
+            return

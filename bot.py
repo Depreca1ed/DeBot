@@ -4,6 +4,7 @@ import configparser
 import datetime
 import functools
 import logging
+import sys
 from itertools import product
 from pathlib import Path
 from pkgutil import iter_modules
@@ -20,6 +21,7 @@ from utils import (
     BASE_PREFIX,
     DESCRIPTION,
     OWNERS_ID,
+    TEST_PREFIX,
     THEME_COLOUR,
     Blacklist,
     DeContext,
@@ -45,10 +47,12 @@ jishaku.Flags.NO_UNDERSCORE = True
 
 EXTERNAL_COGS: list[str] = ['jishaku']
 
+PREFIX = BASE_PREFIX if 'production' in sys.argv else TEST_PREFIX
+
 
 class DeBot(commands.Bot):
     prefix: ClassVar[list[str]] = [
-        ''.join(capitalization) for capitalization in product(*zip(BASE_PREFIX.lower(), BASE_PREFIX.upper(), strict=False))
+        ''.join(capitalization) for capitalization in product(*zip(PREFIX.lower(), PREFIX.upper(), strict=False))
     ]
     colour: discord.Colour = THEME_COLOUR
     session: aiohttp.ClientSession
