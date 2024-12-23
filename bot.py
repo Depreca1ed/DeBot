@@ -172,7 +172,7 @@ class DeBot(commands.Bot):
 
         self.topgg = client.DBLClient(self, self.config.get('bot', 'topgg'), autopost=True, post_shard_count=True)
         self.topggwebhook = webhook.WebhookManager(self).dbl_webhook('/debotdbl', auth_key='debotdbl')
-        await self.topggwebhook.run(5430)
+        await self.topggwebhook.run(8080)
 
         cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
         cogs.extend(EXTERNAL_COGS)
