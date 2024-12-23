@@ -30,9 +30,8 @@ defaults = (
     commands.NotOwner,
     commands.NSFWChannelRequired,
     commands.TooManyArguments,
+    WaifuNotFoundError,
 )
-
-argument_not_found = {WaifuNotFoundError: 'Waifu'}
 
 
 class ErrorHandler(BaseCog):
@@ -242,15 +241,6 @@ class ErrorHandler(BaseCog):
                 str(error),
                 delete_after=getattr(error, 'retry_after', None),
             )
-
-        if isinstance(error, tuple(argument_not_found.keys())):
-            embed = make_embed(
-                title='Argument not found',
-                description=f'Could not find any results for {argument_not_found[error]}',
-                ctx=ctx,
-            )
-
-            return await ctx.reply(embed=embed)
 
         ctx.bot.log.error(
             'Ignoring exception in running %s',
