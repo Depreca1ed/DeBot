@@ -12,6 +12,7 @@ from discord.ext import commands
 
 from cogs.internals.error_handler.constants import CHAR_LIMIT
 from utils import BaseCog, DeContext, Embed, better_string
+from utils.errors import WaifuNotFoundError
 
 from .helpers import clean_error, generate_error_objects, make_embed
 from .views import ErrorView, MissingArgumentHandler
@@ -30,6 +31,8 @@ defaults = (
     commands.NSFWChannelRequired,
     commands.TooManyArguments,
 )
+
+argument_not_found = {WaifuNotFoundError: 'Waifu'}
 
 
 class ErrorHandler(BaseCog):
@@ -239,6 +242,15 @@ class ErrorHandler(BaseCog):
                 str(error),
                 delete_after=getattr(error, 'retry_after', None),
             )
+
+        if isinstance(error, argument_not_found.keys()):
+            embed = make_embed(
+                title='Argument not found',
+                description=f'Could not find any results for {argument_not_found[error]}',
+                ctx=ctx,
+            )
+
+            return await ctx.reply(embed=embed)
 
         ctx.bot.log.error(
             'Ignoring exception in running %s',
