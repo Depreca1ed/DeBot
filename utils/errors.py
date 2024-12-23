@@ -54,7 +54,7 @@ class BlacklistedUserError(commands.CheckFailure, DeBotError):
     ) -> None:
         string = 'You have been blacklisted'
         reason = f' for {reason}' if reason != 'No reason provided' else ''
-        until = f' until {until}' if until else ' permanently'
+        until = f' until {until.strftime("%A %d %B %Y")}' if until else ' permanently'
         super().__init__(string + reason + until)
 
 
@@ -62,7 +62,7 @@ class BlacklistedGuildError(commands.CheckFailure, DeBotError):
     def __init__(self, reason: str, until: datetime | None) -> None:
         string = 'Your guild has been blacklisted'
         reason = f' for {reason}' if reason != 'No reason provided' else ''
-        until = f' until {until}' if until else ' permanently'
+        until = f' until {until.strftime("%A %d %B %Y")}' if until else ' permanently'
         super().__init__(string + reason + until)
 
 
