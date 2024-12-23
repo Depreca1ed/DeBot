@@ -96,8 +96,8 @@ class ErrorView(BaseView):
         is_fixed = 'is not' if self.error['fixed'] is False else 'is'
         embed.add_field(
             value=(
-                f'The error was discovered **{discord.utils.format_dt(error_timestamp, 'R')}** '
-                f'in the **{self.error['command']}** command and **{is_fixed}** fixed'
+                f'The error was discovered **{discord.utils.format_dt(error_timestamp, "R")}** '
+                f'in the **{self.error["command"]}** command and **{is_fixed}** fixed'
             )
         )
         embed.set_footer(text=f'Requested by {interaction.user}', icon_url=interaction.user.display_avatar.url)
