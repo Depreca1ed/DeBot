@@ -243,7 +243,7 @@ class ErrorHandler(BaseCog):
                 delete_after=getattr(error, 'retry_after', None),
             )
 
-        if isinstance(error, argument_not_found.keys()):
+        if isinstance(error, argument_not_found):
             embed = make_embed(
                 title='Argument not found',
                 description=f'Could not find any results for {argument_not_found[error]}',
