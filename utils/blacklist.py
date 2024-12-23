@@ -36,13 +36,11 @@ class Blacklist:
     async def check(self, ctx: DeContext) -> Literal[True]:
         if ctx.guild and self.is_blacklisted(ctx.guild):
             raise BlacklistedGuildError(
-                ctx.guild,
                 reason=self.blacklists[ctx.guild]['reason'],
                 until=self.blacklists[ctx.guild]['lasts_until'],
             )
         if ctx.author and self.is_blacklisted(ctx.author):
             raise BlacklistedUserError(
-                ctx.author,
                 reason=self.blacklists[ctx.author]['reason'],
                 until=self.blacklists[ctx.author]['lasts_until'],
             )
