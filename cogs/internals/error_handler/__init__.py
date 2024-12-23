@@ -238,6 +238,7 @@ class ErrorHandler(BaseCog):
 
         if isinstance(error, defaults):
             embed = make_embed(
+                title='Command failed',
                 description=str(error),
                 ctx=ctx,
             )
