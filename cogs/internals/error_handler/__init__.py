@@ -237,9 +237,13 @@ class ErrorHandler(BaseCog):
             return await ctx.reply(embed=embed)
 
         if isinstance(error, defaults):
+            embed = make_embed(
+                description=str(error),
+                ctx=ctx,
+            )
             return await ctx.reply(
-                str(error),
                 delete_after=getattr(error, 'retry_after', None),
+                embed=embed,
             )
 
         ctx.bot.log.error(
@@ -256,7 +260,9 @@ class ErrorHandler(BaseCog):
         if known_error:
             view = ErrorView(known_error, ctx)
             view.message = await ctx.reply(
-                embed=make_embed(title='Known error occured.', description='This is an already unknown error.', ctx=ctx),
+                embed=make_embed(
+                    title='Known error occured.', description='This is a known error, and is yet to be fixed.', ctx=ctx
+                ),
                 view=view,
             )
         else:
