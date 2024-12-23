@@ -53,17 +53,17 @@ class BlacklistedUserError(commands.CheckFailure, DeBotError):
         until: datetime | None,
     ) -> None:
         string = 'You have been blacklisted'
-        reason = f' for {reason}' if reason != 'No reason provided' else ''
-        until = f' until {until.strftime("%A %d %B %Y")}' if until else ' permanently'
-        super().__init__(string + reason + until)
+        reason_str = f' for {reason}' if reason != 'No reason provided' else ''
+        until_str = f' until {until.strftime("%A %d %B %Y")}' if until is not None else ' permanently'
+        super().__init__(string + reason_str + until_str)
 
 
 class BlacklistedGuildError(commands.CheckFailure, DeBotError):
     def __init__(self, reason: str, until: datetime | None) -> None:
         string = 'Your guild has been blacklisted'
-        reason = f' for {reason}' if reason != 'No reason provided' else ''
-        until = f' until {until.strftime("%A %d %B %Y")}' if until else ' permanently'
-        super().__init__(string + reason + until)
+        reason_str = f' for {reason}' if reason != 'No reason provided' else ''
+        until_str = f' until {until.strftime("%A %d %B %Y")}' if until else ' permanently'
+        super().__init__(string + reason_str + until_str)
 
 
 class AlreadyBlacklistedError(commands.CommandError, DeBotError):
@@ -74,9 +74,9 @@ class AlreadyBlacklistedError(commands.CommandError, DeBotError):
         until: datetime | None,
     ) -> None:
         string = f'{snowflake} is already blacklisted'
-        reason = f' for {reason}' if reason != 'No reason provided' else ''
-        until = f' until {until}' if until else ' permanently'
-        super().__init__(string + reason + until)
+        reason_str = f' for {reason}' if reason != 'No reason provided' else ''
+        until_str = f' until {until}' if until else ' permanently'
+        super().__init__(string + reason_str + until_str)
 
 
 class NotBlacklistedError(commands.CommandError, DeBotError):
