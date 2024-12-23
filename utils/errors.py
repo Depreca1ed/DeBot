@@ -49,16 +49,21 @@ class PrefixNotPresentError(commands.CommandError, DeBotError):
 class BlacklistedUserError(commands.CheckFailure, DeBotError):
     def __init__(
         self,
-        snowflake: discord.User | discord.Member,
         reason: str,
         until: datetime | None,
     ) -> None:
-        super().__init__(f'{snowflake} is blacklisted for {reason} until {until}')
+        string = 'You have been blacklisted'
+        reason_str = f' for {reason}' if reason != 'No reason provided' else ''
+        until_str = f' until {until.strftime("%A %d %B %Y")}' if until is not None else ' permanently'
+        super().__init__(string + reason_str + until_str)
 
 
 class BlacklistedGuildError(commands.CheckFailure, DeBotError):
-    def __init__(self, snowflake: discord.Guild, reason: str, until: datetime | None) -> None:
-        super().__init__(f'{snowflake} is blacklisted for {reason} until {until}')
+    def __init__(self, reason: str, until: datetime | None) -> None:
+        string = 'Your guild has been blacklisted'
+        reason_str = f' for {reason}' if reason != 'No reason provided' else ''
+        until_str = f' until {until.strftime("%A %d %B %Y")}' if until else ' permanently'
+        super().__init__(string + reason_str + until_str)
 
 
 class AlreadyBlacklistedError(commands.CommandError, DeBotError):
@@ -68,7 +73,10 @@ class AlreadyBlacklistedError(commands.CommandError, DeBotError):
         reason: str,
         until: datetime | None,
     ) -> None:
-        super().__init__(f'{snowflake} is already blacklisted for {reason} until {until}')
+        string = f'{snowflake} is already blacklisted'
+        reason_str = f' for {reason}' if reason != 'No reason provided' else ''
+        until_str = f' until {until}' if until else ' permanently'
+        super().__init__(string + reason_str + until_str)
 
 
 class NotBlacklistedError(commands.CommandError, DeBotError):

@@ -12,6 +12,7 @@ from discord.ext import commands
 
 from cogs.internals.error_handler.constants import CHAR_LIMIT
 from utils import BaseCog, DeContext, Embed, better_string
+from utils.errors import WaifuNotFoundError
 
 from .helpers import clean_error, generate_error_objects, make_embed
 from .views import ErrorView, MissingArgumentHandler
@@ -29,6 +30,7 @@ defaults = (
     commands.NotOwner,
     commands.NSFWChannelRequired,
     commands.TooManyArguments,
+    WaifuNotFoundError,
 )
 
 
@@ -235,9 +237,14 @@ class ErrorHandler(BaseCog):
             return await ctx.reply(embed=embed)
 
         if isinstance(error, defaults):
+            embed = make_embed(
+                title='Command failed',
+                description=str(error),
+                ctx=ctx,
+            )
             return await ctx.reply(
-                str(error),
                 delete_after=getattr(error, 'retry_after', None),
+                embed=embed,
             )
 
         ctx.bot.log.error(
@@ -254,7 +261,9 @@ class ErrorHandler(BaseCog):
         if known_error:
             view = ErrorView(known_error, ctx)
             view.message = await ctx.reply(
-                embed=make_embed(title='Known error occured.', description='This is an already unknown error.', ctx=ctx),
+                embed=make_embed(
+                    title='Known error occured.', description='This is a known error, and is yet to be fixed.', ctx=ctx
+                ),
                 view=view,
             )
         else:
