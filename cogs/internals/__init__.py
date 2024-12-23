@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from bot import DeBot
@@ -34,6 +34,10 @@ class Internals(Developer, ErrorHandler, name='Internals'):
         ):
             with contextlib.suppress(discord.HTTPException):
                 await reaction.message.delete()
+
+    @commands.Cog.listener('on_dbl_vote')
+    async def dbl_vote_handler(self, data: dict[Any, Any]) -> None:
+        await self.bot.logger_webhook.send(content=str(data))
 
 
 async def setup(bot: DeBot) -> None:

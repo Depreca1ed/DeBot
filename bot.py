@@ -16,6 +16,7 @@ import discord
 import jishaku
 import mystbin
 from discord.ext import commands
+from topgg import client, webhook
 
 from utils import (
     BASE_PREFIX,
@@ -64,6 +65,7 @@ class DeBot(commands.Bot):
     blacklist: Blacklist
     maintenance: bool
     appinfo: discord.AppInfo
+    topgg: client.DBLClient
     log = log
 
     def __init__(self) -> None:
@@ -167,6 +169,10 @@ class DeBot(commands.Bot):
             await self.pool.execute(f.read())
 
         self.appinfo = await self.application_info()
+
+        self.topgg = client.DBLClient(self, self.config.get('bot', 'topgg'), autopost=True, post_shard_count=True)
+        self.topggwebhook = webhook.WebhookManager(self).dbl_webhook('/debotdbl', auth_key='debotdbl')
+        await self.topggwebhook.run(8080)
 
         cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
         cogs.extend(EXTERNAL_COGS)
