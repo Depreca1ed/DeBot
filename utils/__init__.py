@@ -17,6 +17,7 @@ from .errors import (
     WaifuNotFoundError,
 )
 from .helper_functions import ActivityHandler, better_string
+from .pagination import DePaginator
 from .types import BlacklistBase, WaifuResult
 from .view import BaseView
 
@@ -36,6 +37,7 @@ __all__ = (
     'BlacklistedUserError',
     'DeBotError',
     'DeContext',
+    'DePaginator',
     'Embed',
     'FeatureDisabledError',
     'NotBlacklistedError',

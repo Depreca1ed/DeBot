@@ -66,6 +66,7 @@ class DeBot(commands.Bot):
     maintenance: bool
     appinfo: discord.AppInfo
     topgg: client.DBLClient
+    topggwebhook: webhook.WebhookManager
     log = log
 
     def __init__(self) -> None:
@@ -240,4 +241,8 @@ class DeBot(commands.Bot):
             await self.pool.close()
         if hasattr(self, 'session'):
             await self.session.close()
+        if hasattr(self, 'topgg'):
+            await self.topgg.close()
+        if hasattr(self, 'topggwebhook'):
+            await self.topggwebhook.close()
         await super().close()
