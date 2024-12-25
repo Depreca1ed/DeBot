@@ -21,7 +21,7 @@ __all__ = (
 
 
 class SmashOrPass(BaseView):
-    message: discord.Message
+    message: discord.Message | None
     ctx: DeContext
     current: WaifuResult
     token: str
