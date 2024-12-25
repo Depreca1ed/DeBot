@@ -58,7 +58,6 @@ class DePaginator(BaseView):
 
     def fill_items(self) -> None:
         if not self.compact:
-            self.numbered_page.row = 1
             self.stop_pages.row = 1
 
         if self.source.is_paginating():
@@ -72,16 +71,10 @@ class DePaginator(BaseView):
             self.add_item(self.go_to_next_page)
             if use_last_and_first:
                 self.add_item(self.go_to_last_page)
-            if not self.compact:
-                self.add_item(self.numbered_page)
             self.add_item(self.stop_pages)
 
     async def _get_kwargs_from_page(self, page: int) -> dict[str, Any]:
-        # fmt: off
-        value: dict[str, Any] | str | discord.Embed | Any = self.source.format_page(self, page)  # pyright: ignore[reportUnknownMemberType]
-
-        if isinstance(value, dict):
-            return value  # pyright: ignore[reportUnknownVariableType]
+        value: str | discord.Embed | Any = await discord.utils.maybe_coroutine(self.source.format_page, self, page)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType, reportUnknownArgumentType]
 
         if isinstance(value, str):
             return {'content': value, 'embed': None}
@@ -164,9 +157,28 @@ class DePaginator(BaseView):
         """Go to the previous page."""
         await self.show_checked_page(interaction, self.current_page - 1)
 
-    @discord.ui.button(label='Current', style=discord.ButtonStyle.grey, disabled=True)
+    @discord.ui.button(label='Current', style=discord.ButtonStyle.grey)
     async def go_to_current_page(self, interaction: discord.Interaction, _: discord.ui.Button[Self]) -> None:
-        pass
+        """Lets you type a page number to go to."""
+        if self.current_modal is not None and not self.current_modal.is_finished():
+            self.current_modal.stop()
+
+        self.current_modal = SkipToModal(timeout=20)
+        await interaction.response.send_modal(self.current_modal)
+        timed_out = await self.current_modal.wait()
+
+        if timed_out:
+            await interaction.followup.send('Took too long.', ephemeral=True)
+        elif self.current_modal.interaction is None or not self.current_modal.value:
+            return
+        else:
+            try:
+                page = int(self.current_modal.value)
+            except ValueError:
+                await self.current_modal.interaction.response.send_message('Invalid page number.', ephemeral=True)
+            else:
+                await self.current_modal.interaction.response.defer()
+                await self.show_checked_page(interaction, page - 1)
 
     @discord.ui.button(label='Next', style=discord.ButtonStyle.blurple)
     async def go_to_next_page(self, interaction: discord.Interaction, _: discord.ui.Button[Self]) -> None:
@@ -178,29 +190,6 @@ class DePaginator(BaseView):
         """Go to the last page."""
         # The call here is safe because it's guarded by skip_if
         await self.show_page(interaction, self.source.get_max_pages() - 1)  # type: ignore  # noqa: PGH003
-
-    @discord.ui.button(label='Skip to page...', style=discord.ButtonStyle.grey)
-    async def numbered_page(self, interaction: discord.Interaction, _: discord.ui.Button[Self]) -> None:
-        """Lets you type a page number to go to."""
-        if self.current_modal is not None and not self.current_modal.is_finished():
-            self.current_modal.stop()
-
-        self.current_modal = SkipToModal(timeout=20)
-        await interaction.response.send_modal(self.current_modal)
-        timed_out = await self.current_modal.wait()
-
-        if timed_out:
-            await interaction.followup.send('Took too long.', ephemeral=True)
-        elif self.current_modal.interaction is None:
-            return
-        else:
-            try:
-                page = int(self.current_modal.value)  # pyright: ignore[reportArgumentType]
-            except ValueError:
-                await self.current_modal.interaction.response.send_message('Invalid page number.', ephemeral=True)
-            else:
-                await self.current_modal.interaction.response.defer()
-                await self.show_checked_page(interaction, page - 1)
 
     @discord.ui.button(label='Quit', style=discord.ButtonStyle.red)
     async def stop_pages(self, interaction: discord.Interaction, _: discord.ui.Button[Self]) -> None:

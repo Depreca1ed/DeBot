@@ -2,23 +2,23 @@ from __future__ import annotations
 
 import datetime
 import difflib
+import operator
 import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import discord
-import mystbin
-from discord.ext import commands
+from discord.ext import commands, menus
 
-from cogs.internals.error_handler.constants import CHAR_LIMIT
-from utils import BaseCog, DeContext, Embed, better_string
-from utils.errors import WaifuNotFoundError
+from utils import BaseCog, DeContext, DePaginator, Embed, WaifuNotFoundError, better_string
 
-from .helpers import clean_error, generate_error_objects, make_embed
+from .helpers import clean_error, generate_error_objects, logger_embed, make_embed
 from .views import ErrorView, MissingArgumentHandler
 
 if TYPE_CHECKING:
     import asyncpg
+    import discord
+
+    from bot import DeBot
 
 defaults = (
     commands.UserInputError,
@@ -34,6 +34,18 @@ defaults = (
 )
 
 
+class ErrorPageSource(menus.ListPageSource):
+    def __init__(self, bot: DeBot, entries: list[asyncpg.Record]) -> None:
+        self.bot = bot
+        entries = sorted(entries, key=operator.itemgetter('id'))
+        super().__init__(entries, per_page=1)
+
+    async def format_page(self, _: DePaginator, entry: asyncpg.Record) -> Embed:
+        embed = await logger_embed(self.bot, entry)
+        embed.title = embed.title + f'/{self.get_max_pages()}' if embed.title else None
+        return embed
+
+
 class ErrorHandler(BaseCog):
     def _find_closest_command(self, name: str) -> list[str]:
         return difflib.get_close_matches(
@@ -46,39 +58,6 @@ class ErrorHandler(BaseCog):
         return ''.join(traceback.format_exception(type(error), error, error.__traceback__)).replace(
             str(Path.cwd()), f'/{self.bot.user.name}'
         )
-
-    async def _logger_embed(self, record: asyncpg.Record) -> Embed:
-        error_link = await self.bot.mystbin_cli.create_paste(
-            files=(
-                mystbin.File(
-                    filename=f'error{record["id"]}.py',
-                    content=record['full_error'],
-                ),
-            )
-        )
-
-        logger_embed = Embed(
-            title=f'Error #{record["id"]}',
-            description=f"""```py\n{record['full_error']}```"""
-            if len(record['full_error']) < CHAR_LIMIT
-            else 'Error message was too long to be shown',
-            colour=0xFF0000 if record['fixed'] is False else 0x00FF00,
-            url=error_link.url,
-        )
-
-        logger_embed.add_field(
-            value=better_string(
-                (
-                    f'- **Command:** `{record['command']}`',
-                    f'- **User:** {self.bot.get_user(record['user_id'])}',
-                    f'- **Guild:** {self.bot.get_guild(record['guild']) if record['guild'] else "N/A"}',
-                    f'- **URL: ** [Jump to message]({record['message_url']})',
-                    f'- **Occured: ** {discord.utils.format_dt(record['occured_when'], "f")}',
-                ),
-                seperator='\n',
-            )
-        )
-        return logger_embed
 
     async def _log_error(
         self,
@@ -122,9 +101,9 @@ class ErrorHandler(BaseCog):
         if not record:
             raise ValueError
 
-        logger_embed = await self._logger_embed(record)
+        embed = await logger_embed(self.bot, record)
 
-        await self.bot.logger_webhook.send(embed=logger_embed)
+        await self.bot.logger_webhook.send(embed=embed)
 
         return record
 
@@ -299,6 +278,11 @@ class ErrorHandler(BaseCog):
             if not error_record:
                 await ctx.reply('Error not found.')
                 return
-            logger_embed = await self._logger_embed(error_record)
-            await ctx.reply(embed=logger_embed)
+            embed = await logger_embed(self.bot, error_record)
+            await ctx.reply(embed=embed)
             return
+        errors = await self.bot.pool.fetch(
+            """SELECT * FROM Errors""",
+        )
+        paginate = DePaginator(ErrorPageSource(self.bot, errors), ctx=ctx)
+        await paginate.start()

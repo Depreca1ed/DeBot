@@ -1,11 +1,22 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+import discord
+import mystbin
 from discord.ext import commands
 
 from utils import DeContext, better_string
 from utils.embed import Embed
 
-from .constants import ERROR_COLOUR, HANDLER_EMOJIS
+from .constants import CHAR_LIMIT, ERROR_COLOUR, HANDLER_EMOJIS
+
+if TYPE_CHECKING:
+    import asyncpg
+
+    from bot import DeBot
+
+__all__ = ('clean_error', 'generate_error_objects', 'logger_embed', 'make_embed')
 
 
 def clean_error(objects: list[str] | str, *, seperator: str, prefix: str) -> str:
@@ -122,3 +133,37 @@ def generate_error_objects(
         raise ValueError(msg)
 
     return missings
+
+
+async def logger_embed(bot: DeBot, record: asyncpg.Record) -> Embed:
+    error_link = await bot.mystbin_cli.create_paste(
+        files=(
+            mystbin.File(
+                filename=f'error{record["id"]}.py',
+                content=record['full_error'],
+            ),
+        )
+    )
+
+    logger_embed = Embed(
+        title=f'Error #{record["id"]}',
+        description=f"""```py\n{record['full_error']}```"""
+        if len(record['full_error']) < CHAR_LIMIT
+        else 'Error message was too long to be shown',
+        colour=0xFF0000 if record['fixed'] is False else 0x00FF00,
+        url=error_link.url,
+    )
+
+    logger_embed.add_field(
+        value=better_string(
+            (
+                f'- **Command:** `{record['command']}`',
+                f'- **User:** {bot.get_user(record['user_id'])}',
+                f'- **Guild:** {bot.get_guild(record['guild']) if record['guild'] else "N/A"}',
+                f'- **URL: ** [Jump to message]({record['message_url']})',
+                f'- **Occured: ** {discord.utils.format_dt(record['occured_when'], "f")}',
+            ),
+            seperator='\n',
+        )
+    )
+    return logger_embed
