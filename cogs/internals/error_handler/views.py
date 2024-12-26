@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Self
 
 import discord
 
-from utils import BaseView, DeContext, Embed
+from utils import BaseView, DeContext, DePaginator, Embed
 
 from .constants import ERROR_COLOUR, HANDLER_EMOJIS
 
@@ -126,3 +126,37 @@ class ErrorView(BaseView):
             """INSERT INTO ErrorReminders (id, user_id) VALUES ($1, $2)""", self.error['id'], interaction.user.id
         )
         await interaction.response.send_message('You will now be notified when this error is fixed', ephemeral=True)
+
+
+class ErrorPaginator(DePaginator):
+    async def show_page(self, interaction: discord.Interaction[discord.Client], page_number: int) -> None:
+        check: asyncpg.Record = await self.current(page_number)
+        self.mark_fixed.disabled = check['fixed'] is not False
+        return await super().show_page(interaction, page_number)
+
+    async def start(self, *, ephemeral: bool = False) -> None:
+        check: asyncpg.Record = await self.current(0)
+        self.mark_fixed.disabled = check['fixed'] is not False
+        return await super().start(ephemeral=ephemeral)
+
+    async def current(self, page_number: int) -> asyncpg.Record:
+        current: asyncpg.Record = await self.source.get_page(page_number)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        return current  # pyright: ignore[reportUnknownVariableType]
+
+    def fill_items(self) -> None:
+        super().fill_items()
+        self.add_item(self.mark_fixed)
+
+    @discord.ui.button(label='Mark as fixed', style=discord.ButtonStyle.green, disabled=False)
+    async def mark_fixed(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
+        current = await self.current(self.current_page)
+        notified_people = await interaction.client.pool.fetch(
+            """SELECT user_id FROM ErrorReminders WHERE id = $1""", (current)['id']
+        )
+        users = [_ for _ in [interaction.client.get_user(rec['user_id']) for rec in notified_people] if _]
+        for user in users:
+            await user.send(f'Error #`{current["id"]}` has been fixed.')
+
+        await interaction.client.pool.execute("""UPDATE Errors SET fixed = $1 WHERE id = $2""", True, current['id'])
+        await interaction.client.pool.execute("""DELETE FROM ErrorReminders WHERE id = $1""", current['id'])
+        await self.show_page(interaction, self.current_page)
