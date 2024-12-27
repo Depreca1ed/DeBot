@@ -9,10 +9,10 @@ from typing import TYPE_CHECKING
 
 from discord.ext import commands, menus
 
-from utils import BaseCog, DeContext, DePaginator, Embed, better_string
+from utils import BaseCog, DeContext, DePaginator, Embed, WaifuNotFoundError, better_string
 
 from .helpers import clean_error, generate_error_objects, logger_embed, make_embed
-from .views import ErrorPaginator, ErrorView, MissingArgumentHandler
+from .views import ErrorView, MissingArgumentHandler
 
 if TYPE_CHECKING:
     import asyncpg
@@ -30,6 +30,7 @@ defaults = (
     commands.NotOwner,
     commands.NSFWChannelRequired,
     commands.TooManyArguments,
+    WaifuNotFoundError,
 )
 
 
@@ -283,5 +284,5 @@ class ErrorHandler(BaseCog):
         errors = await self.bot.pool.fetch(
             """SELECT * FROM Errors""",
         )
-        paginate = ErrorPaginator(ErrorPageSource(self.bot, errors), ctx=ctx)
+        paginate = DePaginator(ErrorPageSource(self.bot, errors), ctx=ctx)
         await paginate.start()
