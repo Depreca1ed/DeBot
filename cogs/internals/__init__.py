@@ -12,9 +12,10 @@ from discord.ext import commands
 
 from .dev import Developer
 from .error_handler import ErrorHandler
+from .guild import Guild
 
 
-class Internals(Developer, ErrorHandler, name='Internals'):
+class Internals(Developer, ErrorHandler, Guild, name='Internals'):
     @discord.utils.copy_doc(commands.Cog.cog_check)
     async def cog_check(self, ctx: DeContext) -> bool:
         return await self.bot.is_owner(ctx.author)

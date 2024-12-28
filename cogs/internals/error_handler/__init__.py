@@ -7,16 +7,17 @@ import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import discord
 from discord.ext import commands, menus
 
 from utils import BaseCog, DeContext, DePaginator, Embed, WaifuNotFoundError, better_string
 
+from .constants import HANDLER_EMOJIS
 from .helpers import clean_error, generate_error_objects, logger_embed, make_embed
 from .views import ErrorView, MissingArgumentHandler
 
 if TYPE_CHECKING:
     import asyncpg
-    import discord
 
     from bot import DeBot
 
@@ -286,3 +287,22 @@ class ErrorHandler(BaseCog):
         )
         paginate = DePaginator(ErrorPageSource(self.bot, errors), ctx=ctx)
         await paginate.start()
+
+    @errorcmd_base.command(name='fix', description='Mark an error as fixed')
+    async def error_fix(self, ctx: DeContext, error_id: int) -> None:
+        data = await self.bot.pool.fetchrow("""SELECT * FROM Errors WHERE id = $1""", error_id)
+        if not data:
+            await ctx.reply(f'Cannot find an error with the ID: `{error_id}`')
+            return
+        await self.bot.pool.execute("""UPDATE Errors SET fixed = $1 WHERE id = $2""", True, error_id)
+        notifiers = await self.bot.pool.fetch("""SELECT user_id FROM ErrorReminders WHERE id = $1""", error_id)
+        if notifiers:
+            users = [_ for _ in [self.bot.get_user(user['user_id']) for user in notifiers] if _]
+            for user in users:
+                try:
+                    await user.send(f"Hey! Error `#{data['id']}` in the `{data['command']}` command has been fixed.")
+                except discord.errors.Forbidden:
+                    continue
+            # Assuming all goes fine
+            await self.bot.pool.execute("""DELETE FROM ErrorReminders WHERE id = $1""", error_id)
+        await ctx.message.add_reaction(str(HANDLER_EMOJIS['greentick']))
