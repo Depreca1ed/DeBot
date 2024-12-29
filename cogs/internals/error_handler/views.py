@@ -62,7 +62,13 @@ class MissingArgumentModal(discord.ui.Modal):
 class MissingArgumentHandler(BaseView):
     prev_message: discord.Message
 
-    def __init__(self, error: commands.MissingRequiredArgument, ctx: DeContext, *, timeout: float | None = 180) -> None:
+    def __init__(
+        self,
+        error: commands.MissingRequiredArgument,
+        ctx: DeContext,
+        *,
+        timeout: float | None = 180,
+    ) -> None:
         self.error = error
         self.ctx = ctx
         super().__init__(timeout=timeout)
@@ -115,7 +121,9 @@ class ErrorView(BaseView):
 
         if is_user_present:
             await interaction.client.pool.execute(
-                """DELETE FROM ErrorReminders WHERE id = $1 AND user_id = $2""", self.error['id'], interaction.user.id
+                """DELETE FROM ErrorReminders WHERE id = $1 AND user_id = $2""",
+                self.error['id'],
+                interaction.user.id,
             )
             await interaction.response.send_message(
                 'You will no longer be notified when this error is fixed.', ephemeral=True
@@ -123,6 +131,8 @@ class ErrorView(BaseView):
             return
 
         await interaction.client.pool.execute(
-            """INSERT INTO ErrorReminders (id, user_id) VALUES ($1, $2)""", self.error['id'], interaction.user.id
+            """INSERT INTO ErrorReminders (id, user_id) VALUES ($1, $2)""",
+            self.error['id'],
+            interaction.user.id,
         )
         await interaction.response.send_message('You will now be notified when this error is fixed', ephemeral=True)

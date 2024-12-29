@@ -34,18 +34,7 @@ class Blacklist:
         super().__init__()
 
     async def check(self, ctx: DeContext) -> Literal[True]:
-        if ctx.guild and self.is_blacklisted(ctx.guild):
-            raise BlacklistedGuildError(
-                reason=self.blacklists[ctx.guild]['reason'],
-                until=self.blacklists[ctx.guild]['lasts_until'],
-            )
-        if ctx.author and self.is_blacklisted(ctx.author):
-            raise BlacklistedUserError(
-                reason=self.blacklists[ctx.author]['reason'],
-                until=self.blacklists[ctx.author]['lasts_until'],
-            )
-
-        return True
+        pass
 
     def is_blacklisted(self, snowflake: discord.Member | discord.User | discord.Guild) -> bool:
         return bool(self.blacklists.get(snowflake))

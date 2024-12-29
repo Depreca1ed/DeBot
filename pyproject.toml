@@ -28,6 +28,7 @@ ignore = [
     "RUF036",
     "FBT003",
     "DTZ005",
+    "S105"
 ]
 
 [tool.ruff.lint.mccabe]

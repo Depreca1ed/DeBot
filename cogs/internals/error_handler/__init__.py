@@ -242,7 +242,9 @@ class ErrorHandler(BaseCog):
             view = ErrorView(known_error, ctx)
             view.message = await ctx.reply(
                 embed=make_embed(
-                    title='Known error occured.', description='This is a known error, and is yet to be fixed.', ctx=ctx
+                    title='Known error occured.',
+                    description='This is a known error, and is yet to be fixed.',
+                    ctx=ctx,
                 ),
                 view=view,
             )
@@ -257,7 +259,11 @@ class ErrorHandler(BaseCog):
 
             view = ErrorView(record, ctx)
             view.message = await ctx.reply(
-                embed=make_embed(title='Unknown error occured', description='The developers have been informed.', ctx=ctx),
+                embed=make_embed(
+                    title='Unknown error occured',
+                    description='The developers have been informed.',
+                    ctx=ctx,
+                ),
                 view=view,
             )
 

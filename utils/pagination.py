@@ -16,7 +16,9 @@ __all__ = ('DePaginator',)
 
 class SkipToModal(discord.ui.Modal, title='Skip to page...'):
     page = discord.ui.TextInput[Self](
-        label='Which page do you want to skip to?', max_length=10, placeholder='This prompt times out in 20 seconds...'
+        label='Which page do you want to skip to?',
+        max_length=10,
+        placeholder='This prompt times out in 20 seconds...',
     )
 
     def __init__(self, **kwargs: Any) -> None:

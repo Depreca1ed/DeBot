@@ -76,7 +76,10 @@ class Waifu(BaseCog):
                 self.bot.session,
                 for_user=ctx.author.id,
                 nsfw=ctx.channel.is_nsfw()
-                if not isinstance(ctx.channel, discord.DMChannel | discord.GroupChannel | discord.PartialMessageable)
+                if not isinstance(
+                    ctx.channel,
+                    discord.DMChannel | discord.GroupChannel | discord.PartialMessageable,
+                )
                 else False,
                 source='waifusearch',
                 query=waifu,

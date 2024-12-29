@@ -26,7 +26,15 @@ class SmashOrPass(BaseView):
     current: WaifuResult
     token: str
 
-    def __init__(self, session: ClientSession, *, for_user: int, nsfw: bool, source: str, query: None | str = None) -> None:
+    def __init__(
+        self,
+        session: ClientSession,
+        *,
+        for_user: int,
+        nsfw: bool,
+        source: str,
+        query: None | str = None,
+    ) -> None:
         super().__init__(timeout=500.0)
         self.session = session
         self.for_user = for_user

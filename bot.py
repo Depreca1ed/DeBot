@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import configparser
 import datetime
 import functools
 import logging
 import os
-from itertools import product
 from pathlib import Path
 from pkgutil import iter_modules
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Self, overload
+from typing import TYPE_CHECKING, Any, Literal, Self, overload
 
 import aiohttp
 import asyncpg
@@ -18,12 +16,8 @@ import mystbin
 from discord.ext import commands
 from topgg import client, webhook
 
+import config
 from utils import (
-    BASE_PREFIX,
-    DESCRIPTION,
-    OWNERS_ID,
-    TEST_PREFIX,
-    THEME_COLOUR,
     Blacklist,
     DeContext,
     PrefixAlreadyPresentError,
@@ -35,10 +29,11 @@ from utils import (
 if TYPE_CHECKING:
     from discord.ext.commands._types import ContextT  # pyright: ignore[reportMissingTypeStubs]
 
+import sys
 
 __all__ = ('DeBot',)
 
-log: logging.Logger = logging.getLogger('discord')
+log: logging.Logger = logging.getLogger(__name__)
 
 jishaku.Flags.FORCE_PAGINATOR = True
 jishaku.Flags.HIDE = True
@@ -46,31 +41,50 @@ jishaku.Flags.NO_DM_TRACEBACK = True
 jishaku.Flags.NO_UNDERSCORE = True
 
 
+BASE_PREFIX = 'm.'
+TEST_PREFIX = 'k.'
+
+OWNERS_ID = [
+    688293803613880334,
+    263602820496883712,
+    651454696208465941,
+    412734157819609090,
+    606648465065246750,
+]
+
+DESCRIPTION = """A low effort bot with a cute design."""
+
+THEME_COLOUR = discord.Colour(0x4B506F)
+
 EXTERNAL_COGS: list[str] = ['jishaku']
 
-PREFIX = BASE_PREFIX if str(os.name) == 'posix' else TEST_PREFIX
+PREFIX = BASE_PREFIX if str(os.name) == 'posix' else TEST_PREFIX  # NOTE: Please change this according to your needs.
 
 
 class DeBot(commands.Bot):
-    prefix: ClassVar[list[str]] = [
-        ''.join(capitalization) for capitalization in product(*zip(PREFIX.lower(), PREFIX.upper(), strict=False))
-    ]
-    colour: discord.Colour = THEME_COLOUR
-    session: aiohttp.ClientSession
-    if TYPE_CHECKING:
-        pool: asyncpg.Pool[asyncpg.Record]
-    mystbin_cli: mystbin.Client
-    load_time: datetime.datetime
-    prefixes: dict[int, list[str]]
-    blacklist: Blacklist
-    maintenance: bool
-    appinfo: discord.AppInfo
-    topgg: client.DBLClient
-    topggwebhook: webhook.WebhookManager
-    log = log
+    pool: asyncpg.Pool[asyncpg.Record]
+    user: discord.ClientUser
 
     def __init__(self) -> None:
         intents: discord.Intents = discord.Intents.all()
+        allowed_mentions = discord.AllowedMentions(everyone=False, users=True, roles=False, replied_user=True)
+
+        self.token = config.TOKEN
+        self.session = aiohttp.ClientSession(
+            headers={
+                'User-Agent': (
+                    f'DeBot Python/{sys.version_info[0]}.{sys.version_info[1]}'
+                    f'.{sys.version_info[2]} aiohttp/{aiohttp.__version__}'
+                )
+            },
+            timeout=aiohttp.ClientTimeout(total=60),
+        )
+
+        self.mystbin = mystbin.Client(session=self.session)
+        self.prefixes: dict[int, list[str]] = {}
+        self.blacklist = Blacklist(self)
+        self.maintenance = False
+        self.check_once(self.check_maintenance)
         super().__init__(
             description=DESCRIPTION,
             command_prefix=self.get_prefix,  # pyright: ignore[reportArgumentType]
@@ -78,16 +92,8 @@ class DeBot(commands.Bot):
             strip_after_prefix=True,
             intents=intents,
             max_messages=5000,
-            allowed_mentions=discord.AllowedMentions(everyone=False, users=True, roles=False, replied_user=True),
+            allowed_mentions=allowed_mentions,
         )
-        self.token = str(self.config.get('bot', 'token'))
-        self.session = aiohttp.ClientSession()
-        self.mystbin_cli = mystbin.Client()
-        self.load_time = datetime.datetime.now(tz=datetime.UTC)
-        self.prefixes: dict[int, list[str]] = {}
-        self.blacklist = Blacklist(self)
-        self.maintenance = False
-        self.check_once(self.check_maintenance)
 
     @discord.utils.copy_doc(commands.Bot.get_prefix)
     async def get_prefix(self, message: discord.Message) -> list[str]:
@@ -206,12 +212,6 @@ class DeBot(commands.Bot):
             cls = DeContext  # pyright: ignore[reportAssignmentType]
         return await super().get_context(origin, cls=cls)
 
-    @property
-    def config(self) -> configparser.ConfigParser:
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        return config
-
     @discord.utils.copy_doc(commands.Bot.is_owner)
     async def is_owner(self, user: discord.abc.User) -> bool:
         return bool(user.id in OWNERS_ID)
@@ -227,14 +227,6 @@ class DeBot(commands.Bot):
             msg = 'Support server not found'
             raise commands.GuildNotFound(msg)
         return guild
-
-    @property
-    def user(self) -> discord.ClientUser:
-        user = super().user
-        if not user:
-            msg = "Bot's user not found"
-            raise commands.UserNotFound(msg)
-        return user
 
     async def close(self) -> None:
         if hasattr(self, 'pool'):
