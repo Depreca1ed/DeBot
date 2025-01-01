@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import ActivityHandler, BaseCog, DeContext, Embed, better_string
+from utils import ActivityHandler, BaseCog, Context, Embed, better_string
 
 
 class Userinfo(BaseCog):
@@ -13,7 +13,7 @@ class Userinfo(BaseCog):
     @app_commands.allowed_installs(guilds=True, users=True)
     async def whois(
         self,
-        ctx: DeContext,
+        ctx: Context,
         user: discord.Member | discord.User | None,
     ) -> None:
         user = user or ctx.author

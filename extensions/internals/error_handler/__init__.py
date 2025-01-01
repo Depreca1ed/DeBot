@@ -10,16 +10,16 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, menus
 
-from utils import BaseCog, DeContext, DePaginator, Embed, WaifuNotFoundError, better_string
+from utils import BaseCog, Context, Paginator, Embed, WaifuNotFoundError, better_string
 
 from .constants import HANDLER_EMOJIS
-from .helpers import clean_error, generate_error_objects, logger_embed, make_embed
+from .helpers import clean_error, generate_error_objects, logger_embed
 from .views import ErrorView, MissingArgumentHandler
 
 if TYPE_CHECKING:
     import asyncpg
 
-    from bot import DeBot
+    from bot import Mafuyu
 
 defaults = (
     commands.UserInputError,
@@ -36,12 +36,12 @@ defaults = (
 
 
 class ErrorPageSource(menus.ListPageSource):
-    def __init__(self, bot: DeBot, entries: list[asyncpg.Record]) -> None:
+    def __init__(self, bot: Mafuyu, entries: list[asyncpg.Record]) -> None:
         self.bot = bot
         entries = sorted(entries, key=operator.itemgetter('id'))
         super().__init__(entries, per_page=1)
 
-    async def format_page(self, _: DePaginator, entry: asyncpg.Record) -> Embed:
+    async def format_page(self, _: Paginator, entry: asyncpg.Record) -> Embed:
         embed = await logger_embed(self.bot, entry)
         embed.title = embed.title + f'/{self.get_max_pages()}' if embed.title else None
         return embed
@@ -131,7 +131,7 @@ class ErrorHandler(BaseCog):
         )
 
     @commands.Cog.listener('on_command_error')
-    async def error_handler(self, ctx: DeContext, error: commands.CommandError) -> None | discord.Message:
+    async def error_handler(self, ctx: Context, error: commands.CommandError) -> None | discord.Message:
         if (ctx.command and ctx.command.has_error_handler()) or (ctx.cog and ctx.cog.has_error_handler()):
             return None
 
@@ -144,7 +144,7 @@ class ErrorHandler(BaseCog):
 
             possible_commands = self._find_closest_command(cmd)
             if possible_commands:
-                embed = make_embed(
+                embed = Embed.error_embed(
                     title='Command Not Found',
                     description=f'Could not find a command with that name. Perhaps you meant, `{possible_commands[0]}`?',
                     ctx=ctx,
@@ -156,7 +156,7 @@ class ErrorHandler(BaseCog):
 
         if isinstance(error, commands.MissingRequiredArgument | commands.MissingRequiredAttachment):
             param_name = error.param.displayed_name or error.param.name
-            embed = make_embed(
+            embed = Embed.error_embed(
                 title=f'Missing {param_name} argument!',
                 description=better_string(
                     (
@@ -208,7 +208,7 @@ class ErrorHandler(BaseCog):
                 seperator='\n',
             )
 
-            embed = make_embed(
+            embed = Embed.error_embed(
                 ctx=ctx,
                 title=f'Missing {error_type_wording.title()}',
                 description=content,
@@ -217,7 +217,7 @@ class ErrorHandler(BaseCog):
             return await ctx.reply(embed=embed)
 
         if isinstance(error, defaults):
-            embed = make_embed(
+            embed = Embed.error_embed(
                 title='Command failed',
                 description=str(error),
                 ctx=ctx,
@@ -241,7 +241,7 @@ class ErrorHandler(BaseCog):
         if known_error:
             view = ErrorView(known_error, ctx)
             view.message = await ctx.reply(
-                embed=make_embed(
+                embed=Embed.error_embed(
                     title='Known error occured.',
                     description='This is a known error, and is yet to be fixed.',
                     ctx=ctx,
@@ -259,7 +259,7 @@ class ErrorHandler(BaseCog):
 
             view = ErrorView(record, ctx)
             view.message = await ctx.reply(
-                embed=make_embed(
+                embed=Embed.error_embed(
                     title='Unknown error occured',
                     description='The developers have been informed.',
                     ctx=ctx,
@@ -275,11 +275,11 @@ class ErrorHandler(BaseCog):
         hidden=True,
         invoke_without_command=True,
     )
-    async def errorcmd_base(self, ctx: DeContext) -> None:
+    async def errorcmd_base(self, ctx: Context) -> None:
         await ctx.send_help(ctx.command)
 
     @errorcmd_base.command(name='show', description='Shows the embed for a certain error')
-    async def error_show(self, ctx: DeContext, error_id: int | None = None) -> None:
+    async def error_show(self, ctx: Context, error_id: int | None = None) -> None:
         if error_id:
             error_record = await self.bot.pool.fetchrow("""SELECT * FROM Errors WHERE id = $1""", error_id)
             if not error_record:
@@ -291,11 +291,11 @@ class ErrorHandler(BaseCog):
         errors = await self.bot.pool.fetch(
             """SELECT * FROM Errors""",
         )
-        paginate = DePaginator(ErrorPageSource(self.bot, errors), ctx=ctx)
+        paginate = Paginator(ErrorPageSource(self.bot, errors), ctx=ctx)
         await paginate.start()
 
     @errorcmd_base.command(name='fix', description='Mark an error as fixed')
-    async def error_fix(self, ctx: DeContext, error_id: int) -> None:
+    async def error_fix(self, ctx: Context, error_id: int) -> None:
         data = await self.bot.pool.fetchrow("""SELECT * FROM Errors WHERE id = $1""", error_id)
         if not data:
             await ctx.reply(f'Cannot find an error with the ID: `{error_id}`')

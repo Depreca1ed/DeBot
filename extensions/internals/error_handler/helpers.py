@@ -6,15 +6,15 @@ import discord
 import mystbin
 from discord.ext import commands
 
-from utils import DeContext, better_string
+from utils import better_string
 from utils.embed import Embed
 
-from .constants import CHAR_LIMIT, ERROR_COLOUR, HANDLER_EMOJIS
+from .constants import CHAR_LIMIT
 
 if TYPE_CHECKING:
     import asyncpg
 
-    from bot import DeBot
+    from bot import Mafuyu
 
 __all__ = ('clean_error', 'generate_error_objects', 'logger_embed', 'make_embed')
 
@@ -46,30 +46,6 @@ def clean_error(objects: list[str] | str, *, seperator: str, prefix: str) -> str
         if objects is not str
         else prefix + objects
     )
-
-
-def make_embed(*, title: str | None = None, description: str | None = None, ctx: DeContext | None = None) -> Embed:
-    """
-    Generate an embed for error handler responses.
-
-    Parameters
-    ----------
-    title : str | None, optional
-        The title for the embed
-    description : str | None, optional
-        The description for the embed
-    ctx : DeContext | None, optional
-        The context for the embed, if applicable
-
-    Returns
-    -------
-    Embed
-        The generated embed
-
-    """
-    embed = Embed(title=title, description=description, ctx=ctx, colour=ERROR_COLOUR)
-    embed.set_thumbnail(url=HANDLER_EMOJIS['MafuyuUnamused2'].url)
-    return embed
 
 
 def generate_error_objects(
@@ -135,7 +111,7 @@ def generate_error_objects(
     return missings
 
 
-async def logger_embed(bot: DeBot, record: asyncpg.Record) -> Embed:
+async def logger_embed(bot: Mafuyu, record: asyncpg.Record) -> Embed:
     error_link = await bot.mystbin_cli.create_paste(
         files=(
             mystbin.File(

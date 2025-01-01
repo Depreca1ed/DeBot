@@ -9,9 +9,9 @@ from utils.view import BaseView
 if TYPE_CHECKING:
     from discord.ext import menus
 
-    from . import DeContext
+    from . import Context
 
-__all__ = ('DePaginator',)
+__all__ = ('Paginator',)
 
 
 class SkipToModal(discord.ui.Modal, title='Skip to page...'):
@@ -31,7 +31,7 @@ class SkipToModal(discord.ui.Modal, title='Skip to page...'):
         self.value = self.page.value
 
 
-class DePaginator(BaseView):
+class Paginator(BaseView):
     # This Source Code Form is subject to the terms of the Mozilla Public
     # License, v. 2.0. If a copy of the MPL was not distributed with this
     # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -43,7 +43,7 @@ class DePaginator(BaseView):
         self,
         source: menus.PageSource,
         *,
-        ctx: DeContext,
+        ctx: Context,
         check_embeds: bool = True,
         compact: bool = False,
     ) -> None:
@@ -51,7 +51,7 @@ class DePaginator(BaseView):
         self.current_modal: SkipToModal | None = None
         self.source: menus.PageSource = source
         self.check_embeds: bool = check_embeds
-        self.ctx: DeContext = ctx
+        self.ctx: Context = ctx
         self.message: discord.Message | None = None
         self.current_page: int = 0
         self.compact: bool = compact

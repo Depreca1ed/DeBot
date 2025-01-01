@@ -13,7 +13,7 @@ __all__ = (
     'AlreadyBlacklistedError',
     'BlacklistedGuildError',
     'BlacklistedUserError',
-    'DeBotError',
+    'MafuyuError',
     'FeatureDisabledError',
     'NotBlacklistedError',
     'PrefixAlreadyPresentError',
@@ -23,30 +23,30 @@ __all__ = (
 )
 
 
-class DeBotError(Exception): ...
+class MafuyuError(Exception): ...
 
 
-class FeatureDisabledError(commands.CheckFailure, DeBotError):
+class FeatureDisabledError(commands.CheckFailure, MafuyuError):
     def __init__(self) -> None:
         super().__init__('This feature is not enabled in this server.')
 
 
-class PrefixNotInitialisedError(commands.CommandError, DeBotError):
+class PrefixNotInitialisedError(commands.CommandError, MafuyuError):
     def __init__(self, guild: discord.Guild) -> None:
         super().__init__(f'Prefixes were not initialised for {guild.id}')
 
 
-class PrefixAlreadyPresentError(commands.CommandError, DeBotError):
+class PrefixAlreadyPresentError(commands.CommandError, MafuyuError):
     def __init__(self, prefix: str) -> None:
         super().__init__(f"'{prefix} is an already present prefix.'")
 
 
-class PrefixNotPresentError(commands.CommandError, DeBotError):
+class PrefixNotPresentError(commands.CommandError, MafuyuError):
     def __init__(self, prefix: str, guild: discord.Guild) -> None:
         super().__init__(f'{prefix} is not present in guild: {guild.id}')
 
 
-class BlacklistedUserError(commands.CheckFailure, DeBotError):
+class BlacklistedUserError(commands.CheckFailure, MafuyuError):
     def __init__(
         self,
         reason: str,
@@ -58,7 +58,7 @@ class BlacklistedUserError(commands.CheckFailure, DeBotError):
         super().__init__(string + reason_str + until_str)
 
 
-class BlacklistedGuildError(commands.CheckFailure, DeBotError):
+class BlacklistedGuildError(commands.CheckFailure, MafuyuError):
     def __init__(self, reason: str, until: datetime | None) -> None:
         string = 'Your guild has been blacklisted'
         reason_str = f' for {reason}' if reason != 'No reason provided' else ''
@@ -66,7 +66,7 @@ class BlacklistedGuildError(commands.CheckFailure, DeBotError):
         super().__init__(string + reason_str + until_str)
 
 
-class AlreadyBlacklistedError(commands.CommandError, DeBotError):
+class AlreadyBlacklistedError(commands.CommandError, MafuyuError):
     def __init__(
         self,
         snowflake: discord.User | discord.Guild,
@@ -79,17 +79,17 @@ class AlreadyBlacklistedError(commands.CommandError, DeBotError):
         super().__init__(string + reason_str + until_str)
 
 
-class NotBlacklistedError(commands.CommandError, DeBotError):
+class NotBlacklistedError(commands.CommandError, MafuyuError):
     def __init__(self, snowflake: discord.User | discord.Guild) -> None:
         super().__init__(f'{snowflake} is not blacklisted.')
 
 
-class UnderMaintenanceError(commands.CheckFailure, DeBotError):
+class UnderMaintenanceError(commands.CheckFailure, MafuyuError):
     def __init__(self) -> None:
         super().__init__('The bot is currently under maintenance.')
 
 
-class WaifuNotFoundError(commands.CommandError, DeBotError):
+class WaifuNotFoundError(commands.CommandError, MafuyuError):
     def __init__(self, waifu: str | None = None) -> None:
         if waifu:
             waifu = waifu.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')

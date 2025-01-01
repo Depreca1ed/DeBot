@@ -12,7 +12,7 @@ from utils import Embed, better_string
 if TYPE_CHECKING:
     from discord.ui.item import Item
 
-    from bot import DeBot
+    from bot import Mafuyu
 
 __all__ = ('BaseView',)
 
@@ -30,7 +30,7 @@ class BaseView(discord.ui.View):
 
     async def on_error(
         self,
-        interaction: discord.Interaction[DeBot],
+        interaction: discord.Interaction[Mafuyu],
         error: Exception,
         _: Item[Any],
     ) -> None:

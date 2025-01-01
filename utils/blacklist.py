@@ -18,22 +18,22 @@ if TYPE_CHECKING:
 
     from discord.abc import Snowflake
 
-    from bot import DeBot
+    from bot import Mafuyu
 
-    from .context import DeContext
+    from .context import Context
     from .types import BlacklistBase
 
 
 class Blacklist:
     blacklists: dict[Snowflake, BlacklistBase]
 
-    def __init__(self, bot: DeBot) -> None:
+    def __init__(self, bot: Mafuyu) -> None:
         self.blacklists = {}
         self.bot = bot
         self.bot.check_once(self.check)
         super().__init__()
 
-    async def check(self, ctx: DeContext) -> Literal[True]:
+    async def check(self, ctx: Context) -> Literal[True]:
         pass
 
     def is_blacklisted(self, snowflake: discord.Member | discord.User | discord.Guild) -> bool:

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Self
 
 import discord
 
-from utils import BaseView, DeContext, Embed
+from utils import BaseView, Context, Embed
 
 from .constants import ERROR_COLOUR, HANDLER_EMOJIS
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     import asyncpg
     from discord.ext import commands
 
-    from bot import DeBot
+    from bot import Mafuyu
 
 
 class MissingArgumentModal(discord.ui.Modal):
@@ -31,7 +31,7 @@ class MissingArgumentModal(discord.ui.Modal):
     def __init__(
         self,
         error: commands.MissingRequiredArgument,
-        ctx: DeContext,
+        ctx: Context,
         *,
         title: str,
         timeout: float | None = None,
@@ -65,7 +65,7 @@ class MissingArgumentHandler(BaseView):
     def __init__(
         self,
         error: commands.MissingRequiredArgument,
-        ctx: DeContext,
+        ctx: Context,
         *,
         timeout: float | None = 180,
     ) -> None:
@@ -75,7 +75,7 @@ class MissingArgumentHandler(BaseView):
         self.argument_button.label = f'Add {(self.error.param.displayed_name or self.error.param.name).title()}'
 
     @discord.ui.button(emoji=HANDLER_EMOJIS['grey_tick'], style=discord.ButtonStyle.grey)
-    async def argument_button(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
+    async def argument_button(self, interaction: discord.Interaction[Mafuyu], _: discord.ui.Button[Self]) -> None:
         modal = MissingArgumentModal(
             self.error,
             self.ctx,
@@ -87,13 +87,13 @@ class MissingArgumentHandler(BaseView):
 
 
 class ErrorView(BaseView):
-    def __init__(self, error: asyncpg.Record, ctx: DeContext, *, timeout: float | None = 180) -> None:
+    def __init__(self, error: asyncpg.Record, ctx: Context, *, timeout: float | None = 180) -> None:
         self.error = error  # The wording is strongly terrible here, its a record of error not the error itself
         self.ctx = ctx
         super().__init__(timeout=timeout)
 
     @discord.ui.button(label='Wanna know more?', emoji=HANDLER_EMOJIS['grey_tick'], style=discord.ButtonStyle.grey)
-    async def inform_button(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
+    async def inform_button(self, interaction: discord.Interaction[Mafuyu], _: discord.ui.Button[Self]) -> None:
         embed = Embed(
             description=f'```py\n{self.error["error"]}```',
             colour=ERROR_COLOUR,
@@ -112,7 +112,7 @@ class ErrorView(BaseView):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @discord.ui.button(label='Get notified', emoji=HANDLER_EMOJIS['greentick'], style=discord.ButtonStyle.green)
-    async def notified_button(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
+    async def notified_button(self, interaction: discord.Interaction[Mafuyu], _: discord.ui.Button[Self]) -> None:
         is_user_present = await interaction.client.pool.fetchrow(
             """SELECT * FROM ErrorReminders WHERE id = $1 AND user_id = $2""",
             self.error['id'],

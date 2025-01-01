@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, Self
 import discord
 from asyncpg.exceptions import UniqueViolationError
 
-from utils import BaseView, DeContext, Embed, WaifuNotFoundError, WaifuResult, better_string
+from utils import BaseView, Context, Embed, WaifuNotFoundError, WaifuResult, better_string
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
-    from bot import DeBot
+    from bot import Mafuyu
 
 
 __all__ = (
@@ -22,7 +22,7 @@ __all__ = (
 
 class SmashOrPass(BaseView):
     message: discord.Message | None
-    ctx: DeContext
+    ctx: Context
     current: WaifuResult
     token: str
 
@@ -46,7 +46,7 @@ class SmashOrPass(BaseView):
         self.passers: set[discord.User | discord.Member] = set()
 
     @classmethod
-    async def start(cls, ctx: DeContext, source: str, *, query: None | str = None) -> Self | None:
+    async def start(cls, ctx: Context, source: str, *, query: None | str = None) -> Self | None:
         inst = cls(
             ctx.bot.session,
             for_user=ctx.author.id,
@@ -94,7 +94,7 @@ class SmashOrPass(BaseView):
         emoji='<:MafuyuBlush:1314149745794617365>',
         style=discord.ButtonStyle.green,
     )
-    async def smash(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
+    async def smash(self, interaction: discord.Interaction[Mafuyu], _: discord.ui.Button[Self]) -> None:
         if interaction.user in self.smashers:
             try:
                 await interaction.client.pool.execute(
@@ -139,7 +139,7 @@ class SmashOrPass(BaseView):
         emoji='<:MafuyuUnamused:1314149535043293215>',
         style=discord.ButtonStyle.red,
     )
-    async def passbutton(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
+    async def passbutton(self, interaction: discord.Interaction[Mafuyu], _: discord.ui.Button[Self]) -> None:
         if interaction.user in self.passers:
             return await interaction.response.defer()
 
@@ -166,7 +166,7 @@ class SmashOrPass(BaseView):
         return None
 
     @discord.ui.button(emoji='🔁', style=discord.ButtonStyle.grey)
-    async def _next(self, interaction: discord.Interaction[DeBot], _: discord.ui.Button[Self]) -> None:
+    async def _next(self, interaction: discord.Interaction[Mafuyu], _: discord.ui.Button[Self]) -> None:
         self.smashers.clear()
         self.passers.clear()
         try:

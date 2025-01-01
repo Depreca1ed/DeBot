@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from bot import DeBot
-    from utils import DeContext
+    from bot import Mafuyu
+    from utils import Context
 import contextlib
 
 import discord
@@ -17,7 +17,7 @@ from .guild import Guild
 
 class Internals(Developer, ErrorHandler, Guild, name='Internals'):
     @discord.utils.copy_doc(commands.Cog.cog_check)
-    async def cog_check(self, ctx: DeContext) -> bool:
+    async def cog_check(self, ctx: Context) -> bool:
         return await self.bot.is_owner(ctx.author)
 
     @commands.Cog.listener('on_message_edit')
@@ -41,5 +41,5 @@ class Internals(Developer, ErrorHandler, Guild, name='Internals'):
         await self.bot.logger_webhook.send(content=str(data))
 
 
-async def setup(bot: DeBot) -> None:
+async def setup(bot: Mafuyu) -> None:
     await bot.add_cog(Internals(bot))

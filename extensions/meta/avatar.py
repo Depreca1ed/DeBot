@@ -9,14 +9,14 @@ from discord.ext import commands
 from utils import BaseCog, Embed
 
 if TYPE_CHECKING:
-    from utils import DeContext
+    from utils import Context
 
 
 class Avatar(BaseCog):
     @commands.hybrid_group(name='avatar', help="Get your or user's displayed avatar", aliases=['av'])
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=True)
-    async def avatar(self, ctx: DeContext, user: discord.User | discord.Member | None) -> discord.Message:
+    async def avatar(self, ctx: Context, user: discord.User | discord.Member | None) -> discord.Message:
         user_ = user or ctx.author
         embed = Embed(title=f"{user_}'s avatar", colour=user_.color, ctx=ctx).set_image(url=user_.display_avatar.url)
         filetypes = (
@@ -43,14 +43,14 @@ class Avatar(BaseCog):
         name='show',
         help=avatar.help,
     )  # This is supposed to basically be the slash for avatar command since group base are not really created as a slash
-    async def avatar_slash(self, ctx: DeContext, user: discord.User | discord.Member | None) -> discord.Message:
+    async def avatar_slash(self, ctx: Context, user: discord.User | discord.Member | None) -> discord.Message:
         return await ctx.invoke(self.avatar, user)
 
     @avatar.command(
         name='user',
         help="Get your or user's profile avatar. This does not include server avatars",
     )
-    async def avatar_norm(self, ctx: DeContext, user: discord.User | None) -> discord.Message:
+    async def avatar_norm(self, ctx: Context, user: discord.User | None) -> discord.Message:
         user_ = user or ctx.author
         av = user_.avatar or user_.default_avatar
         embed = Embed(title=f"{user_}'s avatar", ctx=ctx).set_image(url=av.url)
@@ -74,7 +74,7 @@ class Avatar(BaseCog):
     @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
     @app_commands.allowed_installs(guilds=True, users=False)
     @commands.guild_only()
-    async def guild_avatar(self, ctx: DeContext) -> discord.Message:
+    async def guild_avatar(self, ctx: Context) -> discord.Message:
         if not ctx.guild:
             msg = 'Guild not found'
             raise commands.GuildNotFound(msg)

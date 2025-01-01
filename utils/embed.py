@@ -4,22 +4,20 @@ from typing import Any, Self
 
 import discord
 
-from . import THEME_COLOUR, DeContext
+from . import BASE_COLOUR, ERROR_COLOUR, Context
 
 __all__ = ('Embed',)
 
 
 class Embed(discord.Embed):
-    """Main purpose is to get the usual setup of Embed for a command or an error embed."""
-
     def __init__(
         self,
         *,
-        colour: discord.Colour | int | None = THEME_COLOUR,
         title: str | None = None,
         url: str | None = None,
         description: str | None = None,
-        ctx: DeContext | None = None,
+        colour: discord.Colour | int | None = BASE_COLOUR,
+        ctx: Context | None = None,
         **kwargs: Any,
     ) -> None:
         if ctx:
@@ -28,12 +26,36 @@ class Embed(discord.Embed):
                 icon_url=ctx.author.display_avatar.url or None,
             )
         super().__init__(
-            colour=colour if colour and colour != discord.Colour.default() else THEME_COLOUR,
             title=title,
             url=url,
             description=description,
+            colour=colour if colour and colour != discord.Colour.default() else BASE_COLOUR,
             **kwargs,
         )
 
     def add_field(self, *, name: str | None = '', value: str | None = '', inline: bool = False) -> Self:
         return super().add_field(name=name, value=value, inline=inline)
+
+    @classmethod
+    def error_embed(cls, *, title: str | None = None, description: str | None = None, ctx: Context | None = None) -> Self:
+        """
+        Generate an embed for error handler responses.
+
+        Parameters
+        ----------
+        title : str | None, optional
+            The title for the embed
+        description : str | None, optional
+            The description for the embed
+        ctx : Context | None, optional
+            The context for the embed, if applicable
+
+        Returns
+        -------
+        Embed
+            The generated embed
+
+        """
+        embed = cls(title=title, description=description, ctx=ctx, colour=ERROR_COLOUR)
+        embed.set_thumbnail(url=ctx.bot.bot_emojis['MafuyuUnamused2'].url if ctx else None)
+        return embed

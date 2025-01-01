@@ -9,7 +9,7 @@ from discord.ext import commands
 from utils import BaseCog, Embed, better_string
 
 if TYPE_CHECKING:
-    from utils import DeContext
+    from utils import Context
 
 
 class ServerInfo(BaseCog):
@@ -17,7 +17,7 @@ class ServerInfo(BaseCog):
     @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
     @app_commands.allowed_installs(guilds=True, users=False)
     @commands.guild_only()
-    async def serverinfo(self, ctx: DeContext) -> None:
+    async def serverinfo(self, ctx: Context) -> None:
         if not ctx.guild:
             msg = 'Guild not found'
             raise commands.GuildNotFound(msg)

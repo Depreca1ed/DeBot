@@ -10,7 +10,7 @@ import psutil
 from discord import app_commands
 from discord.ext import commands
 
-from utils import BaseCog, DeContext, Embed, better_string
+from utils import BaseCog, Context, Embed, better_string
 
 try:
     from importlib.metadata import distribution, packages_distributions
@@ -28,7 +28,7 @@ class BotInformation(BaseCog):
     )
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
-    async def botinfo(self, ctx: DeContext) -> None:
+    async def botinfo(self, ctx: Context) -> None:
         bot = self.bot
         embed = Embed(title=str(bot.user.name), description=bot.description, ctx=ctx)
         embed.set_author(
@@ -65,7 +65,7 @@ class BotInformation(BaseCog):
         with proc.oneshot():
             memory = proc.memory_info().rss
             uptime = humanize.naturaldelta(
-                datetime.timedelta(seconds=datetime.datetime.now(datetime.UTC).timestamp() - bot.load_time.timestamp())
+                datetime.timedelta(seconds=datetime.datetime.now(datetime.UTC).timestamp() - bot.start_time.timestamp())
             )
             memory_usage = (
                 str(round((memory / 1024) / 1024))

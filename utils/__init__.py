@@ -1,14 +1,14 @@
 from .basecog import BaseCog
 from .blacklist import Blacklist
-from .config import BASE_PREFIX, DESCRIPTION, OWNERS_ID, TEST_PREFIX, THEME_COLOUR
-from .context import DeContext
+from .constants import BASE_COLOUR, ERROR_COLOUR
+from .context import Context
 from .embed import Embed
 from .errors import (
     AlreadyBlacklistedError,
     BlacklistedGuildError,
     BlacklistedUserError,
-    DeBotError,
     FeatureDisabledError,
+    MafuyuError,
     NotBlacklistedError,
     PrefixAlreadyPresentError,
     PrefixNotInitialisedError,
@@ -17,16 +17,13 @@ from .errors import (
     WaifuNotFoundError,
 )
 from .helper_functions import ActivityHandler, better_string
-from .pagination import DePaginator
+from .pagination import Paginator
 from .types import BlacklistBase, WaifuResult
 from .view import BaseView
 
 __all__ = (
-    'BASE_PREFIX',
-    'DESCRIPTION',
-    'OWNERS_ID',
-    'TEST_PREFIX',
-    'THEME_COLOUR',
+    'BASE_COLOUR',
+    'ERROR_COLOUR',
     'ActivityHandler',
     'AlreadyBlacklistedError',
     'BaseCog',
@@ -35,12 +32,12 @@ __all__ = (
     'BlacklistBase',
     'BlacklistedGuildError',
     'BlacklistedUserError',
-    'DeBotError',
-    'DeContext',
-    'DePaginator',
+    'Context',
     'Embed',
     'FeatureDisabledError',
+    'MafuyuError',
     'NotBlacklistedError',
+    'Paginator',
     'PrefixAlreadyPresentError',
     'PrefixNotInitialisedError',
     'PrefixNotPresentError',
