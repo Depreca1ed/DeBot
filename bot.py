@@ -34,7 +34,7 @@ DESCRIPTION = """Yo holy shit a description i wonder what i should put here."""
 
 extensions = [
     'extensions.animanga',
-    'extensins.internals',
+    'extensions.internals',
     'extensions.meta',
 ]
 try:
