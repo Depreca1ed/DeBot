@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import logging
 from pkgutil import iter_modules
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload, Any
 
 import aiohttp
 import asyncpg
@@ -76,7 +76,6 @@ class Mafuyu(commands.Bot):
         self.mystbin = mystbin.Client(session=self.session)
 
         self.prefixes: dict[int, list[str]] = {}
-        self.blacklist = Blacklist(self)
 
         self.maintenance: bool = False
         self.start_time = datetime.datetime.now()
@@ -84,22 +83,30 @@ class Mafuyu(commands.Bot):
         self.initial_extensions = extensions
 
     async def setup_hook(self) -> None:
+        credentials: dict[str, Any] = config.DATABASE_CRED
+        pool = await asyncpg.create_pool(**credentials)
+        if not pool or (pool and pool.is_closing()):
+            msg = 'Failed to setup PostgreSQL. Shutting down.'
+            raise RuntimeError(msg)
+
+        self.pool = pool
         self.appinfo = await self.application_info()
         self.bot_emojis = {emoji.name: emoji for emoji in await self.fetch_application_emojis()}
+        self._support_invite = await self.fetch_invite('https://discord.gg/mtWF6sWMex')
 
-        cogs = [m.name for m in iter_modules(['cogs'], prefix='cogs.')]
-        cogs.append('jishaku')
-        for cog in cogs:
+        self.blacklist = await Blacklist.setup(self)
+
+        for cog in self.initial_extensions:
             try:
                 await self.load_extension(str(cog))
             except commands.ExtensionError as error:
                 log.exception(
-                    'Ignoring exception in loading %s',
+                    'Failed to load %s',
                     cog,
                     exc_info=error,
                 )
             else:
-                log.info('Loaded %s ', cog)
+                log.info('Successfully loaded %s', cog)
 
     @overload
     async def get_context(self, origin: discord.Interaction | discord.Message, /) -> Context: ...
@@ -120,7 +127,7 @@ class Mafuyu(commands.Bot):
 
     @discord.utils.copy_doc(commands.Bot.is_owner)
     async def is_owner(self, user: discord.abc.User) -> bool:
-        return bool(user.id in OWNERS_ID)
+        return bool(user.id in config.OWNERS_ID)
 
     @discord.utils.cached_property
     def logger_webhook(self) -> discord.Webhook:
@@ -133,6 +140,10 @@ class Mafuyu(commands.Bot):
             msg = 'Support server not found'
             raise commands.GuildNotFound(msg)
         return guild
+
+    @property
+    def support_invite(self) -> discord.Invite:
+        return self._support_invite
 
     async def close(self) -> None:
         if hasattr(self, 'pool'):

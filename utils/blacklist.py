@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Self
 
 import discord
 
 from .errors import (
     AlreadyBlacklistedError,
-    BlacklistedGuildError,
-    BlacklistedUserError,
     NotBlacklistedError,
 )
 
@@ -25,19 +23,63 @@ if TYPE_CHECKING:
 
 
 class Blacklist:
-    blacklists: dict[Snowflake, BlacklistBase]
+    blacklist_cache: dict[int, BlacklistBase]
 
-    def __init__(self, bot: Mafuyu) -> None:
-        self.blacklists = {}
+    def __init__(self, bot: Mafuyu, blacklist_cache: dict[int, BlacklistBase]) -> None:
+        self.blacklist_cache = blacklist_cache
         self.bot = bot
         self.bot.check_once(self.check)
+
+        self._command_attempts: dict[int, int] = {}
         super().__init__()
 
-    async def check(self, ctx: Context) -> Literal[True]:
-        pass
+    @classmethod
+    async def setup(cls, bot: Mafuyu) -> Self:
+        entries = await bot.pool.fetch("""SELECT * FROM Blacklists""")
 
-    def is_blacklisted(self, snowflake: discord.Member | discord.User | discord.Guild) -> bool:
-        return bool(self.blacklists.get(snowflake))
+        blacklist_cache: dict[int, BlacklistBase] = {}
+        for entry in entries:
+            blacklist_cache[entry['snowflake']] = {
+                'reason': entry['reason'],
+                'lasts_until': entry['lasts_until'],
+                'blacklist_type': entry['blacklist_type'],
+            }
+
+        return cls(bot, blacklist_cache)
+
+    async def _handle_user_blacklist(self, ctx: Context, user: discord.User | discord.Member, data: BlacklistBase) -> None:
+        timestamp_wording = f'until {data["lasts_until"]}' if data['lasts_until'] else 'permanently'
+        content = (
+            f'{user.mention}, you are blacklisted from using {ctx.bot.user} for `{data['reason']}` {timestamp_wording}. '
+            f'If you wish to appeal this blacklist, please join the [Support Server]( {ctx.bot.support_invite} ).'
+        )
+
+        if isinstance(ctx.channel, discord.DMChannel):
+            await ctx.channel.send(content)
+            return
+
+        attempt_check = self._command_attempts.get(user.id)
+
+        if not attempt_check:
+            self._command_attempts[user.id] = 1
+            return
+
+        if attempt_check >= 5:
+            await ctx.channel.send(content)
+            del self._command_attempts[user.id]
+            return
+
+        self._command_attempts[user.id] += 1
+        return
+
+    async def check(self, ctx: Context):
+        if data := self.is_blacklisted(ctx.author):
+            await self._handle_user_blacklist(ctx, ctx.author, data)
+            return False
+        return True
+
+    def is_blacklisted(self, snowflake: discord.User | discord.Member | discord.Guild) -> BlacklistBase | None:
+        return self.blacklist_cache.get(snowflake.id, None)
 
     async def add(
         self,
