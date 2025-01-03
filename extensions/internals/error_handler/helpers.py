@@ -9,7 +9,6 @@ from discord.ext import commands
 from utils import better_string
 from utils.embed import Embed
 
-from .constants import CHAR_LIMIT
 
 if TYPE_CHECKING:
     import asyncpg

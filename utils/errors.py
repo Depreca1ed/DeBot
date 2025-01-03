@@ -2,19 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import discord
 from discord.ext import commands
 
 if TYPE_CHECKING:
     from datetime import datetime
 
-    import discord
 
 __all__ = (
     'AlreadyBlacklistedError',
-    'BlacklistedGuildError',
-    'BlacklistedUserError',
-    'MafuyuError',
     'FeatureDisabledError',
+    'MafuyuError',
     'NotBlacklistedError',
     'PrefixAlreadyPresentError',
     'PrefixNotInitialisedError',
@@ -23,7 +21,7 @@ __all__ = (
 )
 
 
-class MafuyuError(Exception): ...
+class MafuyuError(discord.ClientException): ...
 
 
 class FeatureDisabledError(commands.CheckFailure, MafuyuError):
@@ -46,41 +44,25 @@ class PrefixNotPresentError(commands.CommandError, MafuyuError):
         super().__init__(f'{prefix} is not present in guild: {guild.id}')
 
 
-class BlacklistedUserError(commands.CheckFailure, MafuyuError):
+class AlreadyBlacklistedError(MafuyuError):
     def __init__(
         self,
+        snowflake: discord.User | discord.Member | discord.Guild,
+        *,
         reason: str,
         until: datetime | None,
     ) -> None:
-        string = 'You have been blacklisted'
-        reason_str = f' for {reason}' if reason != 'No reason provided' else ''
-        until_str = f' until {until.strftime("%A %d %B %Y")}' if until is not None else ' permanently'
-        super().__init__(string + reason_str + until_str)
+        self.snowflake = snowflake
+        self.reason = reason
+        self.until = until
+        timestamp_wording = f'until {until}' if until else 'permanently'
+        string = f'{snowflake} is already blacklisted for {reason} {timestamp_wording}'
+        super().__init__(string)
 
 
-class BlacklistedGuildError(commands.CheckFailure, MafuyuError):
-    def __init__(self, reason: str, until: datetime | None) -> None:
-        string = 'Your guild has been blacklisted'
-        reason_str = f' for {reason}' if reason != 'No reason provided' else ''
-        until_str = f' until {until.strftime("%A %d %B %Y")}' if until else ' permanently'
-        super().__init__(string + reason_str + until_str)
-
-
-class AlreadyBlacklistedError(commands.CommandError, MafuyuError):
-    def __init__(
-        self,
-        snowflake: discord.User | discord.Guild,
-        reason: str,
-        until: datetime | None,
-    ) -> None:
-        string = f'{snowflake} is already blacklisted'
-        reason_str = f' for {reason}' if reason != 'No reason provided' else ''
-        until_str = f' until {until}' if until else ' permanently'
-        super().__init__(string + reason_str + until_str)
-
-
-class NotBlacklistedError(commands.CommandError, MafuyuError):
-    def __init__(self, snowflake: discord.User | discord.Guild) -> None:
+class NotBlacklistedError(MafuyuError):
+    def __init__(self, snowflake: discord.User | discord.Member | discord.Guild) -> None:
+        self.snowflake = snowflake
         super().__init__(f'{snowflake} is not blacklisted.')
 
 
@@ -98,4 +80,4 @@ class WaifuNotFoundError(commands.CommandError, MafuyuError):
             super().__init__(message='Could not find any results')
 
 
-# TODO(Depreca1ed): All of these are not supposed to be CommandError. Change them to actual errors  # noqa: FIX002, TD003
+# TODO(Depreca1ed): All of these are not supposed to be CommandError. Change them to actual errors

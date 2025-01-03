@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import difflib
+import logging
 import operator
 import traceback
 from pathlib import Path
@@ -10,9 +11,8 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, menus
 
-from utils import BaseCog, Context, Paginator, Embed, WaifuNotFoundError, better_string
+from utils import BaseCog, Context, Embed, Paginator, WaifuNotFoundError, better_string
 
-from .constants import HANDLER_EMOJIS
 from .helpers import clean_error, generate_error_objects, logger_embed
 from .views import ErrorView, MissingArgumentHandler
 
@@ -33,6 +33,8 @@ defaults = (
     commands.TooManyArguments,
     WaifuNotFoundError,
 )
+
+log = logging.getLogger(__name__)
 
 
 class ErrorPageSource(menus.ListPageSource):
@@ -227,7 +229,7 @@ class ErrorHandler(BaseCog):
                 embed=embed,
             )
 
-        ctx.bot.log.error(
+        log.error(
             'Ignoring exception in running %s',
             ctx.command,
             exc_info=error,
@@ -272,7 +274,6 @@ class ErrorHandler(BaseCog):
     @commands.group(
         name='error',
         description='Handles all things related to error handler logging.',
-        hidden=True,
         invoke_without_command=True,
     )
     async def errorcmd_base(self, ctx: Context) -> None:

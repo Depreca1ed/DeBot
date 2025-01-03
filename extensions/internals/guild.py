@@ -5,11 +5,7 @@ from typing import Literal
 import discord
 from discord.ext import commands
 
-from utils import BaseCog, Embed, better_string
-
-BOT_THRESHOLD = 80
-BLACKLIST_COLOUR = discord.Colour.from_str('#ccaa88')
-BOT_FARM_COLOUR = discord.Colour.from_str('#fff5e8')
+from utils import BLACKLIST_COLOUR, BOT_FARM_COLOUR, BOT_THRESHOLD, BaseCog, Embed, better_string
 
 
 def guild_embed(guild: discord.Guild, event_type: Literal['Joined', 'Left']) -> Embed:

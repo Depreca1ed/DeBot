@@ -30,8 +30,6 @@ jishaku.Flags.NO_DM_TRACEBACK = True
 jishaku.Flags.NO_UNDERSCORE = True
 
 
-DESCRIPTION = """Yo holy shit a description i wonder what i should put here."""
-
 extensions = [
     'extensions.animanga',
     'extensions.internals',
@@ -55,7 +53,6 @@ class Mafuyu(commands.Bot):
         super().__init__(
             command_prefix=config.DEFAULT_PREFIX,
             case_insensitive=True,
-            description=DESCRIPTION,
             strip_after_prefix=True,
             intents=intents,
             max_messages=5000,
