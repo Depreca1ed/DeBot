@@ -22,9 +22,24 @@ ignore = [
     "D404",
     "CPY001",
     "PLR6301",
+    "PLR2004",
     "A005",
+    "RUF029",
     "RUF036",
+    "FBT003",
+    "DTZ005",
+    "S105",
+    "TD003",
+    "FIX002",
 ]
+
+[tool.ruff.lint.mccabe]
+# Flag errors (`C901`) whenever the complexity level exceeds 5.
+max-complexity = 15
+
+[tool.ruff.lint.pylint]
+max-returns = 10
+max-locals = 20
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = true
@@ -40,19 +55,11 @@ inline-quotes = "single"
 useLibraryCodeForTypes = true
 typeCheckingMode = "strict"
 pythonVersion = "3.12"
-strictListInference = true
-strictDictionaryInference = true
-strictSetInference = true
-strictParameterNoneValue = true
-reportMissingImports = "error"
-reportUnusedImport = "error"
-reportUnusedClass = "error"
-reportUnusedFunction = "error"
-reportUnusedVariable = "error"
-reportUnusedExpression = "error"
-reportGeneralTypeIssues = "error"
-reportDuplicateImport = "error"
-reportUntypedFunctionDecorator = "error"
-reportUnnecessaryTypeIgnoreComment = "warning"
-reportIncompatibleMethodOverride = "none"
-reportIncompatibleVariableOverride = "none"
+enableExperimentalFeatures = true
+reportIncompatibleMethodOverride = false
+reportCallInDefaultInitializer = true
+reportImplicitStringConcatenation = true
+reportMissingSuperCall = true
+reportPropertyTypeMismatch = true
+reportShadowedImports = true
+reportUnnecessaryTypeIgnoreComment = true

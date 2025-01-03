@@ -1,31 +1,23 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from bot import DeBot
-    from utils import DeContext
+    from bot import Mafuyu
+    from utils import Context
 import contextlib
 
 import discord
-import starlight  # pyright: ignore[reportMissingTypeStubs]
 from discord.ext import commands
 
 from .dev import Developer
 from .error_handler import ErrorHandler
+from .guild import Guild
 
 
-class Internals(ErrorHandler, Developer, name='Internals'):
-    def cog_load(self) -> None:
-        self.bot.help_command = starlight.MenuHelpCommand(
-            per_page=10, accent_color=self.bot.colour, error_color=discord.Color.red()
-        )
-
-    def cog_unload(self) -> None:
-        self.bot.help_command = commands.DefaultHelpCommand()
-
+class Internals(Developer, ErrorHandler, Guild, name='Internals'):
     @discord.utils.copy_doc(commands.Cog.cog_check)
-    async def cog_check(self, ctx: DeContext) -> bool:
+    async def cog_check(self, ctx: Context) -> bool:
         return await self.bot.is_owner(ctx.author)
 
     @commands.Cog.listener('on_message_edit')
@@ -44,6 +36,10 @@ class Internals(ErrorHandler, Developer, name='Internals'):
             with contextlib.suppress(discord.HTTPException):
                 await reaction.message.delete()
 
+    @commands.Cog.listener('on_dbl_vote')
+    async def dbl_vote_handler(self, data: dict[Any, Any]) -> None:
+        await self.bot.logger_webhook.send(content=str(data))
 
-async def setup(bot: DeBot) -> None:
+
+async def setup(bot: Mafuyu) -> None:
     await bot.add_cog(Internals(bot))

@@ -12,7 +12,7 @@ from utils import Embed, better_string
 if TYPE_CHECKING:
     from discord.ui.item import Item
 
-    from bot import DeBot
+    from bot import Mafuyu
 
 __all__ = ('BaseView',)
 
@@ -20,17 +20,17 @@ CHAR_LIMIT = 2000
 
 
 class BaseView(discord.ui.View):
-    message: discord.Message
+    message: discord.Message | None
 
     async def on_timeout(self) -> None:
         with contextlib.suppress(discord.errors.NotFound):
-            if hasattr(self, 'message'):
+            if hasattr(self, 'message') and self.message:
                 await self.message.edit(view=None)
         self.stop()
 
     async def on_error(
         self,
-        interaction: discord.Interaction[DeBot],
+        interaction: discord.Interaction[Mafuyu],
         error: Exception,
         _: Item[Any],
     ) -> None:
@@ -50,7 +50,7 @@ class BaseView(discord.ui.View):
         embed = Embed(
             title=error.__class__.__name__,
             description=exc,
-            url=exc_link,
+            url=str(exc_link),
             colour=0x000000,
         )
         embed.add_field(

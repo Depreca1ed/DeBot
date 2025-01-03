@@ -9,12 +9,12 @@ from .serverinfo import ServerInfo
 from .userinfo import Userinfo
 
 if TYPE_CHECKING:
-    from bot import DeBot
+    from bot import Mafuyu
 
 
 class Meta(Avatar, BotInformation, RoleInfo, Userinfo, ServerInfo, name='Meta'):
     """For everything related to Discord."""
 
 
-async def setup(bot: DeBot) -> None:
+async def setup(bot: Mafuyu) -> None:
     await bot.add_cog(Meta(bot))
